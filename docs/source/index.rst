@@ -11,11 +11,15 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   surveyman.js
-   interpreter.js
-   display.js
 
+Modules:
 
+.. toctree::
+   :maxdepth: 20
+   :numbered:
+   :glob:
+
+modules/*
 
 Indices and tables
 ==================
