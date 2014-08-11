@@ -1,13 +1,20 @@
-// putting required modules in as arguments
-// will move over to require.js or something else way better in the future
+//  surveyman.js 1.5.1
+//  http://surveyman.github.io/surveyman.js
+//  (c) 2014 University of Massachusetts Amherst
+//  surveyman.js is released under the CRAPL.
+
+
+
 var surveyman = (function (_) {
 
+    // Internal maps from string ids to objects
+    // --------------
     var         blockMAP            =   {},
                 optionMAP           =   {},
                 questionMAP         =   {};
 
-    // top-level aux functions
-
+    // Top-level auxiliary functions
+    // --------------
     var parseBools = function (thing, defaultVal) {
             if (_.isUndefined(thing)) {
                 return defaultVal;
@@ -21,6 +28,9 @@ var surveyman = (function (_) {
                 return thing;
             } else throw "Unknown type for " + thing + " (" + typeof thing + ")";
         };
+
+    // Survey Objects
+    // --------------
 
     var Option = function(_jsonOption, _question) {
 
@@ -69,9 +79,8 @@ var surveyman = (function (_) {
             };
 
             this.getAllBlockQuestions = function () {
-                // either one question is a branch or all, and they're always out of the top level block.
-                // put the current block's questions in a global stack that we can empty
-                //  how to interleave top-level questions and blocks?
+                // Either one question is a branch or all are "branch", and they're always out of the top level block.
+                // Put the current block's questions in a global stack that we can empty
                 if (this.isBranchAll())
                     return _.shuffle(this.topLevelQuestions)[0];
 
@@ -107,7 +116,7 @@ var surveyman = (function (_) {
             };
 
             this.idComp = function(that) {
-                // returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this
+                // Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this
                 for ( var i = 0 ; i < this.idArray.length ; i++ ) {
                     if ( i < that.idArray.length ) {
                         if ( this.idArray[i] < that.idArray[i] ) {
@@ -123,10 +132,10 @@ var surveyman = (function (_) {
 
                 var i, j, newSBlocks = _.map(_.range(this.subblocks.length), function (foo) { return -1; });
 
-                // randomize questions
+                // Randomize questions
                 this.topLevelQuestions = _.shuffle(this.topLevelQuestions);
 
-                // randomize options
+                // Randomize options
                 for (i = 0 ; i < this.topLevelQuestions.length ; i++ ) {
                     this.topLevelQuestions[i].randomize();
                 }
@@ -134,7 +143,7 @@ var surveyman = (function (_) {
                 if ( newSBlocks.length === 0 )
                     return;
 
-                // randomize blocks
+                // Randomize blocks
                 var stationaryBlocks = _.filter(this.subblocks, function (b) { return ! b.randomizable; }),
                     nonStationaryBlocks = _.filter(this.subblocks, function (b) { return b.randomizable; }),
                     samp = _.sample(_.range(this.subblocks.length), nonStationaryBlocks.length);
@@ -142,7 +151,7 @@ var surveyman = (function (_) {
                 nonStationaryBlocks = _.shuffle(nonStationaryBlocks);
 
                 for ( i = 0 ; i < samp.length ; i++ ) {
-                    // pick the locations for where to put the non-stationary blocks
+                    // Pick the locations for where to put the non-stationary blocks
                     newSBlocks[samp[i]] = nonStationaryBlocks[i];
                 }
 
@@ -189,7 +198,7 @@ var surveyman = (function (_) {
                 return this.subblocks[0].getFirstQuestion();
             };
 
-            // assert that the sub-blocks have the appropriate ids
+            // Assert that the sub-blocks have the appropriate ids
             console.assert(_.every(this.subblocks, function(b) { return this.idComp(b) === 0 }));
 
         },
@@ -309,8 +318,7 @@ var surveyman = (function (_) {
             indices             =   _.sortBy(_.sample(_.range(newTLBs.length), normalBlocks.length), function(n) { return n; }),
             i, j, k = 0;
 
-        // randomize new TLBs as appropriate
-
+        // Randomize new top level blocks as appropriate
         for ( j = 0 ; j < indices.length ; j++ ) {
             newTLBs[indices[j]] = normalBlocks[j];
         }
@@ -322,7 +330,7 @@ var surveyman = (function (_) {
             }
         }
 
-        // reset top level blocks
+        // Reset top level blocks
         _survey.topLevelBlocks = newTLBs;
 
         for ( i = 0 ; i < _survey.topLevelBlocks.length ; i++ ) {
@@ -330,7 +338,6 @@ var surveyman = (function (_) {
             _survey.topLevelBlocks[i].randomize();
         }
 
-        //_survey.firstQuestion = _survey.getFirstQuestion();
     };
 
     Question.makeQuestions  =   function (jsonQuestions, enclosingBlock) {
@@ -355,7 +362,6 @@ var surveyman = (function (_) {
                 str += "\t" + obj[i] + ":" + enclosingQuestion[obj[i]] ;
             }
             console.log("No options defined for " + enclosingQuestion.id + " (" + str + ")");
-            //console.assert(enclosingQuestion.freetext);
             return;
         }
 
