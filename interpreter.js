@@ -1,4 +1,6 @@
-var interpreter = (function (sm) {
+var SurveyMan = SurveyMan || {};
+
+SurveyMan.interpreter = (function () {
 
     var questionSTACK       =   [],
         blockSTACK          =   [],
@@ -11,7 +13,7 @@ var interpreter = (function (sm) {
             topBlock = blockSTACK.shift();
             questionSTACK = topBlock.getAllBlockQuestions();
 
-        }
+        },
         loadQuestions = function(_qList) {
 
             questionSTACK = _qList;
@@ -62,7 +64,7 @@ var interpreter = (function (sm) {
         init                    :   function () {
                                         return function (jsonSurvey) {
 
-                                            var survey = surveyman.init(jsonSurvey);
+                                            var survey = SurveyMan.survey.init(jsonSurvey);
                                             initializeStacks(survey.topLevelBlocks);
 
                                         };
@@ -70,6 +72,7 @@ var interpreter = (function (sm) {
         isQuestionStackEmpty    :   isQuestionStackEmpty,
         isBlockStackEmpty       :   isBlockStackEmpty,
         nextBlock               :   nextBlock,
+        nextQuestion            :   nextQuestion,
         handleBranching         :   function (q, o){
 
                                         if (q.branchMap[o.id])
@@ -88,4 +91,4 @@ var interpreter = (function (sm) {
                                     }
     };
 
-})(surveyman);
+})();

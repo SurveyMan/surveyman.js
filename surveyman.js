@@ -3,9 +3,9 @@
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
+var SurveyMan = SurveyMan || {};
 
-
-var surveyman = (function (_) {
+SurveyMan.survey= (function (_) {
 
     // Internal maps from string ids to objects
     // --------------

@@ -1,4 +1,6 @@
-var display = (function (_, $, interpreter, surveyman) {
+var SurveyMan = SurveyMan || {};
+
+var display = (function (_, $, seedrandom) {
 
     document.cookies = "test=EMMA_COOKIE_TEST";
 
@@ -42,11 +44,11 @@ var display = (function (_, $, interpreter, surveyman) {
             var nextQ;
             if (o && !_.isUndefined(q.branchMap)) {
                 // returns a block
-                nextQ = interpreter.handleBranching(q, o);
+                nextQ = SurveyMan.interpreter.handleBranching(q, o);
             } else {
                 // get the next sequential question
                 //console.log("get next sequential question after " + q.id + "(" + q.qtext + ")" );
-                nextQ = interpreter.nextSequential();
+                nextQ = SurveyMan.interpreter.nextSequential();
             }
             return nextQ;
 
@@ -230,7 +232,7 @@ var display = (function (_, $, interpreter, surveyman) {
         },
         finalSubmit = function () {
 
-            return interpreter.isQuestionStackEmpty() && interpreter.isBlockStackEmpty();
+            return SurveyMan.interpreter.isQuestionStackEmpty() && SurveyMan.interpreter.isBlockStackEmpty();
 
         },
         showEarlySubmit = function (q) {
@@ -247,8 +249,7 @@ var display = (function (_, $, interpreter, surveyman) {
         },
         showFirstQuestion = function() {
 
-            interpreter.init()
-            var firstQ = nextQuestion();
+            var firstQ = SurveyMan.interpreter.nextQuestion();
             showQuestion(firstQ);
             showOptions(firstQ);
 
@@ -301,7 +302,7 @@ var display = (function (_, $, interpreter, surveyman) {
             var dropdownOpt =   $("#select_" + q.id + " option:selected"),
                 oid         =   dropdownOpt.attr("id");
             if (oid===DUMMY_ID) return;
-            return surveyman.getOptionById(oid);
+            return SurveyMan.survey.getOptionById(oid);
 
         };
 
@@ -338,7 +339,7 @@ var display = (function (_, $, interpreter, surveyman) {
                     $("#preview").hide();
                     aid = document.getElementById('assignmentId').value;
                     Math.seedrandom(assignmentId);
-                    (interpreter.init())(jsonizedSurvey);
+                    (SurveyMan.interpreter.init())(jsonizedSurvey);
                     showBreakoffNotice();
                 }
                 if (typeof(customInit) === "function") {
@@ -348,4 +349,4 @@ var display = (function (_, $, interpreter, surveyman) {
         }
     };
 
-})(_, $, interpreter, surveyman);
+})(_, $, seedrandom);
