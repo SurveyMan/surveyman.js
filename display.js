@@ -338,7 +338,7 @@ SurveyMan.display = (function (_, $, seedrandom) {
                     $("#preview").hide();
                     aid = document.getElementById('assignmentId').value;
                     Math.seedrandom(assignmentId);
-                    (SurveyMan.interpreter.init())(jsonizedSurvey);
+                    SurveyMan.interpreter.init(jsonizedSurvey);
                     showBreakoffNotice();
                 }
                 if (typeof(customInit) === "function") {
