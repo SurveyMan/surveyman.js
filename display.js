@@ -1,6 +1,6 @@
 var SurveyMan = SurveyMan || {};
 
-var display = (function (_, $, seedrandom) {
+SurveyMan.display = (function (_, $, seedrandom) {
 
     document.cookies = "test=EMMA_COOKIE_TEST";
 
@@ -314,7 +314,6 @@ var display = (function (_, $, seedrandom) {
         getOptionHTML : getOptionHTML,
         showOptions : showOptions,
         registerAnswerAndShowNextQuestion : registerAnswerAndShowNextQuestion,
-        showEarlySubmit : showEarlySubmit,
         showBreakoffNotice : showBreakoffNotice,
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,

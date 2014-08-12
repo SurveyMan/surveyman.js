@@ -41,13 +41,10 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="toctree-wrapper compound">
-<ul class="simple">
-</ul>
-</div>
-<div class="section" id="overview">
+  <div class="section" id="overview">
 <h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
 <p>The surveyman.js repository contains three modules. Together these three modules form the SurveyMan runtime system, contained in the SurveyMan namespace. This runtime system receives a JSON representation of a survey and executes that survey (with the help of a human!) in a browser. These three modules are meant to be used with the SurveyMan server and static analyzer.</p>
+<p>Currently this code expects to be executed inside <a class="reference external" href="http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html">http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html</a>.</p>
 </div>
 <div class="section" id="install">
 <h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
@@ -55,10 +52,12 @@
 <li>TODO: npm</li>
 <li>TODO: cdn hosted</li>
 </ul>
-<p><strong>Dependencies</strong>
-* underscore
-* jQuery
-* seedrandom</p>
+<p><strong>Dependencies</strong></p>
+<ul class="simple">
+<li>underscore</li>
+<li>jQuery</li>
+<li>seedrandom</li>
+</ul>
 </div>
 <div class="section" id="surveyman-js">
 <h1>surveyman.js<a class="headerlink" href="#surveyman-js" title="Permalink to this headline">¶</a></h1>
@@ -70,9 +69,69 @@
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
-<li><strong>jsonSurvey</strong> &#8211; A JSON representation of the survey, as defined by the JSON schema</li>
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>jsonSurvey</strong> &#8211; A JSON representation of the survey, as defined by the JSON schema <a class="reference external" href="http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata">http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata</a></li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Javascript Survey object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.survey.getOptionById">
+<tt class="descclassname">SurveyMan.survey.</tt><tt class="descname">getOptionById</tt><big>(</big><em>oid</em><big>)</big><a class="headerlink" href="#SurveyMan.survey.getOptionById" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>oid</strong> (<em>string</em>) &#8211; String representation of an option id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Javascript Survey Option object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.survey.getQuestionById">
+<tt class="descclassname">SurveyMan.survey.</tt><tt class="descname">getQuestionById</tt><big>(</big><em>quid</em><big>)</big><a class="headerlink" href="#SurveyMan.survey.getQuestionById" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>quid</strong> (<em>string</em>) &#8211; String representation of a question id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Javascript Question object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.survey.getBlockById">
+<tt class="descclassname">SurveyMan.survey.</tt><tt class="descname">getBlockById</tt><big>(</big><em>bid</em><big>)</big><a class="headerlink" href="#SurveyMan.survey.getBlockById" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>bid</strong> (<em>string</em>) &#8211; String representation of a Block id</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A Javascript Block object</p>
 </td>
 </tr>
 </tbody>
@@ -82,15 +141,298 @@
 </div>
 <div class="section" id="interpreter-js">
 <h1>interpreter.js<a class="headerlink" href="#interpreter-js" title="Permalink to this headline">¶</a></h1>
+<p>interpreter.js executes the survey. It is initialized with a Survey object and updates the state of the interpreter in response to requests for more questions.</p>
+<p>Under the current implmentation, the interpreter does not contain the answer set; this is held in the HTML.</p>
+<dl class="function">
+<dt id="SurveyMan.interpreter.init">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">init</tt><big>(</big><em>jsonSurvey</em><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initilizes survey and the interpreter&#8217;s stacks.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jsonSurvey</strong> &#8211; A JSON representation of the survey, as defined by the JSON schema <a class="reference external" href="http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata">http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata</a></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.isQuestionStackEmpty">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">isQuestionStackEmpty</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.isQuestionStackEmpty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.isBlockStackEmpty">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">isBlockStackEmpty</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.isBlockStackEmpty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Returns boolean:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.nextBlock">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">nextBlock</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.nextBlock" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Block object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.nextQuestion">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">nextQuestion</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.nextQuestion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A Question object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.handleBranching">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">handleBranching</tt><big>(</big><em>q</em>, <em>o</em><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.handleBranching" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> &#8211; A Question object</li>
+<li><strong>o</strong> &#8211; An Option object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The next Question object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.interpreter.nextSequential">
+<tt class="descclassname">SurveyMan.interpreter.</tt><tt class="descname">nextSequential</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.interpreter.nextSequential" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The next Question object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="display-js">
 <h1>display.js<a class="headerlink" href="#display-js" title="Permalink to this headline">¶</a></h1>
+<p>This is the module that controls all of the display logic. The visible methods can be overridden in <cite>~/surveyman/custom.js</cite> to do things like inject timing information.</p>
+<p>** Button Functionality**</p>
+<p>&#8220;Next&#8221; buttons will start out hidden. When the respondent selects an answer, they appear. For a single question, its &#8220;Next&#8221; button can only be hidden again if the question is a checkbox question and the respondent unchecks all boxes.</p>
+<p>&#8220;Submit Early&#8221; will appear alongside &#8220;Next&#8221; if the survey permits breakoff. When the respondent answers the final question, only a button reading &#8220;Submit&#8221; will appear.</p>
+<p><cite>showNextButton</cite> and <cite>getOptionHTML</cite> call <cite>showSubmit</cite>. We include <cite>showSubmit</cite> here in case the survey author wishes to override some behavior.</p>
+<dl class="function">
+<dt id="SurveyMan.display.hideNextButton">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">hideNextButton</tt><big>(</big><em>q</em><big>)</big><a class="headerlink" href="#SurveyMan.display.hideNextButton" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> &#8211; A Question object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showNextButton">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showNextButton</tt><big>(</big><em>pid</em>, <em>q</em>, <em>o</em><big>)</big><a class="headerlink" href="#SurveyMan.display.showNextButton" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pid</strong> (<em>string</em>) &#8211; The id of the div containing this question. Answered questions are pushed onto a hidden HTML &#8220;stack&#8221;.</li>
+<li><strong>q</strong> &#8211; The Question object that&#8217;s just been answered.</li>
+<li><strong>o</strong> &#8211; The Option object that is the answer to that question.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showSubmit">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showSubmit</tt><big>(</big><em>q</em>, <em>o</em><big>)</big><a class="headerlink" href="#SurveyMan.display.showSubmit" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> &#8211; The current Question object.</li>
+<li><strong>o</strong> &#8211; The answered Option object.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.getNextQuestion">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">getNextQuestion</tt><big>(</big><em>q</em>, <em>o</em><big>)</big><a class="headerlink" href="#SurveyMan.display.getNextQuestion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> &#8211; The Question just answered</li>
+<li><strong>o</strong> &#8211; The Option that is the answer</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The next Question object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showQuestion">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showQuestion</tt><big>(</big><em>q</em><big>)</big><a class="headerlink" href="#SurveyMan.display.showQuestion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> &#8211; The Question object being shown.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.getOptionHTML">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">getOptionHTML</tt><big>(</big><em>q</em><big>)</big><a class="headerlink" href="#SurveyMan.display.getOptionHTML" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>q</strong> &#8211; The Question object being shown.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Javascript representation of HTML elements containing Option data. If the Option data is a display, then the &#8220;Next&#8221; button is shown.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showOptions">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showOptions</tt><big>(</big><em>q</em><big>)</big><a class="headerlink" href="#SurveyMan.display.showOptions" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>q</strong> &#8211; The Question object whose options are being shown.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.registerAnswerAndShowNextQuestion">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">registerAnswerAndShowNextQuestion</tt><big>(</big><em>pid</em>, <em>q</em>, <em>o</em><big>)</big><a class="headerlink" href="#SurveyMan.display.registerAnswerAndShowNextQuestion" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pid</strong> (<em>string</em>) &#8211; The id of the div containing this question. Answered questions are pushed onto a hidden HTML &#8220;stack&#8221;.</li>
+<li><strong>q</strong> &#8211; The Question object that&#8217;s just been answered.</li>
+<li><strong>o</strong> &#8211; The Option object that is the answer to that question.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showBreakoffNotice">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showBreakoffNotice</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.display.showBreakoffNotice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a predefined breakoffo notice. This can be changed in <cite>~/surveyman/custom.js</cite>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.showFirstQuestion">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">showFirstQuestion</tt><big>(</big><big>)</big><a class="headerlink" href="#SurveyMan.display.showFirstQuestion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays the first question. Is called first if there is not breakoff.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="SurveyMan.display.ready">
+<tt class="descclassname">SurveyMan.display.</tt><tt class="descname">ready</tt><big>(</big><em>jsonizedSurvey</em>, <em>customInit</em><big>)</big><a class="headerlink" href="#SurveyMan.display.ready" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>jsonSurvey</strong> &#8211; A JSON representation of the survey, as defined by the JSON schema <a class="reference external" href="http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata">http://github.com/SurveyMan/SurveyMan/src/main/resources/schemata</a></li>
+<li><strong>customInit</strong> &#8211; The custom Javascript contained in <cite>~/surveyman/custom.js</cite>. This will be included in the HTML if the SurveyMan Java backend is used.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
 <li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
 </ul>
 </div>

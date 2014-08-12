@@ -61,13 +61,11 @@ SurveyMan.interpreter = (function () {
         };
 
     return {
-        init                    :   function () {
-                                        return function (jsonSurvey) {
+        init                    :   function (jsonSurvey) {
 
-                                            var survey = SurveyMan.survey.init(jsonSurvey);
-                                            initializeStacks(survey.topLevelBlocks);
+                                        var survey = SurveyMan.survey.init(jsonSurvey);
+                                        initializeStacks(survey.topLevelBlocks);
 
-                                        };
                                     },
         isQuestionStackEmpty    :   isQuestionStackEmpty,
         isBlockStackEmpty       :   isBlockStackEmpty,
