@@ -1,0 +1,30 @@
+{
+  "name": "surveyman",
+  "version": "1.5.1",
+  "homepage": "http://surveyman.github.io/surveyman.js",
+  "bugs": {
+    "url": "http://github.com/SurveyMan/surveyman.js/issues",
+    "email": "etosch@cs.umass.edu"
+  },
+  "license": "CRAPL",
+  "author": {
+    "name": "Emma Tosch",
+    "email": "etosch@cs.umass.edu",
+    "url": "http://cs.umass.edu/~etosch"
+  },
+  "files": [
+    "surveyman.js",
+    "interpreter.js",
+    "display.js"
+  ],
+  "main": "SurveyMan",
+  "dependencies": {
+    "underscore": "1.6",
+    "seedrandom": "2.3",
+    "jquery": "1.11",
+    "string": "~1.5.1"
+  },
+  "scripts": {
+    "test": "node tests/surveyman_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
+  }
+}

@@ -3,9 +3,17 @@
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
-var SurveyMan = SurveyMan || {};
+var _ = require("underscore");
 
-SurveyMan.survey= (function (_) {
+SurveyMan = (function () {
+        try {
+            return _.isUndefined(SurveyMan) ? {} : SurveyMan;
+        } catch (err) {
+            return {};
+        }
+    })();
+
+SurveyMan.survey = (function (_) {
 
     // Internal maps from string ids to objects
     // --------------
@@ -16,6 +24,7 @@ SurveyMan.survey= (function (_) {
     // Top-level auxiliary functions
     // --------------
     var parseBools = function (thing, defaultVal) {
+
             if (_.isUndefined(thing)) {
                 return defaultVal;
             } else if (typeof thing === "string") {
@@ -27,6 +36,16 @@ SurveyMan.survey= (function (_) {
             } else if (typeof thing === "boolean") {
                 return thing;
             } else throw "Unknown type for " + thing + " (" + typeof thing + ")";
+
+        },
+        getBlockById = function (bid) {
+
+            if (bid===null)
+                return null;
+            if (_.has(blockMAP, bid))
+                return blockMAP[bid];
+            else throw "Block id " + bid + " not found in blockMAP";
+
         };
 
     // Survey Objects
@@ -304,7 +323,7 @@ SurveyMan.survey= (function (_) {
                 q = _.values(questionMAP)[i];
                 q.makeBranchMap();
             }
-            this.breakoff = new Boolean(_jsonSurvey.breakoff);
+            this.breakoff = parseBools(_jsonSurvey.breakoff);
             this.questions = _.values(questionMAP);
 
         };
@@ -401,15 +420,7 @@ SurveyMan.survey= (function (_) {
                                 else throw "Question id " + quid + " not found in questionMAP";
 
                             },
-        getBlockById    :   function(bid){
-
-                                if (bid===null)
-                                    return null;
-                                if (_.has(blockMAP, bid))
-                                    return blockMAP[bid];
-                                else throw "Block id " + bid + " not found in blockMAP";
-
-                            }
+        getBlockById    :   getBlockById
     };
 
 })(_);
