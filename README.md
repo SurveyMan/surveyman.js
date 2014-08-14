@@ -1,2 +1,3 @@
-surveyman.js <img href="https://travis-ci.org/SurveyMan/surveyman.js.svg?branch=master" />
+surveyman.js [![Build Status](https://travis-ci.org/SurveyMan/surveyman.js.png?branch=master)](https://travis-ci.org/SurveyMan/surveyman.js)
+
 ============
