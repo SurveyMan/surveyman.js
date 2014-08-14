@@ -38,6 +38,20 @@ SurveyMan.survey = (function (_) {
             } else throw "Unknown type for " + thing + " (" + typeof thing + ")";
 
         },
+        getOptionById = function (oid) {
+
+            if (_.has(optionMAP, oid))
+                return optionMAP[oid];
+            else throw "Option id " + oid + " not found in optionMAP";
+
+        },
+        getQuestionById = function (quid) {
+
+            if (_.has(questionMAP, quid))
+                return questionMAP[quid];
+            else throw "Question id " + quid + " not found in questionMAP";
+
+        },
         getBlockById = function (bid) {
 
             if (bid===null)
@@ -406,21 +420,13 @@ SurveyMan.survey = (function (_) {
                                 Survey.randomize(survey);
                                 return survey;
                             },
-        getOptionById   :   function (oid) {
-
-                                if (_.has(optionMAP, oid))
-                                    return optionMAP[oid];
-                                else throw "Option id " + oid + " not found in optionMAP";
-
-                            },
-        getQuestionById :   function (quid) {
-
-                                if (_.has(questionMAP, quid))
-                                    return questionMAP[quid];
-                                else throw "Question id " + quid + " not found in questionMAP";
-
-                            },
-        getBlockById    :   getBlockById
+        getOptionById   :   getOptionById,
+        getQuestionById :   getQuestionById,
+        getBlockById    :   getBlockById,
+        Survey          :   Survey,
+        Block           :   Block,
+        Question        :   Question,
+        Option          :   Option
     };
 
 })(_);
