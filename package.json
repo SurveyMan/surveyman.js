@@ -13,7 +13,7 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "surveyman.js",
+    "survey.js",
     "interpreter.js",
     "display.js"
   ],
@@ -22,9 +22,9 @@
     "underscore": "1.6",
     "seedrandom": "2.3",
     "jquery": "1.11",
-    "string": "~1.5.1"
+    "string": "1.5"
   },
   "scripts": {
-    "test": "node tests/surveyman_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
+    "test": "node tests/survey_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
   }
 }
