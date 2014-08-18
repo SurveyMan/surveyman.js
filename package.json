@@ -23,7 +23,7 @@
     "seedrandom": "2.3",
     "jquery": "1.11",
     "string": "1.5",
-    "tv4" : "1.1"
+    "jayschema" : "0.2"
   },
   "scripts": {
     "test": "node tests/survey_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
