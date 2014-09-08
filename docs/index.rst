@@ -7,7 +7,7 @@ Overview
 ========================================
 The surveyman.js repository contains three modules. Together these three modules form the SurveyMan runtime system, contained in the SurveyMan namespace. This runtime system receives a JSON representation of a survey and executes that survey (with the help of a human!) in a browser. These three modules are meant to be used with the SurveyMan server and static analyzer. 
 
-Currently this code expects to be executed inside http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html. 
+Currently this code expects to be executed inside http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html.
 
 Install 
 =======
@@ -68,8 +68,8 @@ At the end of the body, SurveyMan adds the following snippet:
     </script>
 
 
-surveyman.js
-========================================
+`surveyman.js <http://surveyman.github.io/surveyman.js/survey.js>`_
+===================================================================
 
 surveyman.js contains the internal Javascript representation of a survey. It is simlar to the Java representation contained in http://github.com/SurveyMan/SurveyMan. The internal representation is not visible to the user.
 
@@ -95,8 +95,8 @@ surveyman.js contains the internal Javascript representation of a survey. It is 
 
 
 
-interpreter.js
-========================================
+`interpreter.js <http://surveyman.github.io/surveyman.js/interpreter.js>`_
+==========================================================================
 
 interpreter.js executes the survey. It is initialized with a Survey object and updates the state of the interpreter in response to requests for more questions. 
 
@@ -136,8 +136,8 @@ Under the current implmentation, the interpreter does not contain the answer set
 
 
 
-display.js
-========================================
+`display.js <http://surveyman.github.io/surveyman.js/display.js>`_
+==================================================================
 
 This is the module that controls all of the display logic. The visible methods can be overridden in `~/surveyman/custom.js` to do things like inject timing information.
 
