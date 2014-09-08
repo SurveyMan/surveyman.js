@@ -10,11 +10,15 @@ The surveyman.js repository contains three modules. Together these three modules
 Currently this code expects to be executed inside http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html. 
 
 Install 
-========================================
-* TODO: npm 
-* TODO: cdn hosted
+=======
+To install locally, run
 
-**Dependencies**
+.. code-block:: bash
+
+    npm install surveyman
+
+Dependencies
+============
 
 * underscore
 
@@ -25,22 +29,28 @@ Install
 If you use these modules with the SurveyMan Java backend, everything is good to go! If you're using your own backend or otherwise modifying some part of the pipeline, you will need to ensure the following are present in your HTML for everything to work:
 
 First, make sure you have the following in the head:
-`<script type="text/javascript" src="path/to/cdn/surveyman.js"></script>`
-`<script type="text/javascript" src="path/to/cdn/interpreter.js"></script>`
-`<script type="text/javascript" src="path/to/cdn/display.js"></script>`
+
+.. code-block:: html
+
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/survey.js"></script>
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/interpreter.js"></script>
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/display.js"></script>
 
 If you are using AMT as your backend, you will also need a link to the submission script in the head, per the AMT documentations. If you are using a local backend, you will need some way to capture the assignment id, since it's used to seed the random number generator. The SurveyMan backend generates the following when it is being run locally:
 
-`<script type="text/javascript">
-   $.ajaxSetup({async:false});
-   var turkSetAssignmentID = function () { 
-        $.get("assignmentId", function(_aid) { 
-            console.log("Just pulled assignment Id : " + _aid); 
-            document.getElementById("assignmentId").value = _aid.trim(); 
-            aid = _aid;
-          }); 
-       }; 
-</script>`
+.. code-block:: html
+
+    <script type="text/javascript">
+       $.ajaxSetup({async:false});
+       var turkSetAssignmentID = function () {
+            $.get("assignmentId", function(_aid) {
+                console.log("Just pulled assignment Id : " + _aid);
+                document.getElementById("assignmentId").value = _aid.trim();
+                aid = _aid;
+              });
+           };
+    </script>
+
 
 `turkSetAssignmentId` is an AMT-defined function. Since `SurveyMan.display.ready` expects it, we define a local version here. AMT also injects an `assignmentId` element, so when we run locally, we add an element with this id to our form.
 
@@ -48,12 +58,14 @@ SurveyMan generates a form to be sent with a POST; although a user-defined versi
 
 At the end of the body, SurveyMan adds the following snippet:
 
-`<script type='text/javascript'>
-    turkSetAssignmentID();
-    var loadPreview=function(){<PROBABLY_A_CONSENT_FORM>},
-        jsonizedSurvey=<JSONIZED_SURVEY>;
-    Surveyman.display.ready(jsonizedSurvey, loadPreview);
-</script>`
+.. code-block:: html
+
+    <script type='text/javascript'>
+        turkSetAssignmentID();
+        var loadPreview=function(){<PROBABLY_A_CONSENT_FORM>},
+            jsonizedSurvey=<JSONIZED_SURVEY>;
+        Surveyman.display.ready(jsonizedSurvey, loadPreview);
+    </script>
 
 
 surveyman.js
