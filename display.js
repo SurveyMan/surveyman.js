@@ -1,4 +1,7 @@
 var SurveyMan = SurveyMan || {};
+var _ = require("underscore");
+var $ = require("jquery");
+var seedrandom = require("seedrandom");
 
 SurveyMan.display = (function (_, $, seedrandom) {
 
