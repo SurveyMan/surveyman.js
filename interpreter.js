@@ -36,7 +36,7 @@ SurveyMan.interpreter = (function () {
             var topBlock;
             blockSTACK = _blist;
             topBlock = blockSTACK.shift();
-            questionSTACK = getBlockQuestions(topBlock);
+            questionSTACK = getAllBlockQuestions(topBlock);
 
         },
         loadQuestions = function(_qList) {
@@ -80,7 +80,7 @@ SurveyMan.interpreter = (function () {
                     console.assert( isQuestionStackEmpty() );
 
                     b = blockSTACK.shift();
-                    loadQuestions(getBlockQuestions(b));
+                    loadQuestions(getAllBlockQuestions(b));
                     return head;
 
         };
