@@ -7,9 +7,9 @@ if (!$) {
     $ = require("jquery");
 }
 
-if (!seedrandom) {
-    seedrandom = require("seedrandom");
-}
+//if (!seedrandom) {
+//    seedrandom = require("seedrandom");
+//}
 
 SurveyMan.display = (function () {
 
