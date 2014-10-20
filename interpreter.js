@@ -10,7 +10,7 @@ SurveyMan.interpreter = (function () {
             // Either one question is a branch or all are "branch", and they're always out of the top level block.
             // Put the current block's questions in a global stack that we can empty
             if (_block.isBranchAll())
-                return _.shuffle(this.topLevelQuestions)[0];
+                return _.shuffle(_block.topLevelQuestions)[0];
 
             var i = 0, j = 0, k = 0,
                 retval = [],
