@@ -1,10 +1,17 @@
 var SurveyMan = SurveyMan || {};
 
-SurveyMan.display = (function () {
+if (!_) {
+    _ = require("underscore");
+}
+if (!$) {
+    $ = require("jquery");
+}
 
-    var _ = require("underscore");
-    var $ = require("jquery");
-    var seedrandom = require("seedrandom");
+if (!seedrandom) {
+    seedrandom = require("seedrandom");
+}
+
+SurveyMan.display = (function () {
 
     document.cookies = "test=EMMA_COOKIE_TEST";
 
