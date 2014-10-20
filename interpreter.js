@@ -6,12 +6,37 @@ SurveyMan.interpreter = (function () {
         blockSTACK          =   [],
         branchDest          =   null;
 
-    var initializeStacks = function(_blist) {
+    var getAllBlockQuestions = function (_block) {
+            // Either one question is a branch or all are "branch", and they're always out of the top level block.
+            // Put the current block's questions in a global stack that we can empty
+            if (_block.isBranchAll())
+                return _.shuffle(this.topLevelQuestions)[0];
+
+            var i = 0, j = 0, k = 0,
+                retval = [],
+                indices = _.range(_block.topLevelQuestions.length + this.subblocks.length),
+                qindices = _.sample(indices, this.topLevelQuestions.length),
+                bindices = _.difference(indices, qindices);
+
+            for ( ; i < indices.length ; i++ ) {
+                // it happens that i == indices[i]
+                if (_.contains(qindices, i)) {
+                    retval.push(_block.topLevelQuestions[j]);
+                    j++;
+                } else if (_.contains(bindices, i)) {
+                    retval.push(getAllBlockQuestions(_block.subblocks[k]));
+                    k++;
+                } else throw "Neither qindices nor bindices contain index " + i;
+            }
+
+            return _.flatten(retval);
+        },
+        initializeStacks = function(_blist) {
 
             var topBlock;
             blockSTACK = _blist;
             topBlock = blockSTACK.shift();
-            questionSTACK = topBlock.getAllBlockQuestions();
+            questionSTACK = getBlockQuestions(topBlock);
 
         },
         loadQuestions = function(_qList) {
@@ -55,7 +80,7 @@ SurveyMan.interpreter = (function () {
                     console.assert( isQuestionStackEmpty() );
 
                     b = blockSTACK.shift();
-                    loadQuestions(b.getAllBlockQuestions());
+                    loadQuestions(getBlockQuestions(b));
                     return head;
 
         };

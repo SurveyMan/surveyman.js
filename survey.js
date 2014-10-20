@@ -113,32 +113,6 @@ SurveyMan.survey = (function () {
                 return true;
             };
 
-            this.getAllBlockQuestions = function () {
-                // Either one question is a branch or all are "branch", and they're always out of the top level block.
-                // Put the current block's questions in a global stack that we can empty
-                if (this.isBranchAll())
-                    return _.shuffle(this.topLevelQuestions)[0];
-
-                var i = 0, j = 0, k = 0,
-                    retval = [],
-                    indices = _.range(this.topLevelQuestions.length + this.subblocks.length),
-                    qindices = _.sample(indices, this.topLevelQuestions.length),
-                    bindices = _.difference(indices, qindices);
-
-                for ( ; i < indices.length ; i++ ) {
-                    // it happens that i == indices[i]
-                    if (_.contains(qindices, i)) {
-                        retval.push(this.topLevelQuestions[j]);
-                        j++;
-                    } else if (_.contains(bindices, i)) {
-                        retval.push(this.subblocks[k].getAllBlockQuestions());
-                        k++;
-                    } else throw "Neither qindices nor bindices contain index " + i;
-                }
-
-                return _.flatten(retval);
-            };
-
             this.getQuestion = function(quid) {
 
                 var i;
