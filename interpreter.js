@@ -6,6 +6,7 @@ SurveyMan.interpreter = (function () {
         blockSTACK          =   [],
         branchDest          =   null;
 
+
     var getAllBlockQuestions = function (_block) {
             // Either one question is a branch or all are "branch", and they're always out of the top level block.
             // Put the current block's questions in a global stack that we can empty
@@ -36,7 +37,9 @@ SurveyMan.interpreter = (function () {
             var topBlock;
             blockSTACK = _blist;
             topBlock = blockSTACK.shift();
+
             questionSTACK = getAllBlockQuestions(topBlock);
+
 
         },
         loadQuestions = function(_qList) {
@@ -80,7 +83,9 @@ SurveyMan.interpreter = (function () {
                     console.assert( isQuestionStackEmpty() );
 
                     b = blockSTACK.shift();
+
                     loadQuestions(getAllBlockQuestions(b));
+
                     return head;
 
         };

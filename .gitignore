@@ -1,0 +1,7 @@
+.idea/*
+.idea
+.idea/*.xml
+*~
+*#
+docs/_build
+node_modules

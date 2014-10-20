@@ -19,7 +19,7 @@ SurveyMan.survey = (function () {
 
     // Internal maps from string ids to objects
     // --------------
-    var         blockMAP            =   {},
+   var         blockMAP            =   {},
                 optionMAP           =   {},
                 questionMAP         =   {};
 
@@ -404,5 +404,6 @@ SurveyMan.survey = (function () {
         Question        :   Question,
         Option          :   Option
     };
+
 
 })();
