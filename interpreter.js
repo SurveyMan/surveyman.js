@@ -14,7 +14,7 @@ SurveyMan.interpreter = (function () {
 
             var i = 0, j = 0, k = 0,
                 retval = [],
-                indices = _.range(_block.topLevelQuestions.length + this.subblocks.length),
+                indices = _.range(_block.topLevelQuestions.length + _block.subblocks.length),
                 qindices = _.sample(indices, _block.topLevelQuestions.length),
                 bindices = _.difference(indices, qindices);
 
