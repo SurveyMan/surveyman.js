@@ -3,6 +3,10 @@
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
+if (!_) {
+    _ = require("underscore");
+}
+
 SurveyMan = (function () {
         try {
             return _.isUndefined(SurveyMan) ? {} : SurveyMan;
@@ -12,8 +16,6 @@ SurveyMan = (function () {
     })();
 
 SurveyMan.survey = (function () {
-
-    var _ = require("underscore");
 
     // Internal maps from string ids to objects
     // --------------
