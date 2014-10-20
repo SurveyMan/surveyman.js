@@ -1,9 +1,10 @@
 var SurveyMan = SurveyMan || {};
-var _ = require("underscore");
-var $ = require("jquery");
-var seedrandom = require("seedrandom");
 
-SurveyMan.display = (function (_, $, seedrandom) {
+SurveyMan.display = (function () {
+
+    var _ = require("underscore");
+    var $ = require("jquery");
+    var seedrandom = require("seedrandom");
 
     document.cookies = "test=EMMA_COOKIE_TEST";
 
@@ -351,4 +352,4 @@ SurveyMan.display = (function (_, $, seedrandom) {
         }
     };
 
-})(_, $, seedrandom);
+})();
