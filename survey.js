@@ -318,6 +318,23 @@ SurveyMan.survey = (function () {
 
         };
 
+   Block._blocks_ids = [1];
+
+   Block.new_block = function (parent) {
+       var idArray = [], i = 0;
+       if (!_.isUndefined(parent)) {
+           idArray = parent.idArray;
+           i = _.length(parent.idArray);
+           if (_.isUndefined(Block._blocks_ids[i])) {
+               Block._blocks_ids[i] = 1;
+           }
+       }
+       idArray[i] = Block._blocks_ids[i];
+       Block._blocks_ids[i] += 1;
+       var id = _.foldl(idArray, function(a,b) { return a + "." + b; });
+       return new Block({"id" : id, "questions" : []});
+   };
+
     // "static" methods
     Survey.randomize        =   function (_survey) {
 
