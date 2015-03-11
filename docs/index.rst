@@ -7,7 +7,7 @@ Overview
 ========================================
 The surveyman.js repository contains three modules. Together these three modules form the SurveyMan runtime system, contained in the SurveyMan namespace. This runtime system receives a JSON representation of a survey and executes that survey (with the help of a human!) in a browser. These three modules are meant to be used with the SurveyMan server and static analyzer. 
 
-Currently this code expects to be executed inside http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html.
+Currently this code expects to be executed inside https://github.com/SurveyMan/Runner/blob/master/src/main/resources/HTMLSkeleton.html.
 
 Install 
 =======
