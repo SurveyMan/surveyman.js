@@ -3,14 +3,13 @@
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
-if (!_) {
-    _ = require("underscore");
-}
+var _ = eval("_") === void 0 ? require("underscore"): _ ;
 
 SurveyMan = (function () {
         try {
             return _.isUndefined(SurveyMan) ? {} : SurveyMan;
         } catch (err) {
+            console.log(err);
             return {};
         }
     })();
@@ -20,8 +19,8 @@ SurveyMan.survey = (function () {
     // Internal maps from string ids to objects
     // --------------
    var         blockMAP            =   {},
-                optionMAP           =   {},
-                questionMAP         =   {};
+               optionMAP           =   {},
+               questionMAP         =   {};
 
     // Top-level auxiliary functions
     // --------------

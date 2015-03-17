@@ -26,6 +26,6 @@
     "jayschema" : "0.2"
   },
   "scripts": {
-    "test": "node tests/survey_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
+    "test": "vows tests/* --spec"
   }
 }
