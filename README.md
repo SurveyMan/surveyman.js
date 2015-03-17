@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/SurveyMan/surveyman.js.png?branch=gh-pages)](https://travis-ci.org/SurveyMan/surveyman.js)
+[![Build Status](https://travis-ci.org/SurveyMan/surveyman.js.png?branch=master)](https://travis-ci.org/SurveyMan/surveyman.js)
 
 Overview
 ========
@@ -10,7 +10,16 @@ Usage
 =====
 surveyman.js is not a SurveyMan UI. It implements a Javascript version of a subset of SurveyMan functionality. To see
 how this respository is used, clone the [Runner](https://github.com/SurveyMan/Runner) repository and try running an
-example survey locally. This will produce some HTML in `logs/<surveyid>_<your_survey_file_name>_<timestamp>.html`.
+example survey locally. This will produce some HTML in `logs/<surveyid>_<your_survey_file_name>_<timestamp>.html`. This
+HTML includes the jsonized survey and references to the contents of this repository. Click through the survey to see
+how it is executed.
+
+To investigate this code locally, try running the following in node:
+
+```
+var globals = require("tests/globals.js");
+var survey  = SurveyMan.survey.init(globals['wage_survey']);
+```
 
 
 Contributing

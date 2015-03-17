@@ -2,8 +2,9 @@ console.log("surveyman tests");
 
 var vows = require("vows"),
     assert = require("assert"),
-    globals = require("./globals.js"),
-    survey = require("../survey.js");
+    globals = require("./globals.js");
+
+require("SurveyMan/survey.js");
 
 
 var network_test = function () {
@@ -11,24 +12,18 @@ var network_test = function () {
         _ = require("underscore"),
         $ = require("jquery"),
         http = require("http"),
-        JaySchema = require('jayschema'),
-        js = new JaySchema(JaySchema.loaders.http);
-
-    var statusCode;
-
-    js.maxRecursion = 3;
-
-    function getSchema(callback) {
-        var options = {
+        jjv = require("jjv"),
+        env = jjv(),
+        statusCode = null,
+        options = {
                 hostname : "surveyman.github.io",
                 port : 80,
                 path : "/Schemata/survey_output.json",
                 method : "GET"
-            },
-            schema = "",
-            cbk = function(response) {
-
-                console.log("status code:", response.statusCode);
+        },
+        schema = "",
+        retval = null,
+        cbk = function(response) {
                 statusCode = response.statusCode;
                 response.setEncoding("UTF-8");
 
@@ -37,64 +32,47 @@ var network_test = function () {
                 });
 
                 response.on("end", function () {
-                    callback(JSON.parse(schema));
+                    env.addSchema('output_survey', JSON.parse(schema));
+                    var result1 = env.validate('output_survey', globals['wage_survey']),
+                        result2 = env.validate('output_survey', globals['prototypicality_survey']),
+                        result3 = env.validate('output_survey', globals['pick_randomly_survey']),
+                        result4 = env.validate('output_survey', {
+                            filename : "foo",
+                            breakoff : false,
+                            survey : true }),
+                        result5 = env.validate('output_survey', {
+                            filename: "foo",
+                            breakoff: false,
+                            survey : [{id : 1}]});
+                    console.log("result1: " + JSON.stringify(result1));
+                    console.log("result2: " + JSON.stringify(result2));
+                    console.log("result3: " + JSON.stringify(result3));
+                    console.log("result4: " + JSON.stringify(result4));
+                    console.log("result5: " + JSON.stringify(result5));
                 });
+        },
+        req = http.request(options, cbk);
 
-            };
+    env.defaultOptions.checkRequired = true;
 
-        var req = http.request(options, cbk);
-        req.on("error", function (e){
-            console.log("***",e,"***");
-        });
+    req.on("error", function (e){
+        console.log("***",e,"***");
+    });
 
-        req.end();
+    req.end();
 
-    };
+    console.log("status code: " + statusCode  + "\nretval: " + retval);
 
-    function test(schema, jsonSurvey, expectedOutcome) {
-
-        var ok = true;
-
-
-        //var report = env.validate(jsonSurvey, JSON.parse(env.getSchema));
-        ok = js.validate(jsonSurvey, schema).length === 1;
-
-        return ok===expectedOutcome;
-    };
-
-    // script part
-
-    var fns = [];
-
-    try {
-        for (var i = 0 ; i < jsonizedSurveys.length ; i++) {
-            //validate the jsonizedSurvey against the json schema
-            assert(!_.isUndefined(jsonizedSurveys) && !_.isUndefined(jsonizedSurveys[i]));
-            fns.push(function (s) { test(s, jsonizedSurveys[i], true); });
-        }
-    } catch (err) {
-        console.log("err", err);
-    }
-
-    fns.push(function (s) { return test(s, { filename : "foo", breakoff : false, survey : true }, false); });
-    fns.push(function (s) { return test(s, {filename: "foo", breakoff: false, survey : [{id : "1"}]}, false)});
-
-    var successes = getSchema(function(fns) {
-        return function (s) {
-            var success = true;
-            for (var i = 0; i < fns.length ; i++){
-               success = success && fns[i](s);
-            }
-            return success;
-        }
-    }(fns));
-
-    return statusCode === 200 && successes;
+    return statusCode === 200;
 };
 
 vows.describe("Check validation").addBatch({
     "Validation doesn't cause errors" : {
-        topic : function () { return network_test(); },
-        "Srsly doesn't fail." : function (topic) { assert.ok(topic); }
+        topic : 'Network Test',
+        "Srsly doesn't fail." : function (_) {
+            var outcome = network_test();
+            console.log(outcome);
+            assert.ok(outcome);
+        }
     }
-});
+}).run();

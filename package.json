@@ -1,6 +1,6 @@
 {
   "name": "surveyman",
-  "version": "1.5.1",
+  "version": "",
   "homepage": "http://surveyman.github.io/surveyman.js",
   "bugs": {
     "url": "http://github.com/SurveyMan/surveyman.js/issues",
@@ -13,9 +13,9 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "survey.js",
-    "interpreter.js",
-    "display.js"
+    "SurveyMan/survey.js",
+    "SurveyMan/interpreter.js",
+    "SurveyMan/display.js"
   ],
   "main": "SurveyMan",
   "dependencies": {
@@ -23,7 +23,7 @@
     "seedrandom": "2.3",
     "jquery": "1.11",
     "string": "1.5",
-    "jayschema" : "0.2"
+     "jjv": "1.0"
   },
   "scripts": {
     "test": "vows tests/* --spec"
