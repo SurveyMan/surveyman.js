@@ -11,3 +11,6 @@ branches:
   only:
     gh-pages
     master
+
+before_install:
+  npm install
