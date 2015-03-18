@@ -4,7 +4,7 @@ var vows = require("vows"),
     assert = require("assert"),
     globals = require("./globals.js");
 
-require("SurveyMan/survey.js");
+require("../SurveyMan/survey.js");
 
 
 var network_test = function (callback) {
