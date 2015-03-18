@@ -23,7 +23,8 @@
     "seedrandom": "2.3",
     "jquery": "1.11",
     "string": "1.5",
-     "jjv": "1.0"
+    "jjv": "1.0",
+    "request": "2.53"
   },
   "scripts": {
     "test": "vows tests/* --spec"
