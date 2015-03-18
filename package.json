@@ -30,6 +30,6 @@
     "vows": "0.2"
   },
   "scripts": {
-    "test": "vows tests/* --spec"
+    "test": "vows tests/*"
   }
 }
