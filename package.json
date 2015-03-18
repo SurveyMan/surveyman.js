@@ -2,6 +2,7 @@
   "name": "surveyman",
   "version": "",
   "homepage": "http://surveyman.github.io/surveyman.js",
+  "repository": "http://surveyman.github.io/surveyman.js",
   "bugs": {
     "url": "http://github.com/SurveyMan/surveyman.js/issues",
     "email": "etosch@gmail.com"
