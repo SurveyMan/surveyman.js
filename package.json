@@ -1,8 +1,11 @@
 {
   "name": "surveyman",
-  "version": "",
+  "version": "0.1.0",
   "homepage": "http://surveyman.github.io/surveyman.js",
-  "repository": "http://surveyman.github.io/surveyman.js",
+  "repository": {
+      "type" : "git",
+      "url" : "http://github.com/SurveyMan/surveyman.js"
+  },
   "bugs": {
     "url": "http://github.com/SurveyMan/surveyman.js/issues",
     "email": "etosch@gmail.com"
@@ -14,9 +17,7 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "SurveyMan/survey.js",
-    "SurveyMan/interpreter.js",
-    "SurveyMan/display.js"
+    "SurveyMan"
   ],
   "main": "SurveyMan",
   "dependencies": {
@@ -26,7 +27,7 @@
     "string": "1.5",
     "jjv": "1.0",
     "request": "2.53",
-    "vows": "<=2.5"
+    "vows": "0.2"
   },
   "scripts": {
     "test": "vows tests/* --spec"

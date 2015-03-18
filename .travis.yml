@@ -1,6 +1,6 @@
 language: node_js
 before_install:
-  - npm install
+  - npm -g install
 node_js:
   - 0.12
 branches:
