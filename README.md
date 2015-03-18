@@ -6,6 +6,8 @@ surveyman.js is the browser runtime for the SurveyMan project. It is currently s
 [SurveyMan](https://github.com/SurveyMan/SurveyMan) and the HTML produced by the [Runner](https://github.com/SurveyMan/Runner).
 See [the docs](http://surveyman.github.io/surveyman.js) for how these modules are used.
 
+The `gh-pages` branch contains the last version current to the [Runner](https://github.com/SurveyMan/Runner) repository. Features contained in the `master` branch may not work with the latest [Runner](https://github.com/SurveyMan/Runner) version.
+
 Usage
 =====
 surveyman.js is not a SurveyMan UI. It implements a Javascript version of a subset of SurveyMan functionality. To see
