@@ -1,6 +1,6 @@
 {
   "name": "surveyman",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "http://surveyman.github.io/surveyman.js",
   "repository": {
       "type" : "git",
@@ -17,17 +17,17 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "SurveyMan"
+    "surveyman"
   ],
-  "main": "SurveyMan",
+  "main": "surveyman",
   "dependencies": {
-    "underscore": "1.6",
+    "underscore": "1.8",
     "seedrandom": "2.3",
-    "jquery": "1.11",
-    "string": "1.5",
+    "jquery": "2.1",
+    "string": "3.0",
     "jjv": "1.0",
     "request": "2.53",
-    "vows": "0.2"
+    "vows": "0.8"
   },
   "scripts": {
     "test": "vows tests/*"

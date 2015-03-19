@@ -9,7 +9,7 @@ SurveyMan = (function () {
         try {
             return _.isUndefined(SurveyMan) ? {} : SurveyMan;
         } catch (err) {
-            console.log(err);
+            console.log(err+"\nReturning empty object.");
             return {};
         }
     })();
