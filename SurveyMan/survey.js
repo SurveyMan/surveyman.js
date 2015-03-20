@@ -423,3 +423,5 @@ SurveyMan.survey = (function () {
 
 
 })();
+
+module.exports = SurveyMan.survey;
