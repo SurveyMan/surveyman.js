@@ -7,6 +7,9 @@ var vows = require('vows'),
 var jsonSurvey = globals.wage_survey;
 var parsedSurvey = survey.init(jsonSurvey);
 
+var protoSurvey = globals.randomizable_survey;
+var parsedRandomSurvey = survey.init(protoSurvey);
+
 vows.describe("Blocks are loaded correctly").addBatch({
     'when setting up top level blocks':{
 
@@ -75,6 +78,66 @@ vows.describe("Questions are loaded correctly").addBatch({
             }, 0);
 
             assert.equal(parsedCounts, subBlockLevelOptionCounts + topLevelOptionsCounts);
+        }
+    }
+}).run();
+
+vows.describe('Blocks randomize correctly').addBatch({
+    'when randomize is called': {
+
+        topic: parsedSurvey.topLevelBlocks,
+
+        'top level questions remains the same': function(topic) {
+            _.each(topic, function(block) {
+
+                if (block.topLevelQuestions.length > 0) {
+                    // clone the block before mutation
+                    var savedBlock = _.clone(block);
+                    block.randomize();
+
+                    // validate count
+                    assert.equal(block.topLevelQuestions.length, savedBlock.topLevelQuestions.length);
+
+                    // validating whether the set is same (sort and compare)
+                    var sortedQuestions = _.sortBy(savedBlock.topLevelQuestions, function(q) { return q.id; });
+                    var sortedBlockQuestions = _.sortBy(block.topLevelQuestions, function(q) { return q.id; });
+
+                    _.each(sortedQuestions, function(q1, i) {
+                        var q2 = sortedBlockQuestions[i];
+                        assert.equal(q2.qtext, q1.qtext);
+                    });
+                }
+            });
+        }
+    }
+}).run();
+
+
+vows.describe('Subblocks are randomized correctly').addBatch({
+    'when randomize on parent block is called': {
+
+        topic: function() {
+            return _.find(parsedRandomSurvey.topLevelBlocks, function(block) {
+                return block.randomizable
+            });
+        },
+
+        'non-randomizable blocks should maintain partial order': function(topic) {
+            var fixedBlockIds = _.chain(topic.subblocks)
+                .filter(function(block) { return !block.randomizable })
+                .map(function(block) { return block.id })
+                .value();
+
+            topic.randomize();
+
+            // get indices of fixed block ids in new randomized order
+            var newIds = _.map(topic.subblocks, function(b) { return b.id });
+            var locations = _.map(fixedBlockIds, function(id) {
+                return newIds.indexOf(id);
+            });
+
+            // if locations is ordered, it is equal to its sorted version
+            assert.equal(locations, locations.sort());
         }
     }
 }).run();
