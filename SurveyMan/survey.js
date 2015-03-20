@@ -9,13 +9,13 @@ var _ = eval("_") === void 0 ? require("underscore"): _ ;
 var config = { verbose: false };
 
 SurveyMan = (function () {
-    try {
-        return _.isUndefined(SurveyMan) ? {} : SurveyMan;
-    } catch (err) {
-        console.log(err);
-        return {};
-    }
-})();
+        try {
+            return _.isUndefined(SurveyMan) ? {} : SurveyMan;
+        } catch (err) {
+            console.log(err+"\nReturning empty object.");
+            return {};
+        }
+    })();
 
 SurveyMan.survey = (function () {
 
