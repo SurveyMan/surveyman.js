@@ -27,7 +27,7 @@
     "string": "1.5",
     "jjv": "1.0",
     "request": "2.53",
-    "vows": "0.2"
+    "vows": "0.8.1"
   },
   "scripts": {
     "test": "vows tests/*"
