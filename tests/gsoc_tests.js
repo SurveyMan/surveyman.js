@@ -82,8 +82,8 @@ vows.describe("Questions are loaded correctly").addBatch({
     }
 }).run();
 
-vows.describe('Blocks randomize correctly').addBatch({
-    'when randomize is called': {
+vows.describe('Randomize works correctly').addBatch({
+    'when randomize on a block is called': {
 
         topic: parsedSurvey.topLevelBlocks,
 
@@ -109,11 +109,7 @@ vows.describe('Blocks randomize correctly').addBatch({
                 }
             });
         }
-    }
-}).run();
-
-
-vows.describe('Subblocks are randomized correctly').addBatch({
+    },
     'when randomize on parent block is called': {
 
         topic: function() {
@@ -122,7 +118,7 @@ vows.describe('Subblocks are randomized correctly').addBatch({
             });
         },
 
-        'non-randomizable blocks should maintain partial order': function(topic) {
+        'non-randomizable subblocks should maintain partial order': function(topic) {
             var fixedBlockIds = _.chain(topic.subblocks)
                 .filter(function(block) { return !block.randomizable })
                 .map(function(block) { return block.id })
