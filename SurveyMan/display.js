@@ -339,6 +339,7 @@ SurveyMan.display = (function () {
                     console.log(loadPreview);
                     loadPreview();
                     $("#preview").show();
+                    console.log($("#preview"));
                 } else {
                     $("#preview").hide();
                     Math.seedrandom(assignmentId);
