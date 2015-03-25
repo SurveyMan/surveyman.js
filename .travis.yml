@@ -1,6 +1,12 @@
 language: node_js
+before_install:
+  - npm install
+  - npm link vows
 node_js:
-  - 0.11
-  - 0.10
-  - 0.8
-  - 0.6
+  - 0.12
+branches:
+  only:
+    - gh-pages
+    - master
+script:
+  - npm test

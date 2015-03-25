@@ -1,80 +1,82 @@
 console.log("surveyman tests");
 
-var s = require("string");
-var _ = require("underscore");
-var $ = require("jquery");
-var http = require("http");
-var JaySchema = require('jayschema');
-var js = new JaySchema(JaySchema.loaders.http);
-js.maxRecursion = 3;
-var assert = require("assert");
-require("./globals.js");
-require("../survey.js");
+var vows = require("vows"),
+    assert = require("assert"),
+    globals = require("./globals.js");
 
-function getSchema(callback) {
-    var options = {
-            hostname : "surveyman.github.io",
-            port : 80,
-            path : "/Schemata/survey_output.json",
-            method : "GET"
+var network_test = function (callback) {
+    var s = require("string"),
+        _ = require("underscore"),
+        request = require("request"),
+        jjv = require("jjv"),
+        env = jjv(),
+        statusCode = null,
+        schemata = {
+            'survey_output' : null,
+            'survey_block' : null,
+            'survey_question' : null,
+            'survey_branchMap' : null,
+            'survey_option' : null
         },
-        schema = "",
-        cbk = function(response) {
-
-            console.log("status code:", response.statusCode);
-            response.setEncoding("UTF-8");
-
-            response.on("data", function (d){
-                schema += d.toString();
-            });
-
-            response.on("end", function () {
-                callback(JSON.parse(schema));
-            });
-
+        make_request = function (schema_name, cbk) {
+            var schema = "";
+            request("http://surveyman.github.io/Schemata/" + schema_name + ".json",
+                function (error, response, body) {
+                    console.log("schema_name", schema_name);
+                    if (!error && response.statusCode === 200) {
+                        schemata[schema_name]  = JSON.parse(body);
+                    } else {
+                        console.log("*****" + error + "*****");
+                    }
+                    cbk();
+                });
         };
 
-    var req = http.request(options, cbk);
-    req.on("error", function (e){
-        console.log("***",e,"***");
-    });
+    var stem = "http://surveyman.github.io/Schemata/",
+        survey_output = stem+"survey_output.json";
 
-    req.end();
+    env.defaultOptions.checkRequired = true;
 
+    _.foldl(_.keys(schemata),
+        function(memo, num) { return function () { make_request(num, memo);  }},
+        function() {
+            _.map(_.keys(schemata), function (schema_name) {
+                var keyname = stem+schema_name+".json";
+               console.log(keyname);
+               env.addSchema(keyname, schemata[schema_name]);
+            });
+            var result1 = env.validate(survey_output, globals['wage_survey']),
+                result2 = env.validate(survey_output, globals['prototypicality_survey']),
+                result3 = env.validate(survey_output, globals['pick_randomly_survey']),
+                result4 = env.validate(survey_output, {
+                    filename : "foo",
+                    breakoff : false,
+                    survey : true }),
+                result5 = env.validate(survey_output, {
+                    filename: "foo",
+                    breakoff: false,
+                    survey : [{asdf : 1}]});
+            console.log("result1: " + JSON.stringify(result1));
+            console.log("result2: " + JSON.stringify(result2));
+            console.log("result3: " + JSON.stringify(result3));
+            console.log("result4: " + JSON.stringify(result4));
+            console.log("result5: " + JSON.stringify(result5));
+            assert(!(result1 || result2 || result3) && result4 && result5);
+            if (callback)
+                callback();
+        })();
 };
 
-function test(schema, jsonSurvey, expectedOutcome) {
-
-    var ok = true;
-
-    //var report = env.validate(jsonSurvey, JSON.parse(env.getSchema));
-    ok = js.validate(jsonSurvey, schema).length === 1;
-
-    return ok===expectedOutcome;
-};
-
-// script part
-
-var fns = [];
-
-try {
-    for (var i = 0 ; i < jsonizedSurveys.length ; i++) {
-        //validate the jsonizedSurvey against the json schema
-        assert(!_.isUndefined(jsonizedSurveys) && !_.isUndefined(jsonizedSurveys[i]));
-        fns.push(function (s) { test(s, jsonizedSurveys[i], true); });
-    }
-} catch (err) {
-    console.log("err", err);
-}
-
-fns.push(function (s) { assert(test(s, { filename : "foo", breakoff : false, survey : true }, false)); });
-fns.push(function (s) { assert(test(s, {filename: "foo", breakoff: false, survey : [{id : "1"}]}, false))});
-
-getSchema(function(fns) {
-    return function (s) {
-        for (var i = 0; i < fns.length ; i++){
-            fns[i](s);
+vows.describe("Check validation").addBatch({
+    "Validation doesn't cause errors" : {
+        topic : "Network Test",
+        "Srsly doesn't fail." : function (_) {
+            try{
+                return network_test();
+            } catch (err) {
+                console.log(err);
+            }
+            return false;
         }
     }
-}(fns));
-
+}).run();

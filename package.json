@@ -1,10 +1,14 @@
 {
   "name": "surveyman",
-  "version": "1.5.1",
+  "version": "0.1.1",
   "homepage": "http://surveyman.github.io/surveyman.js",
+  "repository": {
+      "type" : "git",
+      "url" : "http://github.com/SurveyMan/surveyman.js"
+  },
   "bugs": {
     "url": "http://github.com/SurveyMan/surveyman.js/issues",
-    "email": "etosch@cs.umass.edu"
+    "email": "etosch@gmail.com"
   },
   "license": "CRAPL",
   "author": {
@@ -13,19 +17,19 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "survey.js",
-    "interpreter.js",
-    "display.js"
+    "surveyman"
   ],
-  "main": "SurveyMan",
+  "main": "surveyman",
   "dependencies": {
-    "underscore": "1.6",
+    "underscore": "1.8",
     "seedrandom": "2.3",
-    "jquery": "1.11",
-    "string": "1.5",
-    "jayschema" : "0.2"
+    "jquery": "2.1",
+    "string": "3.0",
+    "jjv": "1.0",
+    "request": "2.53",
+    "vows": "0.8"
   },
   "scripts": {
-    "test": "node tests/survey_tests.js && node tests/interpreter_tests.js && node tests/display_tests.js"
+    "test": "vows tests/*_tests.js"
   }
 }

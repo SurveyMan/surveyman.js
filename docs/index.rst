@@ -7,14 +7,18 @@ Overview
 ========================================
 The surveyman.js repository contains three modules. Together these three modules form the SurveyMan runtime system, contained in the SurveyMan namespace. This runtime system receives a JSON representation of a survey and executes that survey (with the help of a human!) in a browser. These three modules are meant to be used with the SurveyMan server and static analyzer. 
 
-Currently this code expects to be executed inside http://github.com/SurveyMan/SurveyMan/src/main/resources/HTMLSkeleton.html. 
+Currently this code expects to be executed inside https://github.com/SurveyMan/Runner/blob/master/src/main/resources/HTMLSkeleton.html.
 
 Install 
-========================================
-* TODO: npm 
-* TODO: cdn hosted
+=======
+To install locally, run
 
-**Dependencies**
+.. code-block:: bash
+
+    npm install surveyman
+
+Dependencies
+============
 
 * underscore
 
@@ -25,22 +29,28 @@ Install
 If you use these modules with the SurveyMan Java backend, everything is good to go! If you're using your own backend or otherwise modifying some part of the pipeline, you will need to ensure the following are present in your HTML for everything to work:
 
 First, make sure you have the following in the head:
-`<script type="text/javascript" src="path/to/cdn/surveyman.js"></script>`
-`<script type="text/javascript" src="path/to/cdn/interpreter.js"></script>`
-`<script type="text/javascript" src="path/to/cdn/display.js"></script>`
+
+.. code-block:: html
+
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/survey.js"></script>
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/interpreter.js"></script>
+    <script type="text/javascript" src="http://surveyman.github.io/surveyman.js/display.js"></script>
 
 If you are using AMT as your backend, you will also need a link to the submission script in the head, per the AMT documentations. If you are using a local backend, you will need some way to capture the assignment id, since it's used to seed the random number generator. The SurveyMan backend generates the following when it is being run locally:
 
-`<script type="text/javascript">
-   $.ajaxSetup({async:false});
-   var turkSetAssignmentID = function () { 
-        $.get("assignmentId", function(_aid) { 
-            console.log("Just pulled assignment Id : " + _aid); 
-            document.getElementById("assignmentId").value = _aid.trim(); 
-            aid = _aid;
-          }); 
-       }; 
-</script>`
+.. code-block:: html
+
+    <script type="text/javascript">
+       $.ajaxSetup({async:false});
+       var turkSetAssignmentID = function () {
+            $.get("assignmentId", function(_aid) {
+                console.log("Just pulled assignment Id : " + _aid);
+                document.getElementById("assignmentId").value = _aid.trim();
+                aid = _aid;
+              });
+           };
+    </script>
+
 
 `turkSetAssignmentId` is an AMT-defined function. Since `SurveyMan.display.ready` expects it, we define a local version here. AMT also injects an `assignmentId` element, so when we run locally, we add an element with this id to our form.
 
@@ -48,16 +58,18 @@ SurveyMan generates a form to be sent with a POST; although a user-defined versi
 
 At the end of the body, SurveyMan adds the following snippet:
 
-`<script type='text/javascript'>
-    turkSetAssignmentID();
-    var loadPreview=function(){<PROBABLY_A_CONSENT_FORM>},
-        jsonizedSurvey=<JSONIZED_SURVEY>;
-    Surveyman.display.ready(jsonizedSurvey, loadPreview);
-</script>`
+.. code-block:: html
+
+    <script type='text/javascript'>
+        turkSetAssignmentID();
+        var loadPreview=function(){<PROBABLY_A_CONSENT_FORM>},
+            jsonizedSurvey=<JSONIZED_SURVEY>;
+        Surveyman.display.ready(jsonizedSurvey, loadPreview);
+    </script>
 
 
-surveyman.js
-========================================
+`surveyman.js <http://surveyman.github.io/surveyman.js/survey.js>`_
+===================================================================
 
 surveyman.js contains the internal Javascript representation of a survey. It is simlar to the Java representation contained in http://github.com/SurveyMan/SurveyMan. The internal representation is not visible to the user.
 
@@ -83,8 +95,8 @@ surveyman.js contains the internal Javascript representation of a survey. It is 
 
 
 
-interpreter.js
-========================================
+`interpreter.js <http://surveyman.github.io/surveyman.js/interpreter.js>`_
+==========================================================================
 
 interpreter.js executes the survey. It is initialized with a Survey object and updates the state of the interpreter in response to requests for more questions. 
 
@@ -124,8 +136,8 @@ Under the current implmentation, the interpreter does not contain the answer set
 
 
 
-display.js
-========================================
+`display.js <http://surveyman.github.io/surveyman.js/display.js>`_
+==================================================================
 
 This is the module that controls all of the display logic. The visible methods can be overridden in `~/surveyman/custom.js` to do things like inject timing information.
 
