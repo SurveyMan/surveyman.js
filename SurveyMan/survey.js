@@ -4,7 +4,14 @@
 //  surveyman.js is released under the CRAPL.
 
 var _ = eval("_") === void 0 ? require("underscore"): _ ;
-var config = require('./config');
+var config = (function () {
+    try {
+        return require('./config');
+    } catch (e) {
+        console.log(e);
+        return { verbose : false };
+    }
+})();
 
 // TODO: Replace with an external library
 function log(msg) {
