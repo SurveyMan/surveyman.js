@@ -329,6 +329,7 @@ SurveyMan.display = (function () {
             $(document).ready(function() {
 
                 assignmentId = (mturk && _.isUndefined(assignmentId))? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
+                console.log(assignmentId);
 
                 $('form').submit(function() {
                     window.onbeforeunload = null;
@@ -336,6 +337,7 @@ SurveyMan.display = (function () {
 
                 var preview = $("#preview");
                 if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
+                    console.log(loadPreview);
                     loadPreview();
                     preview.show();
                 } else {
