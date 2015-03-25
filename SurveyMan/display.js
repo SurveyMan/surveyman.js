@@ -345,6 +345,7 @@ SurveyMan.display = (function () {
                     if (sm.breakoff)
                         showBreakoffNotice();
                     else showFirstQuestion();
+                    $("div[name=question]").show();
                 }
                 if (typeof(customInit) === "function") {
                     customInit();
