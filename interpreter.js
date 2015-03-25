@@ -65,6 +65,7 @@ SurveyMan.interpreter = (function () {
 
                                         var survey = SurveyMan.survey.init(jsonSurvey);
                                         initializeStacks(survey.topLevelBlocks);
+                                        return survey;
 
                                     },
         isQuestionStackEmpty    :   isQuestionStackEmpty,

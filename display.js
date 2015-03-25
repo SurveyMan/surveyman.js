@@ -317,15 +317,14 @@ SurveyMan.display = (function (_, $, seedrandom) {
         showBreakoffNotice : showBreakoffNotice,
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,
-        ready : function (jsonizedSurvey, customInit) {
+        ready : function (mturk, jsonizedSurvey, customInit) {
+            //  Previewing for now is unique to mturk.
             $(document).ready(function() {
-                if (navigator.onLine && !localp) {
-                    assignmentId = turkGetParam('assignmentId', "");
-                } else if (localp) {
-                    //turkSetAssignmentID();
-                    aid = document.getElementById('assignmentId').value;
-                } else {
+                if (mturk) {
+                    // if using mturk
                     assignmentId = "ASSIGNMENT_ID_NOT_AVAILABLE";
+                } else {
+                    aid = document.getElementById('assignmentId').value;
                 }
 
                 $('form').submit(function() {
@@ -336,10 +335,10 @@ SurveyMan.display = (function (_, $, seedrandom) {
                     $("#preview").show();
                 } else {
                     $("#preview").hide();
-                    aid = document.getElementById('assignmentId').value;
                     Math.seedrandom(assignmentId);
-                    SurveyMan.interpreter.init(jsonizedSurvey);
-                    showBreakoffNotice();
+                    var sm = SurveyMan.interpreter.init(jsonizedSurvey);
+                    if (sm.breakoff)
+                        showBreakoffNotice();
                 }
                 if (typeof(customInit) === "function") {
                     customInit();
