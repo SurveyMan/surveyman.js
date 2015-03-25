@@ -338,7 +338,7 @@ SurveyMan.display = (function () {
                     window.onbeforeunload = null;
                 });
 
-                if ( assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE") {
+                if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE") {
                     $("#preview").show();
                 } else {
                     $("#preview").hide();
