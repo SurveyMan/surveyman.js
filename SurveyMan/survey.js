@@ -438,7 +438,7 @@ SurveyMan.survey = (function () {
 
 })();
 
-if (eval("module") !== void 0) {
+if (!_.isUndefined(module)) {
     module.exports = SurveyMan.survey;
 }
 
