@@ -327,12 +327,8 @@ SurveyMan.display = (function () {
         ready : function (mturk, jsonizedSurvey, loadPreview, customInit) {
             //  Previewing for now is unique to mturk.
             $(document).ready(function() {
-                if (mturk) {
-                    // if using mturk
-                    assignmentId = "ASSIGNMENT_ID_NOT_AVAILABLE";
-                } else {
-                    aid = document.getElementById('assignmentId').value;
-                }
+
+                assignmentId = mturk ? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
 
                 $('form').submit(function() {
                     window.onbeforeunload = null;
@@ -348,6 +344,7 @@ SurveyMan.display = (function () {
                     var sm = SurveyMan.interpreter.init(jsonizedSurvey);
                     if (sm.breakoff)
                         showBreakoffNotice();
+                    else showFirstQuestion();
                 }
                 if (typeof(customInit) === "function") {
                     customInit();
