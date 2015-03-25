@@ -335,13 +335,12 @@ SurveyMan.display = (function () {
                     window.onbeforeunload = null;
                 });
 
-                var preview = $("#preview");
                 if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
                     console.log(loadPreview);
                     loadPreview();
-                    preview.show();
+                    $("#preview").show();
                 } else {
-                    preview.hide();
+                    $("#preview").hide();
                     Math.seedrandom(assignmentId);
                     var sm = SurveyMan.interpreter.init(jsonizedSurvey);
                     if (sm.breakoff)
