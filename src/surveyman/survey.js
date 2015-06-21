@@ -1,35 +1,35 @@
 /* @flow */
 // ==================== Start Flow Stuff Here ====================
 // Object types are direct ports of the JSON Schemata
-                           
+type JSONBranchMap  =   {};
 
-                         
-                           
-                           
-  
+type JSONOption     =   {
+    id:             string;
+    otext:          string;
+};
 
-                         
-                           
-                           
-                                      
-                                  
-                                                 
-                            
-                                  
-                            
-                                                  
-                                       
-                                                          
-                                                             
-                                  
-  
+type JSONQuestion   =   {
+    id:             string;
+    qtext:          string;
+    options:        Array<JSONOption>;
+    branchMap:      JSONBranchMap;
+    answer:         string; // not currently used
+    randomize:      boolean;
+    ordered:        Array<string>;
+    exclusive:      boolean;
+    breakoff:       boolean; // not currently used
+    freetext:       (boolean | string);
+    //TODO(etosch): add 'correlation' to the json schemata
+    //TODO(etosch): use the 'correlation' tag in the debugger
+    correlation:    Array<string>;
+};
 
-                         
-               
-                                
-                                   
-                      
-  
+type JSONBlock      =   {
+    id: string;
+    subblocks: Array<JSONBlock>;
+    questions: Array<JSONQuestion>;
+    randomize: boolean
+};
 // ====================  End Flow Stuff Here  ====================
 
 //  surveyman.js 1.5.1
@@ -115,7 +115,7 @@ SurveyMan.survey = (function () {
             this.question = _question;
 
         },
-        Block = function(_jsonBlock            ) {
+        Block = function(_jsonBlock : JSONBlock) {
                     //  get the total number of "slots" and assign indices
 
             blockMAP[_jsonBlock.id] = this;
@@ -250,7 +250,7 @@ SurveyMan.survey = (function () {
             console.assert(_.every(this.subblocks, function(b) { return this.idComp(b) === 0 }));
 
         },
-        Question = function(_jsonQuestion               , _block        ) {
+        Question = function(_jsonQuestion : JSONQuestion, _block : Block) {
 
             questionMAP[_jsonQuestion.id] = this;
 
@@ -280,7 +280,7 @@ SurveyMan.survey = (function () {
             this.setFreetext = function (_jsonQuestion) {
 
                 var reRe                    =   new RegExp("#\{.*\}"),
-                    ft                      =   _jsonQuestion.freetext;
+                    ft : (boolean | string) =   _jsonQuestion.freetext;
 
                 if ( typeof ft == 'boolean' && ft == true ) {
                     return true;

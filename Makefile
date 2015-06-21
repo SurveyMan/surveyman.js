@@ -5,6 +5,8 @@ deps:
 	npm link
 
 test:
+	npm run-script check
+	npm run-script convert
 	npm test
 
 pub: deps

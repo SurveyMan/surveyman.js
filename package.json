@@ -21,15 +21,18 @@
   ],
   "main": "surveyman",
   "dependencies": {
-    "underscore": "1.8",
-    "seedrandom": "2.3",
-    "jquery": "2.1",
-    "string": "3.0",
     "jjv": "1.0",
+    "jquery": "2.1",
+    "jstransform" : "11.0.2",
     "request": "2.53",
+    "seedrandom": "2.3",
+    "string": "3.0",
+    "underscore": "1.8",
     "vows": "0.8"
   },
   "scripts": {
+    "check": "flow check",
+    "convert" : "jstransform --strip-types --harmony src/ .",
     "test": "vows tests/*"
   }
 }
