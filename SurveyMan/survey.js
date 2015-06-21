@@ -1,11 +1,44 @@
+/* @flow */
+// ==================== Start Flow Stuff Here ====================
+// Object types are direct ports of the JSON Schemata
+type JSONBranchMap  =   {};
+
+type JSONOption     =   {
+    id:             string;
+    otext:          string;
+};
+
+type JSONQuestion   =   {
+    id:             string;
+    qtext:          string;
+    options:        Array<JSONOption>;
+    branchMap:      JSONBranchMap;
+    answer:         string; // not currently used
+    randomize:      boolean;
+    ordered:        Array<string>;
+    exclusive:      boolean;
+    breakoff:       boolean; // not currently used
+    freetext:       (boolean | string);
+    //TODO(etosch): add 'correlation' to the json schemata
+    //TODO(etosch): use the 'correlation' tag in the debugger
+    correlation:    Array<string>;
+};
+
+type JSONBlock      =   {
+    id: string;
+    subblocks: Array<JSONBlock>;
+    questions: Array<JSONQuestion>;
+    randomize: boolean
+};
+// ====================  End Flow Stuff Here  ====================
+
 //  surveyman.js 1.5.1
 //  http://surveyman.github.io/surveyman.js
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
-var _ = eval("_") === void 0 ? require("underscore"): _ ;
-
-SurveyMan = (function () {
+var _           =   eval("_") === void 0 ? require("underscore"): _,
+    SurveyMan   =   (function () {
         try {
             return _.isUndefined(SurveyMan) ? {} : SurveyMan;
         } catch (err) {
@@ -18,9 +51,17 @@ SurveyMan.survey = (function () {
 
     // Internal maps from string ids to objects
     // --------------
-   var         blockMAP            =   {},
-               optionMAP           =   {},
-               questionMAP         =   {};
+    var blockMAP                =   {},
+        optionMAP               =   {},
+        questionMAP             =   {},
+        exclusiveDefault        =   true,
+        orderedDefault          =   false,
+        surveyRandomizeDefault  =   true,
+        freetextDefault         =   false,
+        breakoffDefault         =   true,
+        blockRandomizeDefault   =   false,
+        _blocks_ids             =   [1];
+
 
     // Top-level auxiliary functions
     // --------------
@@ -65,7 +106,6 @@ SurveyMan.survey = (function () {
 
     // Survey Objects
     // --------------
-
     var Option = function(_jsonOption, _question) {
 
             optionMAP[_jsonOption.id] = this;
@@ -75,7 +115,7 @@ SurveyMan.survey = (function () {
             this.question = _question;
 
         },
-        Block = function(_jsonBlock) {
+        Block = function(_jsonBlock : JSONBlock) {
                     //  get the total number of "slots" and assign indices
 
             blockMAP[_jsonBlock.id] = this;
@@ -89,7 +129,7 @@ SurveyMan.survey = (function () {
             this.topLevelQuestions = Question.makeQuestions(_jsonBlock.questions, this);
             this.subblocks = [];
             // may need to call a to boolean on jsonBlock.randomize
-            this.randomizable = parseBools(_jsonBlock.randomize);
+            this.randomizable = parseBools(_jsonBlock.randomize, blockRandomizeDefault);
 
             this.isBranchAll = function () {
 
@@ -210,7 +250,7 @@ SurveyMan.survey = (function () {
             console.assert(_.every(this.subblocks, function(b) { return this.idComp(b) === 0 }));
 
         },
-        Question = function(_jsonQuestion, _block) {
+        Question = function(_jsonQuestion : JSONQuestion, _block : Block) {
 
             questionMAP[_jsonQuestion.id] = this;
 
@@ -239,12 +279,12 @@ SurveyMan.survey = (function () {
 
             this.setFreetext = function (_jsonQuestion) {
 
-                var reRe    =   new RegExp("#\{.*\}"),
-                    ft      =   _jsonQuestion.freetext;
+                var reRe                    =   new RegExp("#\{.*\}"),
+                    ft : (boolean | string) =   _jsonQuestion.freetext;
 
-                if ( ft == true ) {
+                if ( typeof ft == 'boolean' && ft == true ) {
                     return true;
-                } else if ( reRe.exec(ft) ) {
+                } else if ( typeof ft == 'string' && reRe.exec(ft) ) {
                     return new RegExp(ft.substring(2, ft.length - 1));
                 } else return new String(ft);
 
@@ -253,7 +293,7 @@ SurveyMan.survey = (function () {
             this.block = _block;
             this.id = _jsonQuestion.id;
             this.qtext = _jsonQuestion.qtext;
-            this.freetext = parseBools(_jsonQuestion.freetext) ? this.setFreetext(_jsonQuestion) : Survey.freetextDefault;
+            this.freetext = parseBools(_jsonQuestion.freetext, freetextDefault);
             this.options = Option.makeOptions(_jsonQuestion.options, this);
             this.correlation = _jsonQuestion.correlation;
 
@@ -282,6 +322,8 @@ SurveyMan.survey = (function () {
 
                 if (this.ordered) {
                     if (Math.random() < 0.5) {
+                        if (_.isUndefined(this.options) || !this.options)
+                            throw "Question property `ordered` set to true, even though the question has no options.";
                         this.options = this.options.reverse();
                     }
                 } else {
@@ -312,12 +354,14 @@ SurveyMan.survey = (function () {
                 q = _.values(questionMAP)[i];
                 q.makeBranchMap();
             }
-            this.breakoff = parseBools(_jsonSurvey.breakoff);
+            this.breakoff = parseBools(_jsonSurvey.breakoff, breakoffDefault);
             this.questions = _.values(questionMAP);
 
-        };
+            this.toJSON = function() {
 
-   Block._blocks_ids = [1];
+            }
+
+        };
 
    Block.new_block = function (parent) {
        var idArray = [], i = 0;
@@ -331,7 +375,7 @@ SurveyMan.survey = (function () {
        idArray[i] = Block._blocks_ids[i];
        Block._blocks_ids[i] += 1;
        var id = _.foldl(idArray, function(a,b) { return a + "." + b; });
-       return new Block({"id" : id, "questions" : []});
+       return new Block({id : id, questions : [], randomize: blockRandomizeDefault, subblocks: []});
    };
 
     // "static" methods
@@ -397,14 +441,6 @@ SurveyMan.survey = (function () {
         return oList;
 
     };
-
-    // "static" fields
-    Survey.exclusiveDefault =   true;
-    Survey.orderedDefault   =   false;
-    Survey.randomizeDefault =   true;
-    Survey.freetextDefault  =   false;
-    Survey.breakoffDefault  =   true;
-    Block.randomizeDefault  =   false;
 
     return {
         init            :   function(jsonSurvey) {
