@@ -17,9 +17,9 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "surveyman"
+    "SurveyMan"
   ],
-  "main": "surveyman",
+  "main": "SurveyMan",
   "dependencies": {
     "jjv": "1.0",
     "jquery": "2.1",
@@ -33,6 +33,6 @@
   "scripts": {
     "check": "flow check",
     "convert" : "jstransform --strip-types --harmony src/ .",
-    "test": "vows tests/*"
+    "test": "vows tests/*_tests.js"
   }
 }

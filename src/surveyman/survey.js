@@ -30,6 +30,12 @@ type JSONBlock      =   {
     questions: Array<JSONQuestion>;
     randomize: boolean
 };
+
+type JSONSurvey     =   {
+    filename:       string;
+    breakoff:       boolean;
+    survey:         Array<JSONBlock>;
+}
 // ====================  End Flow Stuff Here  ====================
 
 //  surveyman.js 1.5.1
@@ -37,15 +43,24 @@ type JSONBlock      =   {
 //  (c) 2014 University of Massachusetts Amherst
 //  surveyman.js is released under the CRAPL.
 
-var _           =   eval("_") === void 0 ? require("underscore"): _,
-    SurveyMan   =   (function () {
+var _       =   eval("_") === void 0 ? require("underscore"): _,
+    config  =   require('./config.js'),
+    SurveyMan = (function () {
         try {
             return _.isUndefined(SurveyMan) ? {} : SurveyMan;
         } catch (err) {
-            console.log(err+"\nReturning empty object.");
+            log(err);
             return {};
         }
     })();
+
+// TODO: Replace with an external library
+function log(msg) {
+    if (config.verbose) {
+        console.log(msg);
+    }
+}
+
 
 SurveyMan.survey = (function () {
 
@@ -80,24 +95,22 @@ SurveyMan.survey = (function () {
             } else throw "Unknown type for " + thing + " (" + typeof thing + ")";
 
         },
-        getOptionById = function (oid) {
+        getOptionById = function (oid : string) : Option {
 
             if (_.has(optionMAP, oid))
                 return optionMAP[oid];
             else throw "Option id " + oid + " not found in optionMAP";
 
         },
-        getQuestionById = function (quid) {
+        getQuestionById = function (quid : string) : Question {
 
             if (_.has(questionMAP, quid))
                 return questionMAP[quid];
             else throw "Question id " + quid + " not found in questionMAP";
 
         },
-        getBlockById = function (bid) {
+        getBlockById = function (bid : string) : Block {
 
-            if (bid===null)
-                return null;
             if (_.has(blockMAP, bid))
                 return blockMAP[bid];
             else throw "Block id " + bid + " not found in blockMAP";
@@ -106,7 +119,7 @@ SurveyMan.survey = (function () {
 
     // Survey Objects
     // --------------
-    var Option = function(_jsonOption, _question) {
+    var Option = function(_jsonOption : JSONOption, _question : Question) {
 
             optionMAP[_jsonOption.id] = this;
 
@@ -164,6 +177,7 @@ SurveyMan.survey = (function () {
             };
 
             this.idComp = function(that) {
+                console.log("WARNING: block ids depend on the semantics of the block. Make sure this complies.");
                 // Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this
                 for ( var i = 0 ; i < this.idArray.length ; i++ ) {
                     if ( i < that.idArray.length ) {
@@ -267,7 +281,8 @@ SurveyMan.survey = (function () {
                         for ( i = 0 ; i < keys.length ; i++ ) {
                             //console.log(_question, keys[i]);
                             var o = _question.getOption(keys[i]),
-                                b = getBlockById(_jsonBranchMap[keys[i]]);
+                                bid = _jsonBranchMap[keys[i]],
+                                b = bid && getBlockById(bid);
                             bm[o.id] = b;
                         }
                         return bm;
@@ -333,7 +348,7 @@ SurveyMan.survey = (function () {
             };
 
         },
-        Survey = function (_jsonSurvey) {
+        Survey = function (_jsonSurvey : JSONSurvey) {
 
             var i, q;
 
@@ -443,7 +458,7 @@ SurveyMan.survey = (function () {
     };
 
     return {
-        init            :   function(jsonSurvey) {
+        init            :   function(jsonSurvey : JSONSurvey) : Survey {
                                 var survey = new Survey(jsonSurvey);
                                 Survey.randomize(survey);
                                 return survey;
@@ -459,3 +474,5 @@ SurveyMan.survey = (function () {
 
 
 })();
+
+module.exports = SurveyMan;
