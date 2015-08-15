@@ -39,7 +39,7 @@ SurveyMan.survey = (function () {
 
     // Top-level auxiliary functions
     // --------------
-    var parseBools = function (thing, defaultVal) {
+    var parseBools = function (thing, defaultVal, question) {
 
         if (_.isUndefined(thing)) {
             return defaultVal;
@@ -51,7 +51,16 @@ SurveyMan.survey = (function () {
             }
         } else if (typeof thing === "boolean") {
             return thing;
-        } else throw "Unknown type for " + thing + " (" + typeof thing + ")";
+        } else if (Array.isArray(thing)) {
+            // New schemata spec for ordered -- provides a list of the ids that are ordered for this question.
+            // Set the initial ids of the question's options
+            var options = [];
+            for (var i = 0; i < thing.length; i++) {
+                options.push(question.getOptionById(thing[i]));
+            }
+            question.options = options;
+            return true;
+        } throw "Unknown type for " + thing + " (" + typeof thing + ")";
 
     },
     getOptionById = function (oid) {
@@ -283,7 +292,7 @@ SurveyMan.survey = (function () {
 
         // FIELDS MUST BE SENT OVER AS STRINGS
         this.randomizable   =   parseBools(_jsonQuestion.randomize, Survey.randomizeDefault);
-        this.ordered        =   parseBools(_jsonQuestion.ordered, Survey.orderedDefault);
+        this.ordered        =   parseBools(_jsonQuestion.ordered, Survey.orderedDefault, this);
         this.exclusive      =   parseBools(_jsonQuestion.exclusive, Survey.exclusiveDefault);
         this.breakoff       =   parseBools(_jsonQuestion.breakoff, Survey.breakoffDefault);
 
