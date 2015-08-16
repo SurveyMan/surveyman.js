@@ -56,7 +56,7 @@ SurveyMan.survey = (function () {
             // Set the initial ids of the question's options
             var options = [];
             for (var i = 0; i < thing.length; i++) {
-                options.push(question.getOptionById(thing[i]));
+                options.push(getOptionById(thing[i]));
             }
             question.options = options;
             return true;
@@ -449,9 +449,8 @@ SurveyMan.survey = (function () {
 
 try {
     if (!_.isUndefined(module)) {
-        module.exports = SurveyMan.survey;
+        module.exports = SurveyMan;
     }
 } catch (e) {
     console.log(e);
 }
-
