@@ -17,21 +17,24 @@
     "url": "http://cs.umass.edu/~etosch"
   },
   "files": [
-    "surveyman"
+    "SurveyMan"
   ],
   "main": "surveyman",
   "dependencies": {
-    "underscore": "1.8",
-    "seedrandom": "2.3",
-    "jquery": "2.1",
-    "string": "3.0",
+    "immutable": "^3.7.3",
     "jjv": "1.0",
-    "request": "2.53"
+    "jquery": "2.1",
+    "request": "2.53",
+    "seedrandom": "2.3",
+    "string": "3.0",
+    "underscore": "1.8"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "doc": "jsdoc"
   },
   "devDependencies": {
-    "jest-cli": "^0.4.x"
+    "jest-cli": "^0.4.x",
+    "jsdoc": "^3.3.x"
   }
 }

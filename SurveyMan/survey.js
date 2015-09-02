@@ -20,7 +20,7 @@ function log(msg) {
     }
 }
 
-SurveyMan = (function () {
+var SurveyMan = (function () {
     try {
         return _.isUndefined(SurveyMan) ? {} : SurveyMan;
     } catch (err) {
@@ -328,7 +328,7 @@ SurveyMan.survey = (function () {
         };
 
         this.filename = _jsonSurvey.filename;
-        this.topLevelBlocks = makeSurvey(_jsonSurvey.survey);
+        this.topLevelBlocks = makeSurvey(_jsonSurvey.survey ? _jsonSurvey.survey : []);
         for (i = 0 ; i < _.keys(questionMAP).length ; i++){
             q = _.values(questionMAP)[i];
             q.makeBranchMap();
@@ -459,3 +459,5 @@ try {
 SurveyMan.new_survey = function () {
     return SurveyMan.survey.init([]);
 }
+
+module.exports = SurveyMan;
