@@ -342,6 +342,7 @@ SurveyMan.display = (function () {
                     console.log($("#preview"));
                 } else {
                     $("#preview").hide();
+                    aid = document.getElementById('assignmentId').value;
                     Math.seedrandom(assignmentId);
                     var sm = SurveyMan.interpreter.init(jsonizedSurvey);
                     if (sm.breakoff)

@@ -2,7 +2,7 @@ var vows = require('vows'),
     _    = require('underscore'),
     assert = require('assert'),
     globals = require('./globals'),
-    survey = require('../SurveyMan/survey.js');
+    survey = require('../SurveyMan/survey.js').survey;
 
 var jsonSurvey = globals.wage_survey;
 var parsedSurvey = survey.init(jsonSurvey);
