@@ -453,6 +453,7 @@ try {
     }
 } catch (e) {
     console.log(e);
+}
 
 // Wrapper for creating a new survey
 SurveyMan.new_survey = function () {
