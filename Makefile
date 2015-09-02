@@ -8,4 +8,4 @@ test:
 	npm test
 
 pub: deps
-	npm publish .
+	npm publish SurveyMan

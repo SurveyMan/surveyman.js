@@ -446,3 +446,5 @@ try {
     console.log(e);
 }
 
+// Wrapper for creating a new survey
+SurveyMan.new_survey = function () { return SurveyMan.survey.init([]); }
