@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Block</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Block</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        Block
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="Block"><span class="type-signature"></span>new Block<span class="signature">(_jsonBlock)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    The Block object holds other blocks or questions. It has 12 fields:
+<ul>
+<li><b>id</b> string representation of the internal id of this block. This has
+an associated semantics.</li>
+<li><b>idArray</b> convenience field -- an array representation of the id.</li>
+<li><b>topLevelQuestions</b> the list of questions that are immediately contained in this block</li>
+<li><b>subblocks</b> potentially empty block list</li>
+<li><b>randomizable</b> boolean indicating whether this block is randomizable or 'floating'</li>
+<li><b>isBranchAll</b> function returning a boolean indicating whether this is a BRANCH-ALL block</li>
+<li><b>getQuestion</b> returns the question in this block associated with the provided id</li>
+<li><b>idComp</b> compares two subblocks to determine their precedence</li>
+<li><b>randomize</b> function to randomizes this block's questions and subblocks</li>
+<li><b>populate</b> initializes the blocks</li>
+<li><b>getFirstQuestion</b> pops off the top question in the block; used by interpreter.js and display.js</li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>_jsonBlock</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">JSON</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line417">line 417</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".new_block"><span class="type-signature">(static) </span>new_block<span class="signature">(parent)</span><span class="type-signature"> &rarr; {<a href="Block.html">Block</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Add a new block programmatically.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>parent</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Block.html">Block</a></span>
+|
+
+<span class="param-type">undefined</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If we are creating a subblock, we must supply the parent.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line555">line 555</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Block.html">Block</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Block.html">Block</a></li><li><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></li><li><a href="Option.html">Option</a></li><li><a href="Question.html">Question</a></li><li><a href="Survey.html">Survey</a></li></ul><h3>Namespaces</h3><ul><li><a href="interpreter.html">interpreter</a></li><li><a href="survey_.html">survey</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getAllBlockQuestions">getAllBlockQuestions</a></li><li><a href="global.html#getBlockById">getBlockById</a></li><li><a href="global.html#getOptionById">getOptionById</a></li><li><a href="global.html#getQuestionById">getQuestionById</a></li><li><a href="global.html#global_reset">global_reset</a></li><li><a href="global.html#handleBranching">handleBranching</a></li><li><a href="global.html#initializeStacks">initializeStacks</a></li><li><a href="global.html#isBlockStackEmpty">isBlockStackEmpty</a></li><li><a href="global.html#isQuestionStackEmpty">isQuestionStackEmpty</a></li><li><a href="global.html#loadQuestions">loadQuestions</a></li><li><a href="global.html#nextBlock">nextBlock</a></li><li><a href="global.html#nextQuestion">nextQuestion</a></li><li><a href="global.html#nextSequential">nextSequential</a></li><li><a href="global.html#parseBools">parseBools</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Sep 07 2015 21:51:50 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

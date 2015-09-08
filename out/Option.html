@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: Option</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: Option</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        Option
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="Option"><span class="type-signature"></span>new Option<span class="signature">(_jsonOption, _question)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    The Option object holds answer options. It has three fields:
+<ul>
+    <li><b>id</b> string representing the internal id of this option</li>
+    <li><b>otext</b> string representation of the option (may include HTML)</li>
+    <li><b>question</b> the question to which this option belongs</li>
+</ul>
+
+Note that there is the opportunity for optimization here; many questions
+have similar answer options.
+
+Note that we do not enforce _question to be defined. This allows us to
+build options incrementally.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>_jsonOption</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">JSON</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_question</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Question.html">Question</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line253">line 253</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id=".makeOptions"><span class="type-signature">(static) </span>makeOptions<span class="signature">(jsonOptions, enclosingQuestion, ordered)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Option.html">Option</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Option.makeOptions creates option objects for the supplied question and ensures the
+ordering of the options, if necessary.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>jsonOptions</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">JSON</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>enclosingQuestion</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Question.html">Question</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ordered</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line269">line 269</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Option.html">Option</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Block.html">Block</a></li><li><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></li><li><a href="Option.html">Option</a></li><li><a href="Question.html">Question</a></li><li><a href="Survey.html">Survey</a></li></ul><h3>Namespaces</h3><ul><li><a href="interpreter.html">interpreter</a></li><li><a href="survey_.html">survey</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getAllBlockQuestions">getAllBlockQuestions</a></li><li><a href="global.html#getBlockById">getBlockById</a></li><li><a href="global.html#getOptionById">getOptionById</a></li><li><a href="global.html#getQuestionById">getQuestionById</a></li><li><a href="global.html#global_reset">global_reset</a></li><li><a href="global.html#handleBranching">handleBranching</a></li><li><a href="global.html#initializeStacks">initializeStacks</a></li><li><a href="global.html#isBlockStackEmpty">isBlockStackEmpty</a></li><li><a href="global.html#isQuestionStackEmpty">isQuestionStackEmpty</a></li><li><a href="global.html#loadQuestions">loadQuestions</a></li><li><a href="global.html#nextBlock">nextBlock</a></li><li><a href="global.html#nextQuestion">nextQuestion</a></li><li><a href="global.html#nextSequential">nextSequential</a></li><li><a href="global.html#parseBools">parseBools</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Sep 07 2015 21:51:50 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

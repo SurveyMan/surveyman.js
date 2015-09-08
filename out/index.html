@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+        surveyman.js
+        </h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><h2>Overview</h2>
+The surveyman.js repository contains three modules. Together these three modules form the SurveyMan runtime system, contained in the SurveyMan namespace. This runtime system receives a JSON representation of a survey and executes that survey (with the help of a human!) in a browser. These three modules are meant to be used with the SurveyMan server and static analyzer.
+
+Currently this code expects to be executed inside https://github.com/SurveyMan/Runner/blob/master/src/main/resources/HTMLSkeleton.html.
+
+<h2>Install</h2>
+
+<tt>npm install surveyman</tt>
+
+<h2>Usage</h2>
+<p><i>Warning: These instructions are deprecated</i></p>
+<p>If you use these modules with the SurveyMan Java backend, everything is good to go! If you're using your own backend or otherwise modifying some part of the pipeline, you will need to ensure the following are present in your HTML for everything to work:
+
+<p>First, make sure you have the following in the head:</p>
+
+<p><tt>&lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/survey.js"&gt;&lt;/script&gt;<br/>
+      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/interpreter.js"&gt;&lt;/script&gt;<br/>
+      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/display.js"&gt;&lt;/script&gt;</tt>
+  </p>
+
+<p>If you are using AMT as your backend, you will also need a link to the submission script in the head, per the AMT documentations. If you are using a local backend, you will need some way to capture the assignment id, since it's used to seed the random number generator. The SurveyMan backend generates the following when it is being run locally:</p>
+
+<p><tt>&lt;script type="text/javascript"&gt;
+   $.ajaxSetup({async:false});<br/>
+   var turkSetAssignmentID = function () { <br/>
+   &nbsp;&nbsp;$.get("assignmentId", function(_aid) { <br/>
+   &nbsp;&nbsp;&nbsp;&nbsp;console.log("Just pulled assignment Id : " + _aid); <br/>
+   &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById("assignmentId").value = _aid.trim(); <br/>
+   &nbsp;&nbsp;&nbsp;&nbsp;aid = _aid; <br/>
+   &nbsp;&nbsp;}); <br/>
+             }; <br/>
+   &lt;/script&gt;</tt></p>
+
+<p><tt>turkSetAssignmentId</tt> is an AMT-defined function. Since <tt>SurveyMan.display.ready</tt> expects it, we define a local version here. AMT also injects an `assignmentId` element, so when we run locally, we add an element with this id to our form.</p>
+
+<p>SurveyMan generates a form to be sent with a POST; although a user-defined version could simply collect data in a Javascript object and POST this back to a local server, we wanted to be able to write one version to work with both AMT and a local server.</p>
+
+<p>At the end of the body, SurveyMan adds the following snippet:</p>
+
+<tt>
+ &lt;script type='text/javascript'&gt;</br/>
+ &nbsp;&nbsp;turkSetAssignmentID();</br/>
+ &nbsp;&nbsp;var loadPreview=function(){<PROBABLY_A_CONSENT_FORM>},</br/>
+ &nbsp;&nbsp;jsonizedSurvey=<JSONIZED_SURVEY>;</br/>
+ &nbsp;&nbsp;Surveyman.display.ready(jsonizedSurvey, loadPreview);</br/>
+     &lt;/script&gt;
+   </tt></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line1">line 1</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Block.html">Block</a></li><li><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></li><li><a href="Option.html">Option</a></li><li><a href="Question.html">Question</a></li><li><a href="Survey.html">Survey</a></li></ul><h3>Namespaces</h3><ul><li><a href="interpreter.html">interpreter</a></li><li><a href="survey_.html">survey</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getAllBlockQuestions">getAllBlockQuestions</a></li><li><a href="global.html#getBlockById">getBlockById</a></li><li><a href="global.html#getOptionById">getOptionById</a></li><li><a href="global.html#getQuestionById">getQuestionById</a></li><li><a href="global.html#global_reset">global_reset</a></li><li><a href="global.html#handleBranching">handleBranching</a></li><li><a href="global.html#initializeStacks">initializeStacks</a></li><li><a href="global.html#isBlockStackEmpty">isBlockStackEmpty</a></li><li><a href="global.html#isQuestionStackEmpty">isQuestionStackEmpty</a></li><li><a href="global.html#loadQuestions">loadQuestions</a></li><li><a href="global.html#nextBlock">nextBlock</a></li><li><a href="global.html#nextQuestion">nextQuestion</a></li><li><a href="global.html#nextSequential">nextSequential</a></li><li><a href="global.html#parseBools">parseBools</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Mon Sep 07 2015 21:51:50 GMT-0400 (EDT)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
