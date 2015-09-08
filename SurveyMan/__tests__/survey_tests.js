@@ -1,4 +1,5 @@
 jest.dontMock("./globals.js")
+    .dontMock("../survey")
     .dontMock("string")
     .dontMock("underscore")
     .dontMock("request")
@@ -79,5 +80,23 @@ describe("Check validation", function() {
             console.log(err);
         }
         return false;
+    });
+});
+
+describe("New ordering mechanism is implemented correctly.", function() {
+    var {survey} = require("../survey");
+    var globals = require("./globals");
+
+    it("parses ordered questions correctly in Ipierotis.csv", function() {
+        try {
+            survey._global_reset();
+            var parsedSurvey = survey.init(globals.ipierotis);
+            expect(parsedSurvey).toBeDefined();
+            expect(parsedSurvey.topLevelBlocks).toBeDefined();
+            expect(parsedSurvey.topLevelBlocks[1].topLevelQuestions[0].ordered).toBeTruthy();
+        } catch (e) {
+            console.log('error: ', e);
+            throw e;
+        }
     });
 });
