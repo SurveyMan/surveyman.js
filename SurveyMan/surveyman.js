@@ -256,6 +256,12 @@ var Option = function (_jsonOption, _question = null) {
   this.id = _jsonOption.id;
   this.otext = _jsonOption.otext;
   this.question = _question;
+  this.toJSON = function() {
+    return {
+      id: this.id,
+      otext: this.otext
+    };
+  }
 };
 
 /**
@@ -305,7 +311,7 @@ Option.makeOptions = function (jsonOptions, enclosingQuestion = null, ordered = 
  * @param {Question} _block
  * @constructor
  */
-var Question = function (_jsonQuestion, _block) {
+var Question = function(_jsonQuestion, _block) {
   assertJSONHasProperties(_jsonQuestion, 'id', 'qtext');
   var id = _jsonQuestion.id,
       branchMap = _jsonQuestion.branchMap || {},
@@ -377,6 +383,24 @@ var Question = function (_jsonQuestion, _block) {
       FYshuffle(this.options);
     }
   };
+  this.toJSON = function() {
+    let branchMap = {};
+    for (let [v, k] in this.branchMap.entries()) {
+      branchMap[k] = v;
+    }
+    return {
+      id: this.id,
+      qtext: this.qtext,
+      branchMap: branchMap,
+      freetext: this.freetext instanceof RegExp ? this.freetext.source : this.freetext,
+      correlation: this.correlation,
+      randomize: this.randomizable,
+      options: this.options.map((o) => o.toJSON()),
+      ordered: this.ordered,
+      exclusive: this.exclusive,
+      breakoff: this.breakoff
+    }
+  }
 };
 
 /**
@@ -385,7 +409,7 @@ var Question = function (_jsonQuestion, _block) {
  * @param {Block} enclosingBlock
  * @returns {Array}
  */
-Question.makeQuestions = function (_jsonQuestions, enclosingBlock) {
+Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
   var i, qList = [];
 
   for (i = 0; i < _jsonQuestions.length; i++) {
@@ -396,21 +420,7 @@ Question.makeQuestions = function (_jsonQuestions, enclosingBlock) {
 };
 
 /**
- * The Block object holds other blocks or questions. It has 12 fields:
- * <ul>
- * <li><b>id</b> string representation of the internal id of this block. This has
- * an associated semantics.</li>
- * <li><b>idArray</b> convenience field -- an array representation of the id.</li>
- * <li><b>topLevelQuestions</b> the list of questions that are immediately contained in this block</li>
- * <li><b>subblocks</b> potentially empty block list</li>
- * <li><b>randomizable</b> boolean indicating whether this block is randomizable or 'floating'</li>
- * <li><b>isBranchAll</b> function returning a boolean indicating whether this is a BRANCH-ALL block</li>
- * <li><b>getQuestion</b> returns the question in this block associated with the provided id</li>
- * <li><b>idComp</b> compares two subblocks to determine their precedence</li>
- * <li><b>randomize</b> function to randomizes this block's questions and subblocks</li>
- * <li><b>populate</b> initializes the blocks</li>
- * <li><b>getFirstQuestion</b> pops off the top question in the block; used by interpreter.js and display.js</li>
- * </ul>
+ * The Block object holds other blocks or questions.
  * @param {JSON} _jsonBlock
  * @constructor
  */
@@ -423,18 +433,42 @@ var Block = function(_jsonBlock) {
   blockMAP.set(id, this);
 
   var numbersRegexp = new RegExp('[0-9]+');
-  var idStringToArray = (_idString) =>
+  this._idStringToArray = (_idString) =>
     _idString.split('.').map((s) =>
       parseInt(numbersRegexp.exec(s)[0]));
   var floatingBlockRegexp = new RegExp('(_|[a-z][a-z]*)[1-9][0-9]*');
   var randomizableId = (_idString) => floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
   // get the total number of 'slots' and assign indices
+  /**
+   * The user-supplied id. This will have the heirarchical/randomization semantics embedded in it.
+   * e.g.: 1._2
+   */
   this.id = id;
-  this.idArray = idStringToArray(id);
+  /**
+   * The idArray allows for quick lookup when comparing different blocks. For example, the block
+   * with id 1._2 has an idArray of [1, 2].
+   * @type {Array<number>}
+   */
+  this.idArray = this._idStringToArray(id);
+  /**
+   * The questions contained directly in this block, i.e., not in subblocks.
+   * @type {Array<Question>}
+   */
   this.topLevelQuestions = Question.makeQuestions(questions, this);
+  /**
+   * The subblocks of this block.
+   * @type {Array<Block>}
+   */
   this.subblocks = [];
-  // may need to call a to boolean on jsonBlock.randomize
+  /**
+   * Boolean indicating whether this is a floating block.
+   * @type {boolean}
+   */
   this.randomizable = Boolean(randomizableId(this.id)) || parseBools(randomize, Block.randomizeDefault);
+  /**
+   * Returns boolean indicating whether this is a branch-all block.
+   * @returns {boolean}
+   */
   this.isBranchAll = function() {
     var i, q, dests;
     if (this.topLevelQuestions.length < 2) return false;
@@ -447,6 +481,28 @@ var Block = function(_jsonBlock) {
     // if all of the branch maps are not empty.
     return this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
   };
+  /**
+   * Returns boolean indicating whether this is a branch-one block.
+   * @returns {boolean}
+   */
+  this.isBranchOne = function() {
+    // Assume that we are properly formed.
+    if (this.isBranchAll()) return false;
+    if (this.topLevelQuestions.filter((q) => q.branchMap.size > 0).length === 1) return true;
+    for (let i = 0; i < this.subblocks.length; i++) {
+      if (this.subblocks[i].isBranchOne()) {
+        return true;
+      }
+    }
+    return false;
+  };
+  /**
+   * Returns the question object associated with the input id.
+   * @param {string} quid The question's id.
+   * @returns {Question}
+   * @throws ObjectNotFoundException if this block does not contain a question with
+   * the input id at the top level.
+   */
   this.getQuestion = function(quid) {
     for (var i = 0; i < this.topLevelQuestions.length; i++) {
       if (this.topLevelQuestions[i].id == quid) {
@@ -455,9 +511,13 @@ var Block = function(_jsonBlock) {
     }
     throw new ObjectNotFoundException('Question', quid, `block ${this.id}`);
   };
+  /**
+   * Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this.
+   * If the ids are exactly the same, return 0; this relationship will be symmetric.
+   * @param {Block} that The block to compare.
+   * @returns {number}
+   */
   this.idComp = function(that) {
-    // Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this
-    // If the ids are exactly the same, return 0; this relationship will be symmetric
     if (this.id === that.id) return 0;
     for (let i = 0; i < this.idArray.length + 1; i++) {
       // If we have reached the end of the comparison and that block has a longer id, then
@@ -473,6 +533,9 @@ var Block = function(_jsonBlock) {
       }
     }
   };
+  /**
+   * Randomizes this block. Shuffles this block's questions and its subblocks appropriately.
+   */
   this.randomize = function() {
     var i, j;
     var newSBlocks = this.subblocks.map((_) => -1);
@@ -526,6 +589,11 @@ var Block = function(_jsonBlock) {
       subblocks.length === this.subblocks.length,
       `json subblocks must match Block object subblocks: ` +
       `${subblocks.length} vs. ${this.subblocks.length}`);
+  /**
+   * Returns the first question to be seen from this block.
+   * @returns {Question}
+   * @throws MalformedSurveyException if there are no questions or subblocks.
+   */
   this.getFirstQuestion = function () {
     if (this.topLevelQuestions.length !== 0)
       return this.topLevelQuestions[0];
@@ -538,6 +606,60 @@ var Block = function(_jsonBlock) {
     (tv, b) => tv && this.idComp(b) === 0, true),
     'subblocks should all return 0 on idComp'
   );
+  /**
+   * Returns the JSON representation of this block.
+   * @returns {{id: *, questions: *, randomize: (boolean|*), subblocks: *}}
+   */
+  this.toJSON = function() {
+    return {
+      id: this.id,
+      questions: this.questions.map((q) => q.toJSON()),
+      randomize: this.randomizable,
+      subblocks: this.subblocks.map((b) => b.toJSON())
+    };
+  };
+  /**
+   * Gets the id of the parent block, to use for parent block lookup.
+   * @returns {string}
+   */
+  this.get_parent_id = function() {
+    return this.id.split('.').slice(0, -1).reduce((a, b) => `${a}.${b}`);
+  };
+  /**
+   * Adds the block provided block to this block.
+   * @param {Block} block The block to add.
+   */
+  this.add_block = function(containingBlock) {
+    var update_ids = function(parent, child) {
+      // update block's id
+      child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
+      child.idArray = child._idStringToArray(child.id);
+      child.subblocks.forEach((b) => update_ids(child, b));
+    };
+    return function(block) {
+      // Check whether it is valid to add this block.
+      if (containingBlock.isBranchAll()) {
+        throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
+      }
+      if (containingBlock.isBranchOne() && block.isBranchOne()) {
+        throw new MalformedSurveyException('Cannot add branch-one blocks as subblocks to a branch-all block');
+      }
+      if (block.get_parent_id() !== containingBlock.id) {
+        update_ids(containingBlock, block);
+      }
+      containingBlock.subblocks.push(block);
+      block.parent = containingBlock;
+    }
+  }(this);
+  /**
+   * Returns all questions belonging to this block and its subblocks.
+   * @returns {Array<Question>}
+   */
+  this.getAllQuestions = function() {
+    let retval = [...this.topLevelQuestions];
+    this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
+    return retval;
+  }
 };
 
 /**
@@ -564,7 +686,11 @@ Block.new_block = function(parent) {
   idArray[i] = Block._blocks_ids[i];
   Block._blocks_ids[i] += 1;
   var id = idArray.reduce(function (a, b) { return a + '.' + b; });
-  return new Block({'id': id, 'questions': []});
+  return new Block({
+    id: id,
+    questions: [],
+    subblocks: []
+  });
 };
 
 /**
@@ -586,7 +712,7 @@ Block.NEXT_BLOCK = function() {
  *   <li><b>filename</b> The path of the source file used to generate this survey; may be empty.</li>
  *   <li><b>topLevelBlocks</b> The list of top level blocks in this survey. </li>
  *   <li><b>breakoff</b> Boolean indicating whether breakoff is permitted for this survey.</li>
- *   <li><b>questions</b> list of all questions. This gets wrapped in an Immutable.List.</li>
+ *   <li><b>questions</b> The list of all questions. This gets wrapped in an Immutable.List.</li>
  * </ul>
  * @param {json} _jsonSurvey - the input survey, typically generated by another program.
  * @constructor
@@ -599,6 +725,38 @@ var Survey = function(_jsonSurvey) {
   this.topLevelBlocks = makeSurvey(survey);
   questionMAP.forEach((q) =>  q.makeBranchMap());
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
+  /**
+   * Returns the JSON representation of this survey.
+   *
+   * Note: we cannot just return the input json because the survey may have been mutated.
+   * @returns {{filename: *, breakoff: *, survey: *}}
+   */
+  this.toJSON = function() {
+    return {
+      filename: this.filename,
+      breakoff: this.breakoff,
+      survey: topLevelBlocks.map((b) => b.toJSON())
+    };
+  };
+  /**
+   * Adds the block to the survey. Mutates the survey object.
+   * @param {Block} block The top-level block to add.
+   * @param {?Block} parent This block's parent. If null, it will attempt to find the parent.
+   */
+  this.add_block = function(block, parent = null) {
+    // We are not adding a top-level block
+    if (block.idArray.length > 1) {
+      let parentid = block.get_parent_id();
+      if (!parent) {
+        parent = getBlockById(parentid);
+      }
+      parent.add_block(block);
+    } else {
+      this.topLevelBlocks.push(block);
+    }
+    // add this block's questions to the top level survey questions
+    block.getAllQuestions().forEach((q) => this.questions.push(q));
+  };
   // Not sure why this isn't working; I think it might be a problem with babel:
   // this.questions = Array.from(questionMAP.values());
   this.questions = [];
@@ -610,6 +768,10 @@ var Survey = function(_jsonSurvey) {
   }
 };
 
+/**
+ * Randomizes the survey blocks and questions, as appropriate.
+ * @param {Survey} _survey
+ */
 Survey.randomize = function(_survey) {
   // Select out and randomize the top level floating blocks.
   var randomizableBlocks = _survey.topLevelBlocks.filter((_block) => _block.randomizable);
@@ -650,11 +812,6 @@ Survey.randomizeDefault = true;
 Survey.freetextDefault = false;
 Survey.breakoffDefault = true;
 Block.randomizeDefault = false;
-
-// Wrapper for creating a new survey
-var new_survey = function () {
-  return init([]);
-};
 
 /**
  * @namespace
@@ -732,8 +889,8 @@ var getAllBlockQuestions = function (_block) {
     } else {
       throw "Neither qindices nor bindices contain index " + i;
     }
-    return flatten(retval);
   }
+  return flatten(retval);
 };
 
 /**
@@ -853,17 +1010,86 @@ var interpreter = {
  * exported module
  *****************************************************************************/
 
-try {
-  var sm = {
-      survey: survey,
-      interpreter: interpreter
-    };
-  if (module) {
-    module.exports = sm;
+var _gensym = function(prefix = "") {
+  return `${prefix}${this.next()}`;
+};
+
+_gensym.counter = 0;
+_gensym.next = function() {
+  _gensym.counter++;
+  return _gensym + 1;
+};
+
+/**
+ * Top-level call to create a new survey.
+ * @returns {survey.Survey}
+ */
+var new_survey = function() {
+  return new survey.Survey({
+    filename: "temp_file_name.json",
+    breakoff: Survey.breakoffDefault,
+    survey: []
+  });
+};
+
+/**
+ * Top-level call to create a new empty block.
+ * @param {string} bid The block id.
+ * @returns {survey.Block}
+ */
+var empty_block = function(bid = _gensym("block")) {
+  return new survey.Block({
+    id: bid,
+    questions: [],
+    subblocks: []
+  });
+};
+
+/**
+ * Adds a block to the top level of the survey.
+ * @param {survey.Block} block The block to add.
+ * @param survey
+ * @param mutate
+ * @returns {?survey.Survey}
+ */
+var add_block = function(block, survey, mutate = true) {
+  if (mutate) {
+    survey.add_block(block);
+    return null;
   } else {
-    // we are in the browser; make this global
-    surveyman = sm;
+    var s = new_survey();
+    // add all the blocks from the starting survey
+    survey.topLevelBlocks.forEach((b) => s.add_block(b));
+    // add the new block
+    s.add_block(block);
+    return s;
   }
-} catch (e) {
-  console.log(e);
-}
+};
+
+/**
+ * Top-level call to create a new Option.
+ * @param {string} surface_text The text to be displayed to the user.
+ * @param {string} oid The option id.
+ * @returns {Option}
+ */
+var new_option = function(surface_text, oid = _gensym("option")) {
+  return new Option({
+    id: oid,
+    otext: surface_text
+  });
+};
+
+/**
+ * Contains top-level calls for use by external programs, e.g. the survey construction GUI.
+ * @namespace
+ * @type {{survey: {_parseBools: Function, _sortById: Function, _global_reset: Function, init: Function, getOptionById: Function, getQuestionById: Function, getBlockById: Function, Survey: Function, Block: Function, Question: Function, Option: Function}, interpreter: {init: Function, isQuestionStackEmpty: Function, isBlockStackEmpty: Function, nextBlock: Function, nextQuestion: Function, handleBranching: Function, nextSequential: Function}}}
+ */
+var surveyman = {
+  survey: survey,
+  interpreter: interpreter,
+  new_survey: new_survey,
+  empty_block: empty_block,
+  new_option: new_option
+};
+
+module.exports = surveyman;
