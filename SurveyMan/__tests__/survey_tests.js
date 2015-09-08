@@ -1,5 +1,5 @@
 jest.dontMock("./globals.js")
-    .dontMock("../survey")
+    .dontMock("../surveyman")
     .dontMock("string")
     .dontMock("underscore")
     .dontMock("request")
@@ -84,7 +84,7 @@ describe("Check validation", function() {
 });
 
 describe("New ordering mechanism is implemented correctly.", function() {
-    var {survey} = require("../survey");
+    var {survey} = require("../surveyman");
     var globals = require("./globals");
 
     it("parses ordered questions correctly in Ipierotis.csv", function() {

@@ -1,9 +1,9 @@
 jest.dontMock("./globals.js")
-    .dontMock("../survey.js");
+    .dontMock("../surveyman.js");
 
 describe('Top-level auxiliary function tests.', function() {
   it('parses boolean values, taking into account our freetext rules', function() {
-    var survey = require('../survey').survey;
+    var survey = require('../surveyman').survey;
     var asdf;
     expect(survey._parseBools(asdf, true, null)).toBe(true);
     expect(survey._parseBools(asdf, 'fdsa', null)).toBe('fdsa');
@@ -13,7 +13,7 @@ describe('Top-level auxiliary function tests.', function() {
 
 describe('Option tests', function() {
 
-  var {Option} = require("../survey").survey;
+  var {Option} = require("../surveyman").survey;
 
   it('ensures that an error occurs if the provided json is malformed.', function() {
     expect(new Option({'id': 'asdf', 'otext': 'fdsa'})).toBeDefined();
@@ -40,7 +40,7 @@ describe('Option tests', function() {
 
 describe('Question tests', function() {
 
-  var {Question} = require('../survey').survey;
+  var {Question} = require('../surveyman').survey;
 
   it('tests freetext parsing', function() {
     var q = new Question({
@@ -107,7 +107,7 @@ describe('Question tests', function() {
 
 describe('Block tests', function() {
 
-  var {Block} = require('../survey').survey;
+  var {Block} = require('../surveyman').survey;
   var {wage_survey} = require('./globals');
 
   it('ensures that an error occurs if the provided json is malformed.', function() {
@@ -172,7 +172,7 @@ describe('Block tests', function() {
 
 describe('Block-Question tests', function() {
 
-  var {Block} = require('../survey').survey;
+  var {Block} = require('../surveyman').survey;
 
   it('tests the interaction between questions and blocks', function() {
     var b = new Block({ "id" : "1",
@@ -191,7 +191,7 @@ describe('Block-Question tests', function() {
 
 describe('Survey tests', function() {
 
-  var {Survey, _global_reset} = require('../survey').survey;
+  var {Survey, _global_reset} = require('../surveyman').survey;
   var ex = {
     "filename": "",
     "breakoff": false,

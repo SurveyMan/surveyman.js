@@ -1,5 +1,5 @@
 //__tests__/gsoc_test.js
-jest.dontMock('../survey.js')
+jest.dontMock('../surveyman.js')
     .dontMock('./globals.js')
     .dontMock('underscore');
 
@@ -8,9 +8,10 @@ jest.dontMock('../survey.js')
 describe("Blocks are loaded correctly", function() {
     var _  = require('underscore');
     var globals = require('./globals');
-    var {survey} = require('../survey');
+    var SurveyMan = require('../surveyman');
+    var {Survey, _sortById} = SurveyMan.survey;
     var jsonSurvey = globals.wage_survey;
-    var parsedSurvey = new survey.Survey(jsonSurvey);
+    var parsedSurvey = new Survey(jsonSurvey);
 
     it('checks that the number of toplevel blocks match', function() {
         expect(parsedSurvey.topLevelBlocks.length).toBe(jsonSurvey.survey.length);
@@ -23,7 +24,7 @@ describe("Blocks are loaded correctly", function() {
         });
     });
     it('matches the number of sub blocks', function() {
-        survey._sortById(parsedSurvey.topLevelBlocks);
+        _sortById(parsedSurvey.topLevelBlocks);
         var [b1, b2, b3, b4] = parsedSurvey.topLevelBlocks;
         expect(b1.id).toBe("1");
         expect(b2.id).toBe("2");
@@ -47,7 +48,7 @@ describe("Blocks are loaded correctly", function() {
 describe("Questions are loaded correctly", function() {
     var _  = require('underscore');
     var globals = require('./globals');
-    var survey = require('../survey').survey;
+    var {survey} = require('../surveyman');
 
     it('tests that the total number of options match with json', function() {
         survey._global_reset();
@@ -92,8 +93,7 @@ describe("Questions are loaded correctly", function() {
 describe('Randomize works correctly', function() {
     var _  = require('underscore');
     var globals = require('./globals');
-    var {survey} = require('../survey');
-
+    var {survey} = require('../surveyman');
 
     it('when randomize on a block is called, top level questions remains the same', function() {
         survey._global_reset();
