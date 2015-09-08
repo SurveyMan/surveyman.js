@@ -15,9 +15,9 @@
  *
  * <p>First, make sure you have the following in the head:</p>
  *
- * <p><tt>&lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/survey.js"&gt;&lt;/script&gt;<br/>
-      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/interpreter.js"&gt;&lt;/script&gt;<br/>
-      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/display.js"&gt;&lt;/script&gt;</tt>
+ * <p><tt>&lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/deprecated/survey.js"&gt;&lt;/script&gt;<br/>
+      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/deprecated/interpreter.js"&gt;&lt;/script&gt;<br/>
+      &lt;script type="text/javascript" src="http://surveyman.github.io/surveyman.js/deprecated/display.js"&gt;&lt;/script&gt;</tt>
   </p>
  *
  * <p>If you are using AMT as your backend, you will also need a link to the submission script in the head, per the AMT documentations. If you are using a local backend, you will need some way to capture the assignment id, since it's used to seed the random number generator. The SurveyMan backend generates the following when it is being run locally:</p>
