@@ -49,21 +49,7 @@
 
 
 <div class="description">
-    The Block object holds other blocks or questions. It has 12 fields:
-<ul>
-<li><b>id</b> string representation of the internal id of this block. This has
-an associated semantics.</li>
-<li><b>idArray</b> convenience field -- an array representation of the id.</li>
-<li><b>topLevelQuestions</b> the list of questions that are immediately contained in this block</li>
-<li><b>subblocks</b> potentially empty block list</li>
-<li><b>randomizable</b> boolean indicating whether this block is randomizable or 'floating'</li>
-<li><b>isBranchAll</b> function returning a boolean indicating whether this is a BRANCH-ALL block</li>
-<li><b>getQuestion</b> returns the question in this block associated with the provided id</li>
-<li><b>idComp</b> compares two subblocks to determine their precedence</li>
-<li><b>randomize</b> function to randomizes this block's questions and subblocks</li>
-<li><b>populate</b> initializes the blocks</li>
-<li><b>getFirstQuestion</b> pops off the top question in the block; used by interpreter.js and display.js</li>
-</ul>
+    The Block object holds other blocks or questions.
 </div>
 
 
@@ -156,7 +142,7 @@ an associated semantics.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line441">line 441</a>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line532">line 532</a>
     </li></ul></dd>
     
 
@@ -202,6 +188,424 @@ an associated semantics.</li>
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="add_block"><span class="type-signature"></span>add_block<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    Adds the block provided block to this block.
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line759">line 759</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="id"><span class="type-signature"></span>id<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    The user-supplied id. This will have the heirarchical/randomization semantics embedded in it.
+e.g.: 1._2
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line551">line 551</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="idArray"><span class="type-signature"></span>idArray<span class="type-signature"> :Array.&lt;number></span></h4>
+
+
+
+
+<div class="description">
+    The idArray allows for quick lookup when comparing different blocks. For example, the block
+with id 1._2 has an idArray of [1, 2].
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;number></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line557">line 557</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="randomizable"><span class="type-signature"></span>randomizable<span class="type-signature"> :boolean</span></h4>
+
+
+
+
+<div class="description">
+    Boolean indicating whether this is a floating block.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">boolean</span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line572">line 572</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="subblocks"><span class="type-signature"></span>subblocks<span class="type-signature"> :Array.&lt;<a href="Block.html">Block</a>></span></h4>
+
+
+
+
+<div class="description">
+    The subblocks of this block.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="Block.html">Block</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line567">line 567</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="topLevelQuestions"><span class="type-signature"></span>topLevelQuestions<span class="type-signature"> :Array.&lt;<a href="Question.html">Question</a>></span></h4>
+
+
+
+
+<div class="description">
+    The questions contained directly in this block, i.e., not in subblocks.
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">Array.&lt;<a href="Question.html">Question</a>></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line562">line 562</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
     
 
     
@@ -318,7 +722,7 @@ an associated semantics.</li>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line587">line 587</a>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line852">line 852</a>
     </li></ul></dd>
     
 
@@ -363,6 +767,1178 @@ an associated semantics.</li>
 
 
         
+            
+
+    
+
+    <h4 class="name" id="add_question"><span class="type-signature"></span>add_question<span class="signature">(question)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Adds the provided question to this block.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>question</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">survey.Question</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Question to add to this block.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line787">line 787</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        MalformedSurveyException if the question cannot be added.
+    
+    </div>
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="get_parent_id"><span class="type-signature"></span>get_parent_id<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Gets the id of the parent block, to use for parent block lookup.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line751">line 751</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getAllQuestions"><span class="type-signature"></span>getAllQuestions<span class="signature">()</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Question.html">Question</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns all questions belonging to this block and its subblocks.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line741">line 741</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Array.&lt;<a href="Question.html">Question</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getFirstQuestion"><span class="type-signature"></span>getFirstQuestion<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="Question.html">Question</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns the first question to be seen from this block.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line710">line 710</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        MalformedSurveyException if there are no questions or subblocks.
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Question.html">Question</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="getQuestion"><span class="type-signature"></span>getQuestion<span class="signature">(quid, deep)</span><span class="type-signature"> &rarr; {<a href="Question.html">Question</a>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns the question object associated with the input id.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>quid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The question's id.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>deep</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Flag indicating whether we should search through subblocks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line611">line 611</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        ObjectNotFoundException if this block does not contain a question with
+the input id at the top level.
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="Question.html">Question</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="idComp"><span class="type-signature"></span>idComp<span class="signature">(that)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this.
+If the ids are exactly the same, return 0; this relationship will be symmetric.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>that</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Block.html">Block</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The block to compare.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line633">line 633</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isBranchAll"><span class="type-signature"></span>isBranchAll<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns boolean indicating whether this is a branch-all block.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line577">line 577</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="isBranchOne"><span class="type-signature"></span>isBranchOne<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns boolean indicating whether this is a branch-one block.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line592">line 592</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="randomize"><span class="type-signature"></span>randomize<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Randomizes this block. Shuffles this block's questions and its subblocks appropriately.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line652">line 652</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="toJSON"><span class="type-signature"></span>toJSON<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Returns the JSON representation of this block.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="surveyman.js.html">surveyman.js</a>, <a href="surveyman.js.html#line726">line 726</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
     
 
     
@@ -378,13 +1954,13 @@ an associated semantics.</li>
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Block.html">Block</a></li><li><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></li><li><a href="Option.html">Option</a></li><li><a href="Question.html">Question</a></li><li><a href="Survey.html">Survey</a></li></ul><h3>Namespaces</h3><ul><li><a href="interpreter.html">interpreter</a></li><li><a href="survey_.html">survey</a></li><li><a href="surveyman.html">surveyman</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getAllBlockQuestions">getAllBlockQuestions</a></li><li><a href="global.html#getBlockById">getBlockById</a></li><li><a href="global.html#getOptionById">getOptionById</a></li><li><a href="global.html#getQuestionById">getQuestionById</a></li><li><a href="global.html#global_reset">global_reset</a></li><li><a href="global.html#handleBranching">handleBranching</a></li><li><a href="global.html#initializeStacks">initializeStacks</a></li><li><a href="global.html#isBlockStackEmpty">isBlockStackEmpty</a></li><li><a href="global.html#isQuestionStackEmpty">isQuestionStackEmpty</a></li><li><a href="global.html#loadQuestions">loadQuestions</a></li><li><a href="global.html#new_option">new_option</a></li><li><a href="global.html#new_survey">new_survey</a></li><li><a href="global.html#nextBlock">nextBlock</a></li><li><a href="global.html#nextQuestion">nextQuestion</a></li><li><a href="global.html#nextSequential">nextSequential</a></li><li><a href="global.html#parseBools">parseBools</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Block.html">Block</a></li><li><a href="Block.NEXT_BLOCK.html">NEXT_BLOCK</a></li><li><a href="Option.html">Option</a></li><li><a href="Question.html">Question</a></li><li><a href="Survey.html">Survey</a></li></ul><h3>Namespaces</h3><ul><li><a href="interpreter.html">interpreter</a></li><li><a href="survey_.html">survey</a></li><li><a href="surveyman.html">surveyman</a></li></ul><h3>Global</h3><ul><li><a href="global.html#add_block">add_block</a></li><li><a href="global.html#add_option">add_option</a></li><li><a href="global.html#add_question">add_question</a></li><li><a href="global.html#copy_block">copy_block</a></li><li><a href="global.html#copy_question">copy_question</a></li><li><a href="global.html#copy_survey">copy_survey</a></li><li><a href="global.html#getAllBlockQuestions">getAllBlockQuestions</a></li><li><a href="global.html#getBlockById">getBlockById</a></li><li><a href="global.html#getOptionById">getOptionById</a></li><li><a href="global.html#getQuestionById">getQuestionById</a></li><li><a href="global.html#global_reset">global_reset</a></li><li><a href="global.html#handleBranching">handleBranching</a></li><li><a href="global.html#initializeStacks">initializeStacks</a></li><li><a href="global.html#isBlockStackEmpty">isBlockStackEmpty</a></li><li><a href="global.html#isQuestionStackEmpty">isQuestionStackEmpty</a></li><li><a href="global.html#loadQuestions">loadQuestions</a></li><li><a href="global.html#new_block">new_block</a></li><li><a href="global.html#new_option">new_option</a></li><li><a href="global.html#new_question">new_question</a></li><li><a href="global.html#new_survey">new_survey</a></li><li><a href="global.html#nextBlock">nextBlock</a></li><li><a href="global.html#nextQuestion">nextQuestion</a></li><li><a href="global.html#nextSequential">nextSequential</a></li><li><a href="global.html#parseBools">parseBools</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Tue Sep 08 2015 10:06:39 GMT-0400 (EDT)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.2</a> on Tue Sep 22 2015 11:16:24 GMT-0400 (EDT)
 </footer>
 
 <script> prettyPrint(); </script>

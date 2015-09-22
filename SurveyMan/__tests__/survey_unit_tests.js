@@ -27,14 +27,14 @@ describe('Option tests', function() {
     var jsonOptions = [optionJSON_1, optionJSON_2, optionJSON_3];
     var oList = jsonOptions.map((o) => new Option(o));
     var parsed_oList = Option.makeOptions(jsonOptions);
-    expect(parsed_oList[0]).toEqual(oList[0]);
-    expect(parsed_oList[1]).toEqual(oList[1]);
-    expect(parsed_oList[2]).toEqual(oList[2]);
+    expect(parsed_oList[0].equals(oList[0])).toBeTruthy();
+    expect(parsed_oList[1].equals(oList[1])).toBeTruthy();
+    expect(parsed_oList[2].equals(oList[2])).toBeTruthy();
     parsed_oList = Option.makeOptions(jsonOptions, null, [1, 2, 'asdf']);
-    expect(parsed_oList[0]).not.toEqual(oList[0]);
-    expect(parsed_oList[0]).toEqual(oList[1]);
-    expect(parsed_oList[1]).toEqual(oList[2]);
-    expect(parsed_oList[2]).toEqual(oList[0]);
+    expect(parsed_oList[0].equals(oList[0])).toBeFalsy();
+    expect(parsed_oList[0].equals(oList[1])).toBeTruthy();
+    expect(parsed_oList[1].equals(oList[2])).toBeTruthy();
+    expect(parsed_oList[2].equals(oList[0])).toBeTruthy();
   });
 });
 
@@ -121,7 +121,7 @@ describe('Block tests', function() {
     expect(b.topLevelQuestions.length).toBe(0);
     expect(b.subblocks.length).toBe(0);
     expect(b.randomizable).toBeFalsy();
-    expect(b.isBranchAll()).toBeFalsy();
+    expect(b.isBranchAll()).toBeTruthy();
     expect(b.idComp(new Block({'id': '2.1'}))).toBe(0);
     expect(b.idComp(new Block({'id': '2'}))).toBe(0);
     expect(b.idComp(new Block({'id': '2.1.1'}))).toBe(0);

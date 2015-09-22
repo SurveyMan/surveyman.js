@@ -261,6 +261,18 @@ var Option = function (_jsonOption, _question = null) {
       id: this.id,
       otext: this.otext
     };
+  };
+  /**
+   * Two options are equal if their ids and text match. Note that this is not
+   * the same definition of equality as what is used in the final SurveyMan analysis.
+   * @param {*} that The object we are comparing this object to.
+   * @returns {boolean}
+   */
+  this.equals = function(that) {
+    // TODO(etosch) write unit test
+    return that instanceof Option &&
+        this.id === that.id &&
+        this.otext === that.otext;
   }
 };
 
@@ -291,21 +303,6 @@ Option.makeOptions = function (jsonOptions, enclosingQuestion = null, ordered = 
 
 /**
  * The Question object holds a single question.
- * <ul>
- * <li><b>makeBranchMap</b> creates the branch map from options to blocks</li>
- * <li><b>block</b> the block containing this question</li>
- * <li><b>qtext</b> the text to display with this question (may contain HTML)</li.
- * <li><b>freetext</b> flag/string/regexp providing freetext data about this question</li>
- * <li><b>options</b> the list of options associated with this question (may be empty)</li>
- * <li><b>correlation</b> either a string or a list of strings corresponding to questions
- *  we expect to be correlated with this question</li>
- * <li><b>randomizable</b> boolean indicating whether the options in this question can be shuffled</li>
- * <li><b>ordered</b> boolean or ordered list of option ids</li>
- * <li><b>exclusive</b> determines whether we should display options as radio or checkbox</li>
- * <li><b>breakoff</b> boolean indicating whether we should allow people to submit the survey at this
- *   question</li>
- * <li><b>randomize</b> function to randomize the contents of this question</li>
- * </ul>
  * @param {JSON} _jsonQuestion
  * @param {Question} _block
  * @constructor
@@ -324,6 +321,13 @@ var Question = function(_jsonQuestion, _block) {
       breakoff = _jsonQuestion.breakoff;
 
   questionMAP.set(id, this);
+  /**
+   * Returns the Option object associated with the provided option id.
+   * @param oid
+   * @returns {Option}
+   * @throws ObjectNotFoundException if this question does not contain an
+   * option with the provided id.
+   */
   this.getOption = function (oid) {
     for (let i = 0; i < this.options.length; i++) {
       if (this.options[i].id === oid) {
@@ -332,6 +336,10 @@ var Question = function(_jsonQuestion, _block) {
     }
     throw new ObjectNotFoundException('Option', oid, `question ${this.id}`);
   };
+  /**
+   * Creates the branch map from options to blocks
+   * @type {Function}
+   */
   this.makeBranchMap = function (question) {
     return function () {
       var bm = new Map();
@@ -350,6 +358,11 @@ var Question = function(_jsonQuestion, _block) {
       question.branchMap = bm;
     };
   }(this);
+  /**
+   * Function used to parse the provided freetext.
+   * @param freetext
+   * @returns {RegExp|boolean|string}
+   */
   this.setFreetext = function (freetext) {
     var reRe = new RegExp('#\{.*\}'),
         ft = freetext;
@@ -359,22 +372,64 @@ var Question = function(_jsonQuestion, _block) {
       return new RegExp(ft.substring(2, ft.length - 1));
     } else return ft;
   };
-
+  /**
+   * The block containing this question
+   * @type {Block}
+   */
   this.block = _block;
   /**
    * String representation of the internal id of this question
+   * @type {string}
    */
   this.id = id;
+  /**
+   * The text to display with this question (may contain HTML).
+   * @type {string}
+   */
   this.qtext = qtext;
+  /**
+   * Provides freetext data about this question.
+   * @type {boolean|string|RegExp}
+   */
   this.freetext = parseBools(freetext, false) ?
       this.setFreetext(freetext) : Survey.freetextDefault;
+  /**
+   * Either a string or a list of strings corresponding to questions we expect
+   * to be correlated with this question.
+   * @type {string|Array<string>}
+   */
   this.correlation = correlation;
   // FIELDS MUST BE SENT OVER AS STRINGS
+  /**
+   * Boolean indicating whether the options in this question can be shuffled.
+   * @type {boolean}
+   */
   this.randomizable = parseBools(randomize, Survey.randomizeDefault);
+  /**
+   * The list of options associated with this question (may be empty).
+   * @type {Array.<Option>}
+   */
   this.options = Option.makeOptions(options, this, this.ordered);
+  /**
+   *  Boolean or ordered list of option ids.
+   * @type {boolean|Array.<string>}
+   */
   this.ordered = parseBools(ordered, Survey.orderedDefault, this);
+  /**
+   * Determines whether we should display options as radio or checkbox.
+   * @type {boolean}
+   */
   this.exclusive = parseBools(exclusive, Survey.exclusiveDefault);
+  /**
+   * Boolean indicating whether we should allow people to submit the survey at
+   * this question.
+   * @type {boolean}
+   */
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
+  /**
+   * Function to randomize the contents of this question.
+   * @type {Function}
+   */
   this.randomize = function () {
     if (!(this.randomizable && Boolean(this.options))) return;
     if (this.ordered) {
@@ -385,6 +440,10 @@ var Question = function(_jsonQuestion, _block) {
       FYshuffle(this.options);
     }
   };
+  /**
+   * Returns the json representation of this question.
+   * @returns {{id: *, qtext: *, branchMap: {}, freetext: *, correlation: *, randomize: (boolean|*), options: *, ordered: *, exclusive: *, breakoff: *}}
+   */
   this.toJSON = function() {
     let branchMap = {};
     for (let [v, k] in this.branchMap.entries()) {
@@ -404,12 +463,32 @@ var Question = function(_jsonQuestion, _block) {
     }
   };
   /**
+   * Two questions are equal if their fields are equal; note that this is not
+   * the same definition of equality as in the SurveyMan analyses.
+   * @param {*} that The object to compare
+   * @returns {boolean}
+   */
+  this.equals = function(that) {
+    //TODO(etosch) write unit test
+    return that instanceof Question &&
+            this.id === that.id &&
+            this.qtext === that.qtext &&
+            this.branchMap.reduce((tv, [k, v]) => tv && bar[k] === v, true) &&
+            this.freetext === that.freetext &&
+            this.randomizable === that.randomizable &&
+            this.options.reduce((tv, o1) => tv && that.options.find(o2 => o2.equals(o1)), true) &&
+            this.ordered === that.ordered &&
+            this.exclusive === that.exclusive &&
+            this.breakoff === that.breakoff;
+  };
+  /**
    * Adds the provided option to this question. If the question and if option ids are not
    * semantic, the ordered field will be a list. Adds the new oid to the end of the list.
    * That is, this function assumes that for ordered options, options will be added in order.
-   * @param {survey.Question} option The option to add to this question.
+   * @param {Option} option The option to add to this question.
    */
   this.add_option = function(option) {
+    // TODO(etosch): write unit test.
     if (this.freetext) {
       throw new MalformedSurveyException('Cannot add an option to a freetext question.');
     } else {
@@ -419,7 +498,14 @@ var Question = function(_jsonQuestion, _block) {
       }
     }
   };
-
+  this.clear_options = function() {
+    // TODO(etosch): write unit test.
+    this.options = [];
+    this.branchMap = new Map();
+    if (Array.isArray(this.ordered)) {
+      this.ordered = [];
+    }
+  }
 };
 
 /**
@@ -440,10 +526,10 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
 
 /**
  * The Block object holds other blocks or questions.
- * @param {JSON} _jsonBlock
+ * @param {JSON} _jsonBlock The json version of the block, passed as the initial input.
  * @constructor
  */
-var Block = function(_jsonBlock) {
+  var Block = function(_jsonBlock) {
   assertJSONHasProperties(_jsonBlock, 'id');
   var id = _jsonBlock.id,
       questions = _jsonBlock.questions || [],
@@ -461,6 +547,7 @@ var Block = function(_jsonBlock) {
   /**
    * The user-supplied id. This will have the heirarchical/randomization semantics embedded in it.
    * e.g.: 1._2
+   * @type string
    */
   this.id = id;
   /**
@@ -517,14 +604,23 @@ var Block = function(_jsonBlock) {
   /**
    * Returns the question object associated with the input id.
    * @param {string} quid The question's id.
+   * @param {boolean} deep Flag indicating whether we should search through subblocks.
    * @returns {Question}
    * @throws ObjectNotFoundException if this block does not contain a question with
    * the input id at the top level.
    */
-  this.getQuestion = function(quid) {
-    for (var i = 0; i < this.topLevelQuestions.length; i++) {
+  this.getQuestion = function(quid, deep = false) {
+    for (let i = 0; i < this.topLevelQuestions.length; i++) {
       if (this.topLevelQuestions[i].id == quid) {
         return this.topLevelQuestions[i];
+      }
+    }
+    // TODO(etosch): write unit test
+    if (deep) {
+      for (let b in this.subblocks) {
+        try {
+          return b.getQuestion(quid, true);
+        } catch (e) {}
       }
     }
     throw new ObjectNotFoundException('Question', quid, `block ${this.id}`);
@@ -637,9 +733,35 @@ var Block = function(_jsonBlock) {
     };
   };
   /**
+   * Tests whether the supplied item is equivalent, in terms of Block's fields.
+   * Note that this is not the same definition of equality that SurveyMan uses
+   * for its analyses.
+   * @param {*} that The thing to compare.
+   * @returns {boolean}
+   */
+  this.equals = function(that) {
+    // TODO(etosch) write unit test)
+    return that instanceof Block &&
+            this.id === that.id &&
+            this.subblocks.reduce((tv, b1) =>
+              tv && that.subblocks.find(b2 => b1.equals(b2))) &&
+            this.topLevelQuestions.reduce((tv , q1) =>
+              tv && that.topLevelQuestions.find(q2 => q1.equals(q2)));
+  };
+  /**
+   * Returns all questions belonging to this block and its subblocks.
+   * @returns {Array<Question>}
+   */
+  this.getAllQuestions = function() {
+    let retval = [...this.topLevelQuestions];
+    this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
+    return retval;
+  };
+  /**
    * Gets the id of the parent block, to use for parent block lookup.
    * @returns {string}
    */
+  // TODO(etosch): write unit test
   this.get_parent_id = function() {
     return this.id.split('.').slice(0, -1).reduce((a, b) => `${a}.${b}`);
   };
@@ -647,6 +769,7 @@ var Block = function(_jsonBlock) {
    * Adds the block provided block to this block.
    * @param {Block} containingBlock The block to add.
    */
+    // TODO(etosch): write unit test
   this.add_block = function(containingBlock) {
     var update_ids = function(parent, child) {
       // update block's id
@@ -674,6 +797,7 @@ var Block = function(_jsonBlock) {
    * @param {survey.Question} question Question to add to this block.
    * @throws MalformedSurveyException if the question cannot be added.
    */
+    // TODO(etosch): write unit test
   this.add_question = function(question) {
     let isBranchAll = this.isBranchAll();
     let isBranchOne = this.isBranchOne();
@@ -710,14 +834,20 @@ var Block = function(_jsonBlock) {
         `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
         `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
   };
-  /**
-   * Returns all questions belonging to this block and its subblocks.
-   * @returns {Array<Question>}
-   */
-  this.getAllQuestions = function() {
-    let retval = [...this.topLevelQuestions];
-    this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
-    return retval;
+  this.remove_question = function(question) {
+    // TODO(etosch): write unit test
+    let idx = this.topLevelQuestions.indexOf(question)
+    if (idx !== -1) {
+      this.topLevelQuestions.splice(idx, 1);
+      return true;
+    } else {
+      for (let b in this.subblocks) {
+        if (b.remove_question(question)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 };
 
@@ -766,24 +896,43 @@ Block.NEXT_BLOCK = function() {
 
 /**
  * Survey constructor. Takes a json survey and returns an internal survey
- * object. It contains the fields:
- * <ul>
- *   <li><b>filename</b> The path of the source file used to generate this survey; may be empty.</li>
- *   <li><b>topLevelBlocks</b> The list of top level blocks in this survey. </li>
- *   <li><b>breakoff</b> Boolean indicating whether breakoff is permitted for this survey.</li>
- *   <li><b>questions</b> The list of all questions. This gets wrapped in an Immutable.List.</li>
- * </ul>
- * @param {json} _jsonSurvey - the input survey, typically generated by another program.
+ * object.
+ * @param {json} _jsonSurvey The input survey, typically generated by another program.
  * @constructor
  */
 var Survey = function(_jsonSurvey) {
   assertJSONHasProperties(_jsonSurvey, 'filename', 'survey');
   var {filename, survey, breakoff} = _jsonSurvey;
   var makeSurvey = (_jsonSurvey) => _jsonSurvey.map((jsonBlock) => new Block(jsonBlock));
+  /**
+   * The path of the source file used to generate this survey; may be empty.
+   * @type {string}
+   */
   this.filename = filename;
+  /**
+   * The list of top level blocks in this survey.
+   * @type {Array<survey.Block>}
+   */
   this.topLevelBlocks = makeSurvey(survey);
   questionMAP.forEach((q) =>  q.makeBranchMap());
+  /**
+   * Boolean indicating whether breakoff is permitted for this survey.
+   * @type {boolean}
+   */
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
+  // Not sure why this isn't working; I think it might be a problem with babel:
+  // this.questions = Array.from(questionMAP.values());
+  /**
+   * The list of all questions.
+   * @type {Array<survey.Question>}
+   */
+  this.questions = [];
+  let qiter = questionMAP.values();
+  while (true) {
+    let {done, value} = qiter.next();
+    if (done) break;
+    this.questions.push(value);
+  }
   /**
    * Returns the JSON representation of this survey.
    *
@@ -791,6 +940,7 @@ var Survey = function(_jsonSurvey) {
    * @returns {{filename: *, breakoff: *, survey: *}}
    */
   this.toJSON = function() {
+    // TODO(etosch): Write unit test.
     return {
       filename: this.filename,
       breakoff: this.breakoff,
@@ -803,6 +953,7 @@ var Survey = function(_jsonSurvey) {
    * @param {?Block} parent This block's parent. If null, it will attempt to find the parent.
    */
   this.add_block = function(block, parent = null) {
+    // TODO(etosch): write unit test
     // We are not adding a top-level block
     if (block.idArray.length > 1) {
       let parentid = block.get_parent_id();
@@ -816,15 +967,31 @@ var Survey = function(_jsonSurvey) {
     // add this block's questions to the top level survey questions
     block.getAllQuestions().forEach((q) => this.questions.push(q));
   };
-  // Not sure why this isn't working; I think it might be a problem with babel:
-  // this.questions = Array.from(questionMAP.values());
-  this.questions = [];
-  let qiter = questionMAP.values();
-  while (true) {
-    let {done, value} = qiter.next();
-    if (done) return;
-    this.questions.push(value);
-  }
+  /**
+   * Swaps out the provided question for one having the same id.
+   * @param {survey.Question} new_question The replacement question.
+   */
+  this.replace_question = function(new_question) {
+    // TODO(etosch): write unit test.
+    let old_question = this.questions.filter((q) => q.id === new_question.id)[0];
+    let index_to_remove = this.questions.indexOf(old_question);
+    this.questions.splice(index_to_remove, 1, new_question);
+    //  Find the block that holds the old question
+    let b = this.topLevelBlocks.map(function(b) {
+      try {
+        return b.getQuestion(b, true);
+      } catch (e) {
+        return false;
+      }
+    }).filter((item) => item !== false)[0];
+    // swap the questions
+    if (!b.remove_question(old_question)) {
+      throw new SMSurveyException(
+          `Attempting to remove question that has already been removed: ${old_question}`,
+          true);
+    }
+    b.add_question(new_question);
+  };
 };
 
 /**
@@ -1215,6 +1382,15 @@ var new_option = function(surface_text, oid = _gensym("option")) {
   });
 };
 
+/**
+ * Top-level call to add an option to a question.
+ * @param {survey.Question} question The question to add the option to.
+ * @param {survey.Option} option The option to add to the input question.
+ * @param {survey.Survey} survey The survey that this question belongs to.
+ * @param {boolean} mutate Flag indicating whether we should mutate the survey
+ * provided, or return a new survey.
+ * @returns {?survey.Survey}
+ */
 var add_option = function(question, option, survey, mutate = true) {
   if (mutate) {
     question.add_option(option);
@@ -1236,6 +1412,7 @@ var surveyman = {
   survey: survey,
   interpreter: interpreter,
   new_survey: new_survey,
+  copy_survey: copy_survey,
   empty_block: new_block,
   add_block: add_block,
   new_question: new_question,
