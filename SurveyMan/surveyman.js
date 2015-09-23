@@ -950,14 +950,15 @@ var Survey = function(_jsonSurvey) {
   /**
    * Adds the block to the survey. Mutates the survey object.
    * @param {Block} block The top-level block to add.
-   * @param {?Block} parent This block's parent. If null, it will attempt to find the parent.
+   * @param {?Block} parent This block's parent. If null, it will attempt to find
+   * the parent.
    */
   this.add_block = function(block, parent = null) {
     // TODO(etosch): write unit test
     // We are not adding a top-level block
     if (block.idArray.length > 1) {
-      let parentid = block.get_parent_id();
       if (!parent) {
+        let parentid = block.get_parent_id();
         parent = getBlockById(parentid);
       }
       parent.add_block(block);
@@ -966,6 +967,30 @@ var Survey = function(_jsonSurvey) {
     }
     // add this block's questions to the top level survey questions
     block.getAllQuestions().forEach((q) => this.questions.push(q));
+  };
+  /**
+   * Removes the block from the survey. Mutates the survey object.
+   * @param {Block} block The block to delete.
+   * @param {?Block} parent This block's parent. If null, it will attempt to find
+   * the parent.
+   */
+  this.remove_block = function(block, parent = null) {
+    // TODO(etosch): write unit test
+    if (block.idArray.length > 1) {
+      if (!parent) {
+        let parentid = block.get_parent_id();
+        parent = getBlockById(parentid);
+      }
+      parent.remove_block(block);
+    } else {
+      let i = this.topLevelBlocks.index(block);
+      this.topLevelBlocks.splice(i, 1);
+    }
+    // remove this block's questions from the top level survey questions.
+    block.getAllQuestions().forEach(q => {
+      let i = this.questions.index(q);
+      this.questions.splice(i, 1);
+    })
   };
   /**
    * Swaps out the provided question for one having the same id.
@@ -991,6 +1016,29 @@ var Survey = function(_jsonSurvey) {
           true);
     }
     b.add_question(new_question);
+  };
+  /**
+   * Returns the Question object in this survey that has the provided id.
+   * @param {string} question_id The identifier of the question of interest.
+   * @returns {Question}
+   */
+  this.get_question_by_id = function(question_id) {
+    // TODO(etosch): write unit test.
+    return this.questions.find(q => q.id === question_id);
+  };
+  /**
+   * Returns the Block object in this survey that has the provided id.
+   * @param {string} block_id Block identifier.
+   * @returns {Block}
+   * @throws ObjectNotFoundException
+   */
+  this.get_block_by_id = function(block_id) {
+    for (let b in this.topLevelBlocks) {
+      if (b.id === block_id) {
+        return b;
+      }
+    }
+    throw new ObjectNotFoundException('Block', block_id, 'current survey');
   };
 };
 
@@ -1305,6 +1353,25 @@ var add_block = function(block, survey, mutate = true) {
   } else {
     let s = copy_survey(survey);
     s.add_block(block);
+    return s;
+  }
+};
+
+/**
+ * Top-level call to remove a block from the Survey.
+ * @param {Block} block The block to remove.
+ * @param {Survey} survey The survey to remove the block from.
+ * @param {boolean} mutate Flag indicating whether we should mutate the survey,
+ * or return a new survey with this block removed.
+ * @returns {?Survey}
+ */
+var remove_block = function(block, survey, mutate = true) {
+  if (mutate) {
+    survey.remove_block(block);
+    return null;
+  } else {
+    let s = copy_survey(survey);
+    s.remove_block(block);
     return s;
   }
 };
