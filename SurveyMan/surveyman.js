@@ -269,7 +269,6 @@ var Option = function (_jsonOption, _question = null) {
    * @returns {boolean}
    */
   this.equals = function(that) {
-    // TODO(etosch) write unit test
     return that instanceof Option &&
         this.id === that.id &&
         this.otext === that.otext;
@@ -287,7 +286,7 @@ var Option = function (_jsonOption, _question = null) {
 Option.makeOptions = function (jsonOptions, enclosingQuestion = null, ordered = null) {
   if (jsonOptions === undefined) {
     log.info(`No options defined for Question ${enclosingQuestion.id} ( ${enclosingQuestion.qtext} )`);
-    return;
+    return [];
   }
   let oList = jsonOptions.map((o) => new Option(o, enclosingQuestion));
   if (Array.isArray(ordered)) {
@@ -321,6 +320,7 @@ var Question = function(_jsonQuestion, _block) {
       breakoff = _jsonQuestion.breakoff;
 
   questionMAP.set(id, this);
+  this.branchMap = new Map();
   /**
    * Returns the Option object associated with the provided option id.
    * @param oid
@@ -336,28 +336,6 @@ var Question = function(_jsonQuestion, _block) {
     }
     throw new ObjectNotFoundException('Option', oid, `question ${this.id}`);
   };
-  /**
-   * Creates the branch map from options to blocks
-   * @type {Function}
-   */
-  this.makeBranchMap = function (question) {
-    return function () {
-      var bm = new Map();
-      // json branchMap is a map from oid to bid
-      // internal branchMap is a map from Option to Block
-      for (var k in branchMap) {
-        var o = question.getOption(k);
-        var b;
-        if (branchMap[k] === null) {
-          b = Block.NEXT_BLOCK;
-        } else {
-          b = getBlockById(branchMap[k]);
-        }
-        bm.set(o, b);
-      }
-      question.branchMap = bm;
-    };
-  }(this);
   /**
    * Function used to parse the provided freetext.
    * @param freetext
@@ -410,6 +388,28 @@ var Question = function(_jsonQuestion, _block) {
    * @type {Array.<Option>}
    */
   this.options = Option.makeOptions(options, this, this.ordered);
+  /**
+   * Creates the branch map from options to blocks
+   * @type {Function}
+   */
+  this.makeBranchMap = function (question) {
+    return function () {
+      var bm = new Map();
+      // json branchMap is a map from oid to bid
+      // internal branchMap is a map from Option to Block
+      for (var k in branchMap) {
+        var o = question.getOption(k);
+        var b;
+        if (branchMap[k] === null) {
+          b = Block.NEXT_BLOCK;
+        } else {
+          b = getBlockById(branchMap[k]);
+        }
+        bm.set(o, b);
+      }
+      question.branchMap = bm;
+    };
+  }(this);
   /**
    *  Boolean or ordered list of option ids.
    * @type {boolean|Array.<string>}
@@ -469,17 +469,24 @@ var Question = function(_jsonQuestion, _block) {
    * @returns {boolean}
    */
   this.equals = function(that) {
-    //TODO(etosch) write unit test
+    if (!(that instanceof Question)) return false;
+    var branchMapEqual = true;
+    for (var [k, v] of that.branchMap) {
+      branchMapEqual = branchMapEqual &&
+          that.branchMap.has(k) &&
+          that.branchMap.get(k).equals(v);
+      if (!branchMapEqual) break;
+    }
     return that instanceof Question &&
-            this.id === that.id &&
-            this.qtext === that.qtext &&
-            this.branchMap.reduce((tv, [k, v]) => tv && bar[k] === v, true) &&
-            this.freetext === that.freetext &&
-            this.randomizable === that.randomizable &&
-            this.options.reduce((tv, o1) => tv && that.options.find(o2 => o2.equals(o1)), true) &&
-            this.ordered === that.ordered &&
-            this.exclusive === that.exclusive &&
-            this.breakoff === that.breakoff;
+        this.id === that.id &&
+        this.qtext === that.qtext &&
+        branchMapEqual &&
+        this.freetext === that.freetext &&
+        this.randomizable === that.randomizable &&
+        this.options.reduce((tv, o1) => tv && that.options.find(o2 => o2.equals(o1)), true) &&
+        this.ordered === that.ordered &&
+        this.exclusive === that.exclusive &&
+        this.breakoff === that.breakoff;
   };
   /**
    * Adds the provided option to this question. If the question and if option ids are not
@@ -497,6 +504,10 @@ var Question = function(_jsonQuestion, _block) {
         this.ordered.push(option.oid);
       }
     }
+  };
+  this.remove_option = function(option) {
+    let index = this.options.findIndex(o => o.equals(option));
+    this.options.splice(index, 1);
   };
   this.clear_options = function() {
     // TODO(etosch): write unit test.
@@ -529,7 +540,7 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
  * @param {JSON} _jsonBlock The json version of the block, passed as the initial input.
  * @constructor
  */
-  var Block = function(_jsonBlock) {
+var Block = function(_jsonBlock) {
   assertJSONHasProperties(_jsonBlock, 'id');
   var id = _jsonBlock.id,
       questions = _jsonBlock.questions || [],
@@ -727,7 +738,7 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
   this.toJSON = function() {
     return {
       id: this.id,
-      questions: this.questions.map((q) => q.toJSON()),
+      questions: this.topLevelQuestions.map((q) => q.toJSON()),
       randomize: this.randomizable,
       subblocks: this.subblocks.map((b) => b.toJSON())
     };
@@ -744,9 +755,9 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
     return that instanceof Block &&
             this.id === that.id &&
             this.subblocks.reduce((tv, b1) =>
-              tv && that.subblocks.find(b2 => b1.equals(b2))) &&
+              tv && that.subblocks.find(b2 => b1.equals(b2)), true) &&
             this.topLevelQuestions.reduce((tv , q1) =>
-              tv && that.topLevelQuestions.find(q2 => q1.equals(q2)));
+              tv && that.topLevelQuestions.find(q2 => q1.equals(q2)), true);
   };
   /**
    * Returns all questions belonging to this block and its subblocks.
@@ -768,9 +779,11 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
   /**
    * Adds the block provided block to this block.
    * @param {Block} containingBlock The block to add.
+   * @param {?number} index The index at which to add this block.
    */
     // TODO(etosch): write unit test
-  this.add_block = function(containingBlock) {
+  this.add_block = function(containingBlock, index = -1) {
+    index = index === -1 ? containingBlock.subblocks.length : index;
     var update_ids = function(parent, child) {
       // update block's id
       child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
@@ -788,7 +801,7 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
       if (block.get_parent_id() !== containingBlock.id) {
         update_ids(containingBlock, block);
       }
-      containingBlock.subblocks.push(block);
+      containingBlock.subblocks.splice(index, 0, block);
       block.parent = containingBlock;
     }
   }(this);
@@ -797,7 +810,7 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
    * @param {survey.Question} question Question to add to this block.
    * @throws MalformedSurveyException if the question cannot be added.
    */
-    // TODO(etosch): write unit test
+  // TODO(etosch): write unit test
   this.add_question = function(question) {
     let isBranchAll = this.isBranchAll();
     let isBranchOne = this.isBranchOne();
@@ -901,9 +914,11 @@ Block.NEXT_BLOCK = function() {
  * @constructor
  */
 var Survey = function(_jsonSurvey) {
+  questionMAP.clear();
+  blockMAP.clear();
   assertJSONHasProperties(_jsonSurvey, 'filename', 'survey');
   var {filename, survey, breakoff} = _jsonSurvey;
-  var makeSurvey = (_jsonSurvey) => _jsonSurvey.map((jsonBlock) => new Block(jsonBlock));
+  var makeSurvey = _jsonSurvey => _jsonSurvey.map((jsonBlock) => new Block(jsonBlock));
   /**
    * The path of the source file used to generate this survey; may be empty.
    * @type {string}
@@ -940,12 +955,27 @@ var Survey = function(_jsonSurvey) {
    * @returns {{filename: *, breakoff: *, survey: *}}
    */
   this.toJSON = function() {
-    // TODO(etosch): Write unit test.
     return {
       filename: this.filename,
       breakoff: this.breakoff,
-      survey: topLevelBlocks.map((b) => b.toJSON())
+      survey: this.topLevelBlocks.map((b) => b.toJSON())
     };
+  };
+  this.equals = function(that) {
+    return that instanceof Survey &&
+            this.topLevelBlocks.length === that.topLevelBlocks.length &&
+            this.topLevelBlocks.reduce((tv, b1) =>
+              tv && that.topLevelBlocks.find(b2 => b1.equals(b2)), true);
+  };
+  this._find_containing_question = function(qid, survey) {
+    //  Find the block that holds the question
+    return survey.topLevelBlocks.map(function (b) {
+      try {
+        return b.getQuestion(qid, true);
+      } catch (e) {
+        return false;
+      }
+    }).filter((item) => item !== false)[0];
   };
   /**
    * Adds the block to the survey. Mutates the survey object.
@@ -993,6 +1023,28 @@ var Survey = function(_jsonSurvey) {
     })
   };
   /**
+   * Adds the provided question to the provided block in this survey.
+   * @param {Question} question The question to add.
+   * @param {Block} block The block to add to.
+   */
+  this.add_question = function(question, block) {
+    block.add_question(question);
+  };
+  /**
+   * Removes the provided question from the survey. If the containing block is not
+   * provided, the method will search for it.
+   * @param {Question} question The question to remove.
+   * @param {?Block} block Optional block to remove the survey from.
+   */
+  this.remove_question = function(survey) {
+    return function (question, block = null) {
+      if (!block) {
+        block = survey._find_containing_question(question, survey);
+      }
+      block.remove_question(question);
+    };
+  }(this);
+  /**
    * Swaps out the provided question for one having the same id.
    * @param {survey.Question} new_question The replacement question.
    */
@@ -1000,15 +1052,8 @@ var Survey = function(_jsonSurvey) {
     // TODO(etosch): write unit test.
     let old_question = this.questions.filter((q) => q.id === new_question.id)[0];
     let index_to_remove = this.questions.indexOf(old_question);
+    let containing_block = this._find_containing_block(new_question.id);
     this.questions.splice(index_to_remove, 1, new_question);
-    //  Find the block that holds the old question
-    let b = this.topLevelBlocks.map(function(b) {
-      try {
-        return b.getQuestion(b, true);
-      } catch (e) {
-        return false;
-      }
-    }).filter((item) => item !== false)[0];
     // swap the questions
     if (!b.remove_question(old_question)) {
       throw new SMSurveyException(
@@ -1032,14 +1077,25 @@ var Survey = function(_jsonSurvey) {
    * @returns {Block}
    * @throws ObjectNotFoundException
    */
+  // TODO(etosch): write unit test
   this.get_block_by_id = function(block_id) {
-    for (let b in this.topLevelBlocks) {
+    for (let [,b] of this.topLevelBlocks.entries()) {
       if (b.id === block_id) {
         return b;
       }
     }
     throw new ObjectNotFoundException('Block', block_id, 'current survey');
   };
+  this.remove_option = function(survey) {
+    return function(option, question = null) {
+      if (!question) {
+        question = survey.questions.find(q =>
+            q.options.find(o => o.equals(option))
+        );
+      }
+      question.remove_option(option);
+    }
+  }(this);
 };
 
 /**
@@ -1087,28 +1143,6 @@ Survey.freetextDefault = false;
 Survey.breakoffDefault = true;
 Block.randomizeDefault = false;
 
-/**
- * @namespace
- * @type {{_parseBools: Function, _sortById: Function, _global_reset: Function, init: Function, getOptionById: Function, getQuestionById: Function, getBlockById: Function, Survey: Function, Block: Function, Question: Function, Option: Function}}
- */
-var survey = {
-  _parseBools : parseBools,
-  _sortById: sortById,
-  _global_reset: global_reset,
-  init: function (jsonSurvey) {
-    var survey = new Survey(jsonSurvey);
-    Survey.randomize(survey);
-    return survey;
-  },
-  getOptionById: getOptionById,
-  getQuestionById: getQuestionById,
-  getBlockById: getBlockById,
-  Survey: Survey,
-  Block: Block,
-  Question: Question,
-  Option: Option
-};
-
 /*****************************************************************************
  * Interpreter submodule
  *****************************************************************************/
@@ -1139,7 +1173,7 @@ var flatten = function(lst) {
  * @param _block {survey.Block} The block whose questions we want.
  * @returns {Array} A stack of questions.
  */
-var getAllBlockQuestions = function (_block) {
+var getAllBlockQuestions = function(_block) {
   if (_block.isBranchAll()) {
     FYshuffle(_block.topLevelQuestions);
     return _block.topLevelQuestions[0];
@@ -1262,229 +1296,262 @@ var nextSequential = function () {
   return nextQuestion();
 };
 
-/**
- * @namespace interpreter
- * @type {{init: Function, isQuestionStackEmpty: Function, isBlockStackEmpty: Function, nextBlock: Function, nextQuestion: Function, handleBranching: Function, nextSequential: Function}}
- */
-var interpreter = {
-  init:   function (jsonSurvey) {
-    var survey = SurveyMan.survey.init(jsonSurvey);
-    initializeStacks(survey.topLevelBlocks);
-    return survey;
-  },
-  isQuestionStackEmpty: isQuestionStackEmpty,
-  isBlockStackEmpty: isBlockStackEmpty,
-  nextBlock: nextBlock,
-  nextQuestion: nextQuestion,
-  handleBranching: handleBranching,
-  nextSequential: nextSequential
-};
-
 /*****************************************************************************
- * exported module
+ * top-level surveyman module
  *****************************************************************************/
 
-var _gensym = function(prefix = "") {
-  return `${prefix}${this.next()}`;
-};
-
-_gensym.counter = 0;
-_gensym.next = function() {
-  _gensym.counter++;
-  return _gensym + 1;
-};
-
-/**
- * Top-level call to create a new survey.
- * @returns {survey.Survey}
- */
-var new_survey = function() {
-  return new survey.Survey({
-    filename: "temp_file_name.json",
-    breakoff: Survey.breakoffDefault,
-    survey: []
-  });
-};
-
-/**
- * Top-level call to copy the input survey to a new survey.
- * Quick and dirty approach -- converts to JSON and re-parses.
- * @param survey
- * @returns {survey.Survey}
- */
-var copy_survey = function(survey) {
-  return new survey.Survey(survey.toJSON());
-};
-
-/**
- * Top-level call to create a new empty block.
- * @param {string} bid The block id.
- * @returns {survey.Block}
- */
-var new_block = function(bid = _gensym("block")) {
-  return new survey.Block({
-    id: bid,
-    questions: [],
-    subblocks: []
-  });
-};
-
-/**
- * Top-level call to copy a block. Done by converting to JSON and copying.
- * This is the quick and dirty approach to copying.
- * @param {survey.Block} block
- * @returns {survey.Block}
- */
-var copy_block = function(block) {
-  return new survey.Block(block.toJSON());
-};
-
-/**
- * Adds a block to the top level of the survey.
- * @param {survey.Block} block The block to add.
- * @param survey
- * @param mutate
- * @returns {?survey.Survey}
- */
-var add_block = function(block, survey, mutate = true) {
-  if (mutate) {
-    survey.add_block(block);
-    return null;
-  } else {
-    let s = copy_survey(survey);
-    s.add_block(block);
-    return s;
-  }
-};
-
-/**
- * Top-level call to remove a block from the Survey.
- * @param {Block} block The block to remove.
- * @param {Survey} survey The survey to remove the block from.
- * @param {boolean} mutate Flag indicating whether we should mutate the survey,
- * or return a new survey with this block removed.
- * @returns {?Survey}
- */
-var remove_block = function(block, survey, mutate = true) {
-  if (mutate) {
-    survey.remove_block(block);
-    return null;
-  } else {
-    let s = copy_survey(survey);
-    s.remove_block(block);
-    return s;
-  }
-};
-
-/**
- * Top-level call to create a new Question.
- * @param {string} surface_text The text to be displayed for this question. May include HTML.
- * @param {string} qid The question id.
- * @returns {survey.Question}
- */
-var new_question = function(surface_text, qid = _gensym("question")) {
-  return new survey.Question({
-    id: qid,
-    qtext: surface_text
-  }, null);
-};
-
-/**
- * Top-level call to copy a question.
- * Done by converting to JSON and re-parsing.
- * @param {survey.Question} question
- * @returns {survey.Question}
- */
-var copy_question = function(question) {
-  return new survey.Question(question.toJSON());
-};
-
-/**
- * Top-level call to add a question to a block.
- * @param {survey.Question} question The question we want to add.
- * @param {survey.Block} block The block we want to add the question to.
- * @param {?survey.Survey} survey The survey that contains the question and the block
- * @param {boolean } mutate Boolean indicating whether we should mutate the survey or return
- * a new survey.
- * @returns {?survey.Survey}
- */
-var add_question = function(question, block, survey = null, mutate = true) {
-  if (mutate) {
-    block.add_question(question);
-    return null;
-  } else {
-    let s = copy_survey(survey);
-    // Get the block in our new survey that matches the input block's id.
-    let block_id_array = block.idArray;
-    let current_block_list = s.topLevelBlocks;
-    // Iterate through the block id array to find the match at the appropriate depth.
-    for (let i = 0; i < block_id_array.length; i++) {
-      // Iterate through the blocks at the current depth to find the match at this level.
-      for (var b in current_block_list) {
-        if (b.idArray[i] === block_id_array[i]) {
-          // When we find the match, update the current block list to point to the new block's
-          // subblocks.
-          current_block_list = b.subblocks;
-          // Break out of the inner loop, since we will have updated the current block list.
-          break;
-        }
-      }
-    }
-    console.assert(b.id === block.id, 'If we have found the correct block, their ids will be equal.');
-    b.add_question(question);
-    return s;
-  }
-};
-
-/**
- * Top-level call to create a new Option.
- * @param {string} surface_text The text to be displayed to the user.
- * @param {string} oid The option id.
- * @returns {survey.Option}
- */
-var new_option = function(surface_text, oid = _gensym("option")) {
-  return new survey.Option({
-    id: oid,
-    otext: surface_text
-  });
-};
-
-/**
- * Top-level call to add an option to a question.
- * @param {survey.Question} question The question to add the option to.
- * @param {survey.Option} option The option to add to the input question.
- * @param {survey.Survey} survey The survey that this question belongs to.
- * @param {boolean} mutate Flag indicating whether we should mutate the survey
- * provided, or return a new survey.
- * @returns {?survey.Survey}
- */
-var add_option = function(question, option, survey, mutate = true) {
-  if (mutate) {
-    question.add_option(option);
-    return null;
-  } else {
-    let s = copy_survey(survey);
-    let q = s.questions.find((q) => q.id === question.id);
-    q.add_option(option);
-    return s;
-  }
-};
+var _gensym = (function(counter) {
+  return function (prefix = "") {
+    return `${prefix}${counter++}`;
+  };
+})(0);
 
 /**
  * Contains top-level calls for use by external programs, e.g. the survey construction GUI.
- * @namespace
+ * @namespace surveyman
  * @type {{survey: {_parseBools: Function, _sortById: Function, _global_reset: Function, init: Function, getOptionById: Function, getQuestionById: Function, getBlockById: Function, Survey: Function, Block: Function, Question: Function, Option: Function}, interpreter: {init: Function, isQuestionStackEmpty: Function, isBlockStackEmpty: Function, nextBlock: Function, nextQuestion: Function, handleBranching: Function, nextSequential: Function}}}
  */
-var surveyman = {
-  survey: survey,
-  interpreter: interpreter,
-  new_survey: new_survey,
-  copy_survey: copy_survey,
-  empty_block: new_block,
-  add_block: add_block,
-  new_question: new_question,
-  copy_question: copy_question,
-  new_option: new_option
+module.exports = {
+  /**
+   * @namespace survey
+   * @type {{_parseBools: Function, _sortById: Function, _global_reset: Function, init: Function, getOptionById: Function, getQuestionById: Function, getBlockById: Function, Survey: Function, Block: Function, Question: Function, Option: Function}}
+   */
+  survey: {
+    _gensym: _gensym,
+    _parseBools: parseBools,
+    _sortById: sortById,
+    _global_reset: global_reset,
+    init: function (jsonSurvey) {
+      var survey = new Survey(jsonSurvey);
+      Survey.randomize(survey);
+      return survey;
+    },
+    getOptionById: getOptionById,
+    getQuestionById: getQuestionById,
+    getBlockById: getBlockById,
+    Survey: Survey,
+    Block: Block,
+    Question: Question,
+    Option: Option
+  },
+  /**
+   * @namespace interpreter
+   * @type {{init: Function, isQuestionStackEmpty: Function, isBlockStackEmpty: Function, nextBlock: Function, nextQuestion: Function, handleBranching: Function, nextSequential: Function}}
+   */
+  interpreter: {
+    init: function (jsonSurvey) {
+      var survey = SurveyMan.survey.init(jsonSurvey);
+      initializeStacks(survey.topLevelBlocks);
+      return survey;
+    },
+    isQuestionStackEmpty: isQuestionStackEmpty,
+    isBlockStackEmpty: isBlockStackEmpty,
+    nextBlock: nextBlock,
+    nextQuestion: nextQuestion,
+    handleBranching: handleBranching,
+    nextSequential: nextSequential
+  },
+  /**
+   * Top-level call to create a new survey.
+   * @returns {survey.Survey}
+   */
+  new_survey: function() {
+    return new Survey({
+      filename: "temp_file_name.json",
+      breakoff: Survey.breakoffDefault,
+      survey: []
+    });
+  },
+  /**
+   * Top-level call to copy the input survey to a new survey.
+   * Quick and dirty approach -- converts to JSON and re-parses.
+   * @param survey
+   * @returns {survey.Survey}
+   */
+  copy_survey: function (survey) {
+    return new Survey(survey.toJSON());
+  },
+  /**
+   * Top-level call to create a new empty block.
+   * @param {string} bid The block id.
+   * @returns {survey.Block}
+   */
+  new_block: function (bid = _gensym("block")) {
+    return new Block({
+      id: bid,
+      questions: [],
+      subblocks: []
+    });
+  },
+  /**
+   * Top-level call to copy a block. Done by converting to JSON and copying.
+   * This is the quick and dirty approach to copying.
+   * @param {Block} block
+   * @returns {Block}
+   */
+  copy_block: function (block) {
+    return new Block(block.toJSON());
+  },
+  /**
+   * Adds a block to the top level of the survey.
+   * @param {survey.Block} block The block to add.
+   * @param survey
+   * @param mutate
+   * @returns {?survey.Survey}
+   */
+  add_block: function (block, survey, mutate = true) {
+    if (mutate) {
+      survey.add_block(block);
+      return null;
+    } else {
+      let s = copy_survey(survey);
+      s.add_block(block);
+      return s;
+    }
+  },
+  /**
+   * Top-level call to remove a block from the Survey.
+   * @param {Block} block The block to remove.
+   * @param {Survey} survey The survey to remove the block from.
+   * @param {boolean} mutate Flag indicating whether we should mutate the survey,
+   * or return a new survey with this block removed.
+   * @returns {?Survey}
+   */
+  remove_block: function (block, survey, mutate = true) {
+    if (mutate) {
+      survey.remove_block(block);
+      return null;
+    } else {
+      let s = this.copy_survey(survey);
+      s.remove_block(block);
+      return s;
+    }
+  },
+  /**
+   * Top-level call to create a new Question.
+   * @param {string} surface_text The text to be displayed for this question. May include HTML.
+   * @param {string} qid The question id.
+   * @returns {survey.Question}
+   */
+  new_question: function (surface_text, qid = _gensym("question")) {
+    return new survey.Question({
+      id: qid,
+      qtext: surface_text
+    }, null);
+  },
+  /**
+   * Top-level call to copy a question.
+   * Done by converting to JSON and re-parsing.
+   * @param {Question} question
+   * @returns {Question}
+   */
+  copy_question: function (question) {
+    return new Question(question.toJSON());
+  },
+  /**
+   * Top-level call to add a question to a block.
+   * @param {Question} question The question we want to add.
+   * @param {Block} block The block we want to add the question to.
+   * @param {?Survey} survey The survey that contains the question and the block
+   * @param {boolean } mutate Boolean indicating whether we should mutate the survey or return
+   * a new survey.
+   * @returns {?Survey}
+   */
+  add_question: function (question, block, survey = null, mutate = true) {
+    if (mutate) {
+      block.add_question(question);
+      return null;
+    } else {
+      let s = this.copy_survey(survey);
+      // Get the block in our new survey that matches the input block's id.
+      let block_id_array = block.idArray;
+      let current_block_list = s.topLevelBlocks;
+      // Iterate through the block id array to find the match at the appropriate depth.
+      for (let i = 0; i < block_id_array.length; i++) {
+        // Iterate through the blocks at the current depth to find the match at this level.
+        for (var [,b] of current_block_list) {
+          if (b.idArray[i] === block_id_array[i]) {
+            // When we find the match, update the current block list to point to the new block's
+            // subblocks.
+            current_block_list = b.subblocks;
+            // Break out of the inner loop, since we will have updated the current block list.
+            break;
+          }
+        }
+      }
+      console.assert(b.id === block.id, 'If we have found the correct block, their ids will be equal.');
+      b.add_question(question);
+      return s;
+    }
+  },
+  /**
+   * Removes the question from the provided survey.
+   * @param {Question} question The question to remove.
+   * @param {Survey} survey The survey to remove the question from.
+   * @param {?Block} block The block the question belongs to.
+   * @param {boolean} mutate Flag inidicating whether we should mutate the
+   * survey or return a new one.
+   * @returns {?Survey}
+   */
+  remove_question: function(question, survey, block = null, mutate = true) {
+    if (mutate) {
+      survey.remove_question(question, block, survey);
+      return null;
+    } else {
+      let s = this.copy_survey(survey);
+      s.remove_question(question);
+      return s;
+    }
+  },
+  /**
+   * Top-level call to create a new Option.
+   * @param {string} surface_text The text to be displayed to the user.
+   * @param {string} oid The option id.
+   * @returns {Option}
+   */
+  new_option: function (surface_text, oid = _gensym("option")) {
+    return new Option({
+      id: oid,
+      otext: surface_text
+    });
+  },
+  /**
+   * Top-level call to add an option to a question.
+   * @param {Question} question The question to add the option to.
+   * @param {Option} option The option to add to the input question.
+   * @param {Survey} survey The survey that this question belongs to.
+   * @param {boolean} mutate Flag indicating whether we should mutate the survey
+   * provided, or return a new survey.
+   * @returns {?Survey}
+   */
+  add_option: function (question, option, survey, mutate = true) {
+    if (mutate) {
+      question.add_option(option);
+      return null;
+    } else {
+      let s = this.copy_survey(survey);
+      let q = s.questions.find(q => q.id === question.id);
+      q.add_option(option);
+      return s;
+    }
+  },
+  /**
+   * Removes the option from the provided survey
+   * @param {Option} option The option to remove.
+   * @param {Survey} survey The survey to remove the option from.
+   * @param {?Question} question The question to remove the option from.
+   * @param {boolean} mutate Flag indicating whether the survey should be
+   * mutated or if a new survey should be returned.
+   * @returns {?Survey}
+   */
+  remove_option: function(option, survey, question = null, mutate = true) {
+    if (mutate) {
+      survey.remove_option(option, question, survey);
+      return null;
+    } else {
+      let s = this.copy_survey(survey);
+      s.remove_option(option);
+      return s;
+    }
+  }
 };
-
-module.exports = surveyman;

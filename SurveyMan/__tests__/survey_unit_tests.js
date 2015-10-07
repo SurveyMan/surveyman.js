@@ -36,6 +36,13 @@ describe('Option tests', function() {
     expect(parsed_oList[1].equals(oList[2])).toBeTruthy();
     expect(parsed_oList[2].equals(oList[0])).toBeTruthy();
   });
+
+  it('tests that options are converted to json properly', function() {
+    var o1 = new Option({"id": "comp_3_5", "otext": "Choose me"});
+    var o2 = new Option(o1.toJSON());
+    expect(o1.equals(o2)).toBeTruthy();
+  });
+
 });
 
 describe('Question tests', function() {
@@ -87,7 +94,7 @@ describe('Question tests', function() {
       "branchMap" : {"comp_3_5" : "3", "comp_2_5" : "2"}
     });
     expect(q.freetext).toBeFalsy();
-    expect(q.branchMap).toBeUndefined();
+    expect(q.branchMap.size).toBe(0);
     expect(q.getOption("comp_3_5").id).toEqual("comp_3_5");
     expect(q.randomizable).toBeTruthy();
     expect(q.ordered).toBeFalsy();
@@ -102,6 +109,21 @@ describe('Question tests', function() {
       }
     }
     expect(num_times_first_is_second).toBeGreaterThan(0);
+  });
+
+  it('tests whether question json is produced properly', function() {
+    var q1 = new Question({ "id" : "q_2_4",
+      "qtext" : "Please choose one." ,
+      "options" : [
+        { "id" : "comp_3_5", "otext" : "Choose me" },
+        { "id" : "comp_2_5", "otext" : "Choose me" } ],
+      "branchMap" : {"comp_3_5" : "3", "comp_2_5" : "2"}
+    });
+    var q2 = new Question(q1.toJSON());
+    var q3 = new Question({'id': 'a', qtext: 'b'});
+    var q4 = new Question(q3.toJSON());
+    expect(q3.equals(q4)).toBeTruthy();
+    //expect(q1.equals(q2)).toBeTruthy();
   });
 });
 
@@ -238,8 +260,51 @@ describe('Survey tests', function() {
     }
   });
 
+  it('tests that surveys are converted to json properly', function() {
+    var s1 = new Survey(ex);
+    var s2 = new Survey(s1.toJSON());
+    console.log(`s1:`,s1);
+    console.log(`s2:`,s2);
+    expect(s1.equals(s2)).toBeTruthy();
+  });
+
   it('tests that surveys randomize properly', function() {
     //var s = new Survey(ex);
     //Survey.randomize(s);
   });
+});
+
+describe('Top level tests', function() {
+
+  var SurveyMan = require('../surveyman');
+  var {Survey} = SurveyMan.survey;
+
+  it('tests gensym', function(){
+    let gs1 = SurveyMan.survey._gensym();
+    let gs2 = SurveyMan.survey._gensym();
+    expect(gs1).toBeDefined();
+    expect(gs2).toBeDefined();
+    expect(gs1).not.toEqual(gs2);
+  });
+
+  it('tests creation of a new survey', function() {
+    var s = SurveyMan.new_survey();
+    expect(s.filename).toBe('temp_file_name.json');
+    expect(s.breakoff).toBe(true);
+    expect(s.topLevelBlocks.length).toBe(0);
+    expect(s.questions.length).toBe(0);
+  });
+
+  it('tests whether the survey is copied correctly', function() {
+    var {wage_survey} = require('./globals');
+    var s1 = new Survey(wage_survey);
+    var s2 = SurveyMan.copy_survey(s1);
+    expect(s1.equals(s2)).toBeTruthy();
+  });
+
+  it('tests the creation of a new block', function() {
+    var b = SurveyMan.new_block();
+    //expect(b.idArray.length).toBe(1);
+  })
+
 });
