@@ -205,7 +205,8 @@ describe('Block tests', function() {
 
 describe('Block-Question tests', function() {
 
-  var {Block} = require('../surveyman').survey;
+  var {Block, Question} = require('../surveyman').survey;
+  var SurveyMan = require('../surveyman');
 
   it('tests the interaction between questions and blocks', function() {
     var b = new Block({ "id" : "1",
@@ -219,6 +220,20 @@ describe('Block-Question tests', function() {
       } ]
     });
     expect(b.topLevelQuestions.length).toBe(1);
+  });
+
+  it('tests that a question has been added successfully', function() {
+    let b = SurveyMan.new_block();
+    let q = new Question({ "id" : "q_2_4",
+      "qtext" : "Please choose one." ,
+      "options" : [
+        { "id" : "comp_3_5", "otext" : "Choose me" },
+        { "id" : "comp_2_5", "otext" : "Choose me" } ],
+      "branchMap" : {"comp_3_5" : "3", "comp_2_5" : "2"}
+    });
+    expect(b.getAllQuestions().length).toBe(0);
+    b.add_question(q);
+    expect(b.getAllQuestions().length).toBe(1);
   });
 });
 
@@ -345,5 +360,14 @@ describe('Top level tests', function() {
     expect(new_par1.subblocks.length).toBe(0);
     expect(new_par2.subblocks.length).toBe(1);
   });
+
+  it('tests removing blocks from a survey', function() {
+    let s = SurveyMan.new_survey();
+    let b = SurveyMan.new_block();
+    s.add_block(b);
+    expect(s.topLevelBlocks.length).toBe(1);
+    s.remove_block(b);
+    expect(s.topLevelBlocks.length).toBe(0);
+  })
 
 });

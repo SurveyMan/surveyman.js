@@ -812,9 +812,8 @@ var Block = function(_jsonBlock) {
    * @param {survey.Question} question Question to add to this block.
    * @throws MalformedSurveyException if the question cannot be added.
    */
-  // TODO(etosch): write unit test
   this.add_question = function(question) {
-    let isBranchAll = this.isBranchAll();
+    let isBranchAll = this.subblocks.length > 0 && this.isBranchAll();
     let isBranchOne = this.isBranchOne();
     let isBranchNone = !isBranchAll && !isBranchOne;
     let addingNonBranchingQuestionToNonBranchAllBlock =
@@ -1023,7 +1022,6 @@ var Survey = function(_jsonSurvey) {
    * the parent.
    */
   this.remove_block = function(block, parent = null) {
-    // TODO(etosch): write unit test
     if (block.idArray.length > 1) {
       if (!parent) {
         let parentid = block.get_parent_id();
@@ -1031,7 +1029,7 @@ var Survey = function(_jsonSurvey) {
       }
       parent.remove_block(block);
     } else {
-      let i = this.topLevelBlocks.index(block);
+      let i = this.topLevelBlocks.indexOf(block);
       this.topLevelBlocks.splice(i, 1);
     }
     // remove this block's questions from the top level survey questions.
@@ -1504,22 +1502,7 @@ module.exports = {
     } else {
       let s = this.copy_survey(survey);
       // Get the block in our new survey that matches the input block's id.
-      let block_id_array = block.idArray;
-      let current_block_list = s.topLevelBlocks;
-      // Iterate through the block id array to find the match at the appropriate depth.
-      for (let i = 0; i < block_id_array.length; i++) {
-        // Iterate through the blocks at the current depth to find the match at this level.
-        for (var [,b] of current_block_list) {
-          if (b.idArray[i] === block_id_array[i]) {
-            // When we find the match, update the current block list to point to the new block's
-            // subblocks.
-            current_block_list = b.subblocks;
-            // Break out of the inner loop, since we will have updated the current block list.
-            break;
-          }
-        }
-      }
-      console.assert(b.id === block.id, 'If we have found the correct block, their ids will be equal.');
+      let b = s.get_block_by_id(block.id);
       b.add_question(question);
       return s;
     }
