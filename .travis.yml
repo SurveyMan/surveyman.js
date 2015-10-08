@@ -4,7 +4,7 @@ before_install:
   - npm install
   - npm link vows
 node_js:
-  - 0.12
+  - iojs
 branches:
   only:
     - gh-pages
