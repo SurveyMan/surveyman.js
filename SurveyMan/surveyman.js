@@ -162,7 +162,6 @@ var getOptionById = function (oid) {
   if (optionMAP.has(oid)) {
     return optionMAP.get(oid);
   }
-  console.log(optionMAP);
   throw new ObjectNotFoundException('Option', oid, 'optionMAP');
 };
 
@@ -780,18 +779,18 @@ var Block = function(_jsonBlock) {
   };
   /**
    * Adds the block provided block to this block.
-   * @param {Block} containingBlock The block to add.
+   * @param {Block} block The block to add.
    * @param {?number} index The index at which to add this block.
    */
-  this.add_block = function(containingBlock, index = -1) {
-    index = index === -1 ? containingBlock.subblocks.length : index;
+  this.add_block = function(containingBlock) {
+    // NOTE: THIS IS A CLOSURE -- the "real" function is the one returned.
     var update_ids = function(parent, child) {
       // update block's id
       child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
       child.idArray = child._idStringToArray(child.id);
       child.subblocks.forEach((b) => update_ids(child, b));
     };
-    return function(block) {
+    return function(block, index = containingBlock.subblocks.length) {
       // Check whether it is valid to add this block.
       if (containingBlock.topLevelQuestions.length > 1 && containingBlock.isBranchAll()) {
         throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
@@ -802,8 +801,10 @@ var Block = function(_jsonBlock) {
       if (block.get_parent_id() !== containingBlock.id) {
         update_ids(containingBlock, block);
       }
+      let prev_subs = containingBlock.subblocks.length;
       containingBlock.subblocks.splice(index, 0, block);
       block.parent = containingBlock;
+      console.assert(containingBlock.subblocks.length === prev_subs + 1);
     }
   }(this);
   /**
@@ -936,7 +937,7 @@ var Survey = function(_jsonSurvey) {
    * @type {boolean}
    */
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
-  // Not sure why this isn't working; I think it might be a problem with babel:
+  // Probably need to shim something to make this work:
   // this.questions = Array.from(questionMAP.values());
   /**
    * The list of all questions.
@@ -962,6 +963,12 @@ var Survey = function(_jsonSurvey) {
       survey: this.topLevelBlocks.map((b) => b.toJSON())
     };
   };
+  /**
+   * Compares two surveys to see if they are equal, by comparing the equality of their
+   * subblocks.
+   * @param {Survey} that The survey to compare to.
+   * @returns {boolean}
+   */
   this.equals = function(that) {
     let rhs = that.topLevelBlocks;
     let lhs = this.topLevelBlocks;
@@ -982,23 +989,29 @@ var Survey = function(_jsonSurvey) {
     }).filter((item) => item !== false)[0];
   };
   /**
-   * Adds the block to the survey. Mutates the survey object.
+   * Adds the block to the survey. Mutates the survey object. If index is provided with
+   * a parent block, it will try to insert the block at the provided index in the parent
+   * block. If the block is a top-level block, it will insert at the provided index in
+   * the survey's topLevelBlock list.
    * @param {Block} block The top-level block to add.
-   * @param {?Block} parent This block's parent. If null, it will attempt to find
+   * @param {?Block} parent This block's parent. If null, it will attempt to find it.
+   * @param {?number} index The index at which to insert the provided block.
    * the parent.
    */
-  this.add_block = function(block, parent = null, index = -1) {
-    // TODO: write unit test
-    // TODO: add functionality to insert an an index
-    // We are not adding a top-level block
-    if (block.idArray.length > 1) {
-      if (!parent) {
-        let parentid = block.get_parent_id();
-        parent = getBlockById(parentid);
-      }
-      parent.add_block(block);
+  this.add_block = function(
+    block,
+    parent = this.get_block_by_id(block.get_parent_id()),
+    index = parent ? parent.subblocks.length : this.topLevelBlocks.length
+  ){
+    if(parent) {
+      let prev_subblocks = parent.subblocks.length;
+      parent.add_block(block, index);
+      console.assert(parent.subblocks.length === prev_subblocks + 1);
     } else {
-      this.topLevelBlocks.push(block);
+      if (block.randomizable && block.isBranchOne()) {
+        throw new SMSurveyException('Cannot have top level blocks that are both branching and randomizable');
+      }
+      this.topLevelBlocks.splice(index, 0, block);
     }
     // add this block's questions to the top level survey questions
     block.getAllQuestions().forEach((q) => this.questions.push(q));
@@ -1084,10 +1097,20 @@ var Survey = function(_jsonSurvey) {
    */
   // TODO(etosch): write unit test
   this.get_block_by_id = function(block_id) {
-    for (let [,b] of this.topLevelBlocks.entries()) {
-      if (b.id === block_id) {
-        return b;
+    if (block_id === '') {
+      console.warn('Trying to get block with empty string id. Please correct.');
+      return null;
+    }
+    var find_block_by_id = function(b, id) {
+      if (b.id === id) return b;
+      for (let [, subb] of b.subblocks.entries()) {
+        let found = find_block_by_id(subb, id);
+        if (found) return found;
       }
+    };
+    for (let [,b] of this.topLevelBlocks.entries()) {
+      let found = find_block_by_id(b, block_id);
+      if (found) return found;
     }
     throw new ObjectNotFoundException('Block', block_id, 'current survey');
   };
@@ -1402,18 +1425,27 @@ module.exports = {
   },
   /**
    * Adds a block to the top level of the survey.
+   * @param {Survey} survey The survey to add the block to.
    * @param {Block} block The block to add.
-   * @param survey
-   * @param mutate
+   * @param {?Block} parent_block The parent block to add this block to.
+   * @param {?boolean} mutate Flag indicating whether we should mutate the survey provided or return an updated copy.
+   * @param {number} index Index at which to add the the block in its containing parent.
    * @returns {?Survey}
    */
-  add_block: function (block, survey, mutate = true, index = -1) {
+  add_block: function (
+      survey,
+      block,
+      parent_block = survey.get_block_by_id(block.get_parent_id()),
+      mutate = true,
+      index = parent_block ? parent_block.subblocks.length : survey.topLevelBlocks.length
+  ) {
     if (mutate) {
-      survey.add_block(block, index);
+      survey.add_block(block, parent_block, index);
       return null;
     } else {
       let s = this.copy_survey(survey);
-      s.add_block(block, index);
+      let p = s.get_block_by_id(parent_block ? parent_block.id : '');
+      s.add_block(block, p, index);
       return s;
     }
   },
