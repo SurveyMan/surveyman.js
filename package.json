@@ -28,7 +28,8 @@
     "request": "2.53",
     "seedrandom": "2.3",
     "string": "3.0",
-    "underscore": "1.8"
+    "underscore": "1.8",
+    "array.prototype.find": "1.0.0"
   },
   "scripts": {
     "test": "jest",
@@ -37,7 +38,8 @@
   "devDependencies": {
     "babel-core": "^5.8.23",
     "babel-jest": "^5.3.0",
-    "jest-cli": "^0.4.x",
+    "jest": "^0.1.40",
+    "jest-cli": "^0.5.10",
     "jsdoc": "^3.3.x"
   },
   "jest": {

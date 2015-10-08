@@ -131,6 +131,7 @@ describe('Block tests', function() {
 
   var {Block} = require('../surveyman').survey;
   var {wage_survey} = require('./globals');
+  var SurveyMan = require('../surveyman');
 
   it('ensures that an error occurs if the provided json is malformed.', function() {
     expect(function() { new Block({}); }).toThrow();
@@ -189,6 +190,16 @@ describe('Block tests', function() {
     expect(json_block_with_subblocks.subblocks.length).toBe(39);
     var parsed_block_with_subblocks = new Block(json_block_with_subblocks);
     expect(parsed_block_with_subblocks.subblocks.length).toBe(39);
+  });
+
+  it('tests adding a subblock', function() {
+    let b1 = SurveyMan.new_block();
+    let b2 = SurveyMan.new_block();
+    expect(b1.equals(b2)).toBeFalsy();
+    expect(b2.idArray.length).toBe(1);
+    b1.add_block(b2);
+    expect(b1.subblocks.length).toBe(1);
+    expect(b2.idArray.length).toBe(2);
   });
 });
 
@@ -263,8 +274,6 @@ describe('Survey tests', function() {
   it('tests that surveys are converted to json properly', function() {
     var s1 = new Survey(ex);
     var s2 = new Survey(s1.toJSON());
-    console.log(`s1:`,s1);
-    console.log(`s2:`,s2);
     expect(s1.equals(s2)).toBeTruthy();
   });
 
@@ -304,7 +313,37 @@ describe('Top level tests', function() {
 
   it('tests the creation of a new block', function() {
     var b = SurveyMan.new_block();
-    //expect(b.idArray.length).toBe(1);
-  })
+    expect(b.idArray.length).toBe(1);
+  });
+
+  it('tests adding a block to a survey', function() {
+    let s1 = SurveyMan.new_survey();
+    let b1 = SurveyMan.new_block();
+    // first test copying
+    let s2 = SurveyMan.add_block(s1, b1, null, false);
+    expect(s2).toBeDefined();
+    expect(s1).not.toBe(s2);
+    expect(s1.topLevelBlocks.length).toBe(0);
+    expect(s2.topLevelBlocks.length).toBe(1);
+    // add another top level block.
+    let b3 = SurveyMan.new_block();
+    let s3 = SurveyMan.add_block(s2, b3, null, false);
+    expect(s3).toBeDefined();
+    expect(s3).not.toBe(s2);
+    expect(s3.topLevelBlocks.length).toBe(2);
+    let [tlb1, tlb2] = s3.topLevelBlocks;
+    expect(tlb1.subblocks.length).toBe(0);
+    expect(tlb2.subblocks.length).toBe(0);
+    // add a subblock
+    let child = SurveyMan.new_block();
+    let [par1, par2] = s3.topLevelBlocks;
+    let s4 = SurveyMan.add_block(s3, child, par2, false);
+    let new_par1 = s4.get_block_by_id(par1.id);
+    let new_par2 = s4.get_block_by_id(par2.id);
+    expect(par1.subblocks.length).toBe(0);
+    expect(par2.subblocks.length).toBe(0);
+    expect(new_par1.subblocks.length).toBe(0);
+    expect(new_par2.subblocks.length).toBe(1);
+  });
 
 });
