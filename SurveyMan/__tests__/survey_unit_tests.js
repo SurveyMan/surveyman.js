@@ -263,8 +263,6 @@ describe('Survey tests', function() {
   it('tests that surveys are converted to json properly', function() {
     var s1 = new Survey(ex);
     var s2 = new Survey(s1.toJSON());
-    console.log(`s1:`,s1);
-    console.log(`s2:`,s2);
     expect(s1.equals(s2)).toBeTruthy();
   });
 

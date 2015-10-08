@@ -63,6 +63,7 @@
 // API returns Immutable objects to be used in React interface
 // Incremental adds
 
+require('array.prototype.find');
 var Immutable = require('immutable');
 var log = require('loglevel');
 var config = (function () {
@@ -928,7 +929,7 @@ var Survey = function(_jsonSurvey) {
    * The list of top level blocks in this survey.
    * @type {Array<survey.Block>}
    */
-  this.topLevelBlocks = makeSurvey(survey);
+  this.topLevelBlocks = makeSurvey(survey) || [];
   questionMAP.forEach((q) =>  q.makeBranchMap());
   /**
    * Boolean indicating whether breakoff is permitted for this survey.
@@ -962,10 +963,16 @@ var Survey = function(_jsonSurvey) {
     };
   };
   this.equals = function(that) {
-    return that instanceof Survey &&
-            this.topLevelBlocks.length === that.topLevelBlocks.length &&
-            this.topLevelBlocks.reduce((tv, b1) =>
-              tv && that.topLevelBlocks.find(b2 => b1.equals(b2)), true);
+      console.assert(that.topLevelBlocks !== undefined);
+      console.assert(Array.isArray(that.topLevelBlocks));
+      console.assert(Array.prototype.find !== undefined);
+      let rhs = that.topLevelBlocks;
+      let lhs = this.topLevelBlocks;
+      if(!(that instanceof Survey)) return false;
+      if (lhs.length !== rhs.length) return false;
+    return lhs.reduce((tv, b1) => {
+                return tv && rhs.find(b2 => b1.equals(b2))
+            }, true);
   };
   this._find_containing_question = function(qid, survey) {
     //  Find the block that holds the question
@@ -1366,7 +1373,7 @@ module.exports = {
    * Top-level call to copy the input survey to a new survey.
    * Quick and dirty approach -- converts to JSON and re-parses.
    * @param survey
-   * @returns {survey.Survey}
+   * @returns {Survey}
    */
   copy_survey: function (survey) {
     return new Survey(survey.toJSON());
@@ -1404,7 +1411,7 @@ module.exports = {
       survey.add_block(block);
       return null;
     } else {
-      let s = copy_survey(survey);
+      let s = this.copy_survey(survey);
       s.add_block(block);
       return s;
     }
