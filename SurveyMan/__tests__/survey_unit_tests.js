@@ -190,6 +190,17 @@ describe('Block tests', function() {
     var parsed_block_with_subblocks = new Block(json_block_with_subblocks);
     expect(parsed_block_with_subblocks.subblocks.length).toBe(39);
   });
+
+  it('tests adding a subblock', function() {
+    var SurveyMan = require('../surveyman');
+    let b1 = SurveyMan.new_block();
+    let b2 = SurveyMan.new_block();
+    expect(b1.equals(b2)).toBeFalsy();
+    expect(b2.idArray.length).toBe(1);
+    b1.add_block(b2);
+    expect(b1.subblocks.length).toBe(1);
+    expect(b2.idArray.length).toBe(2);
+  })
 });
 
 describe('Block-Question tests', function() {

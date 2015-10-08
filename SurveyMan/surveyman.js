@@ -775,14 +775,14 @@ var Block = function(_jsonBlock) {
    */
   // TODO(etosch): write unit test
   this.get_parent_id = function() {
-    return this.id.split('.').slice(0, -1).reduce((a, b) => `${a}.${b}`);
+    let parent_arr = this.id.split('.').slice(0, -1);
+    return parent_arr.length === 0 ? "" : parent_arr.reduce((a, b) => `${a}.${b}`);
   };
   /**
    * Adds the block provided block to this block.
    * @param {Block} containingBlock The block to add.
    * @param {?number} index The index at which to add this block.
    */
-    // TODO(etosch): write unit test
   this.add_block = function(containingBlock, index = -1) {
     index = index === -1 ? containingBlock.subblocks.length : index;
     var update_ids = function(parent, child) {
@@ -793,7 +793,7 @@ var Block = function(_jsonBlock) {
     };
     return function(block) {
       // Check whether it is valid to add this block.
-      if (containingBlock.isBranchAll()) {
+      if (containingBlock.topLevelQuestions.length > 1 && containingBlock.isBranchAll()) {
         throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
       }
       if (containingBlock.isBranchOne() && block.isBranchOne()) {
@@ -963,13 +963,10 @@ var Survey = function(_jsonSurvey) {
     };
   };
   this.equals = function(that) {
-      console.assert(that.topLevelBlocks !== undefined);
-      console.assert(Array.isArray(that.topLevelBlocks));
-      console.assert(Array.prototype.find !== undefined);
-      let rhs = that.topLevelBlocks;
-      let lhs = this.topLevelBlocks;
-      if(!(that instanceof Survey)) return false;
-      if (lhs.length !== rhs.length) return false;
+    let rhs = that.topLevelBlocks;
+    let lhs = this.topLevelBlocks;
+    if(!(that instanceof Survey)) return false;
+    if (lhs.length !== rhs.length) return false;
     return lhs.reduce((tv, b1) => {
                 return tv && rhs.find(b2 => b1.equals(b2))
             }, true);
@@ -990,8 +987,9 @@ var Survey = function(_jsonSurvey) {
    * @param {?Block} parent This block's parent. If null, it will attempt to find
    * the parent.
    */
-  this.add_block = function(block, parent = null) {
-    // TODO(etosch): write unit test
+  this.add_block = function(block, parent = null, index = -1) {
+    // TODO: write unit test
+    // TODO: add functionality to insert an an index
     // We are not adding a top-level block
     if (block.idArray.length > 1) {
       if (!parent) {
@@ -1329,6 +1327,7 @@ module.exports = {
     _sortById: sortById,
     _global_reset: global_reset,
     init: function (jsonSurvey) {
+      console.assert(jsonSurvey !== undefined);
       var survey = new Survey(jsonSurvey);
       Survey.randomize(survey);
       return survey;
@@ -1376,12 +1375,14 @@ module.exports = {
    * @returns {Survey}
    */
   copy_survey: function (survey) {
-    return new Survey(survey.toJSON());
+    let s = survey.toJSON();
+    console.assert(s !== undefined);
+    return new Survey(s);
   },
   /**
    * Top-level call to create a new empty block.
    * @param {string} bid The block id.
-   * @returns {survey.Block}
+   * @returns {Block}
    */
   new_block: function (bid = _gensym("block")) {
     return new Block({
@@ -1401,18 +1402,18 @@ module.exports = {
   },
   /**
    * Adds a block to the top level of the survey.
-   * @param {survey.Block} block The block to add.
+   * @param {Block} block The block to add.
    * @param survey
    * @param mutate
-   * @returns {?survey.Survey}
+   * @returns {?Survey}
    */
-  add_block: function (block, survey, mutate = true) {
+  add_block: function (block, survey, mutate = true, index = -1) {
     if (mutate) {
-      survey.add_block(block);
+      survey.add_block(block, index);
       return null;
     } else {
       let s = this.copy_survey(survey);
-      s.add_block(block);
+      s.add_block(block, index);
       return s;
     }
   },
@@ -1438,10 +1439,10 @@ module.exports = {
    * Top-level call to create a new Question.
    * @param {string} surface_text The text to be displayed for this question. May include HTML.
    * @param {string} qid The question id.
-   * @returns {survey.Question}
+   * @returns {Question}
    */
   new_question: function (surface_text, qid = _gensym("question")) {
-    return new survey.Question({
+    return new Question({
       id: qid,
       qtext: surface_text
     }, null);
