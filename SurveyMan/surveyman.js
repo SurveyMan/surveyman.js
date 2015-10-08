@@ -595,7 +595,8 @@ var Block = function(_jsonBlock) {
     // The block is branch-all if all of the questions
     // Since we rely on the static analyzer to do a more thorough check, for now just see
     // if all of the branch maps are not empty.
-    return this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
+    return this.topLevelQuestions.length > 1 &&
+      this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
   };
   /**
    * Returns boolean indicating whether this is a branch-one block.
@@ -792,7 +793,7 @@ var Block = function(_jsonBlock) {
     };
     return function(block, index = containingBlock.subblocks.length) {
       // Check whether it is valid to add this block.
-      if (containingBlock.topLevelQuestions.length > 1 && containingBlock.isBranchAll()) {
+      if (containingBlock.isBranchAll()) {
         throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
       }
       if (containingBlock.isBranchOne() && block.isBranchOne()) {
@@ -809,7 +810,7 @@ var Block = function(_jsonBlock) {
   }(this);
   /**
    * Adds the provided question to this block.
-   * @param {survey.Question} question Question to add to this block.
+   * @param {Question} question Question to add to this block.
    * @throws MalformedSurveyException if the question cannot be added.
    */
   this.add_question = function(question) {
@@ -842,27 +843,19 @@ var Block = function(_jsonBlock) {
         addingBranchingQuestionToBranchAllBlock
     ) {
       this.topLevelQuestions.push(question);
+      question.block = this;
       return;
     }
     throw new MalformedSurveyException(
         `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
         `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
   };
-  this.remove_question = function(question) {
+  this.remove_question = (question) => {
     // TODO(etosch): write unit test
-    let idx = this.topLevelQuestions.indexOf(question)
-    if (idx !== -1) {
-      this.topLevelQuestions.splice(idx, 1);
-      return true;
-    } else {
-      for (let b in this.subblocks) {
-        if (b.remove_question(question)) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+    let idx = this.topLevelQuestions.indexOf(q => q.equals(question));
+    this.topLevelQuestions.splice(idx, 1);
+    question.block = null;
+  };
 };
 
 /**
@@ -1052,14 +1045,14 @@ var Survey = function(_jsonSurvey) {
    * @param {Question} question The question to remove.
    * @param {?Block} block Optional block to remove the survey from.
    */
-  this.remove_question = function(survey) {
-    return function (question, block = null) {
-      if (!block) {
-        block = survey._find_containing_question(question, survey);
-      }
-      block.remove_question(question);
-    };
-  }(this);
+  this.remove_question = (question) => {
+    let block = question.block;
+    let idx = this.questions.findIndex(q => q.equals(question));
+    let tlq1 = block.topLevelQuestions.length;
+    block.remove_question(question);
+    console.assert(tlq1 === block.topLevelQuestions.length + 1, 'Did not remove question');
+    this.questions.splice(idx, 1);
+  };
   /**
    * Swaps out the provided question for one having the same id.
    * @param {survey.Question} new_question The replacement question.
@@ -1122,6 +1115,14 @@ var Survey = function(_jsonSurvey) {
       question.remove_option(option);
     }
   }(this);
+  this.get_option_by_id = function(oid) {
+    for (let i = 0; i < this.questions.length; i++) {
+      let q = this.questions[i];
+      let o = q.options.find(o => o.id === oid);
+      if (o) return o;
+    }
+    throw new ObjectNotFoundException('Option', oid, 'current survey');
+  }
 };
 
 /**
@@ -1504,6 +1505,7 @@ module.exports = {
       // Get the block in our new survey that matches the input block's id.
       let b = s.get_block_by_id(block.id);
       b.add_question(question);
+      s.questions.push(question);
       return s;
     }
   },
@@ -1516,13 +1518,18 @@ module.exports = {
    * survey or return a new one.
    * @returns {?Survey}
    */
-  remove_question: function(question, survey, block = null, mutate = true) {
+  remove_question: function(question, survey, mutate = true) {
     if (mutate) {
-      survey.remove_question(question, block, survey);
+      survey.remove_question(question);
       return null;
     } else {
       let s = this.copy_survey(survey);
+      let b = question.block;
+      let ct_survey_q = s.questions.length;
+      let ct_block_q = b.getAllQuestions().length;
       s.remove_question(question);
+      console.assert(ct_survey_q === s.questions.length + 1, 'Did not remove question from survey.');
+      console.assert(ct_block_q === b.topLevelQuestions.length + 1, 'Did not remove question from block.')
       return s;
     }
   },
@@ -1547,7 +1554,7 @@ module.exports = {
    * provided, or return a new survey.
    * @returns {?Survey}
    */
-  add_option: function (question, option, survey, mutate = true) {
+  add_option: function (option, question, survey, mutate = true) {
     if (mutate) {
       question.add_option(option);
       return null;
