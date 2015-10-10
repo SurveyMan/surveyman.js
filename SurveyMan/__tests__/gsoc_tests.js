@@ -127,17 +127,17 @@ describe('Randomize works correctly', function() {
         var protoSurvey = globals.randomizable_survey;
         var parsedRandomSurvey = survey.init(protoSurvey);
 
-        var topic = _.find(parsedRandomSurvey.topLevelBlocks, function (block) { return block.randomizable });
-        var fixedBlockIds = _.chain(topic.subblocks)
+        var parent = parsedRandomSurvey.topLevelBlocks.filter(block => block.randomizable)[0];
+        var fixedBlockIds = _.chain(parent.subblocks)
                 .filter(function(block) { return !block.randomizable })
                 .map(function(block) { return block.id })
                 .value();
 
-        topic.randomize();
+        parent.randomize();
 
         // get indices of fixed block ids in new randomized order
-        var newIds = _.map(topic.subblocks, function(b) { return b.id });
-        var locations = _.map(fixedBlockIds, function(id) { return newIds.indexOf(id); });
+        var newIds = parent.subblocks.map(b => b.id);
+        var locations = fixedBlockIds.map(id => newIds.indexOf(id));
 
         // if locations is ordered, it is equal to its sorted version
         expect(locations).toBe(locations.sort());
