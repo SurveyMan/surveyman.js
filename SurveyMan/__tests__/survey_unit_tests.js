@@ -144,7 +144,7 @@ describe('Block tests', function() {
     expect(b.topLevelQuestions.length).toBe(0);
     expect(b.subblocks.length).toBe(0);
     expect(b.randomizable).toBeFalsy();
-    expect(b.isBranchAll()).toBeTruthy();
+    expect(b.isBranchAll()).toBeFalsy();
     expect(b.idComp(new Block({'id': '2.1'}))).toBe(0);
     expect(b.idComp(new Block({'id': '2'}))).toBe(0);
     expect(b.idComp(new Block({'id': '2.1.1'}))).toBe(0);
