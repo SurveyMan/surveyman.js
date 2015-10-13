@@ -1,5 +1,11 @@
 jest.dontMock("./globals.js")
-    .dontMock("../surveyman.js");
+    .dontMock("../surveyman.js")
+    .dontMock("stack-trace")
+    .dontMock("../config.js")
+    .dontMock("array.prototype.find");
+
+var config = require("../config.js");
+config.debug = true;
 
 describe('Top-level auxiliary function tests.', function() {
   it('parses boolean values, taking into account our freetext rules', function() {
@@ -123,7 +129,7 @@ describe('Question tests', function() {
     var q3 = new Question({'id': 'a', qtext: 'b'});
     var q4 = new Question(q3.toJSON());
     expect(q3.equals(q4)).toBeTruthy();
-    //expect(q1.equals(q2)).toBeTruthy();
+    expect(q1.equals(q2)).toBeTruthy();
   });
 });
 
@@ -262,7 +268,6 @@ describe('Survey tests', function() {
   };
 
   it('tests that surveys are parsed correctly.', function() {
-    try {
       expect(function () {
         new Survey({});
       }).toThrow();
@@ -280,10 +285,6 @@ describe('Survey tests', function() {
       expect(bm.size).toEqual(2);
       expect(bm.get(o1)).toEqual(b3);
       expect(bm.get(o2)).toEqual(b2);
-    } catch (e) {
-      console.log(e);
-      throw e;
-    }
   });
 
   it('tests that surveys are converted to json properly', function() {
@@ -293,8 +294,8 @@ describe('Survey tests', function() {
   });
 
   it('tests that surveys randomize properly', function() {
-    //var s = new Survey(ex);
-    //Survey.randomize(s);
+    var s = new Survey(ex);
+    Survey.randomize(s);
   });
 });
 
@@ -311,8 +312,13 @@ describe('Top level tests', function() {
     expect(gs1).not.toEqual(gs2);
   });
 
+  it('tests creation of a new block', function() {
+    let b = SurveyMan.new_block();
+    expect(b.idArray.length).toBe(1);
+  });
+
   it('tests creation of a new survey', function() {
-    var s = SurveyMan.new_survey();
+    let s = SurveyMan.new_survey();
     expect(s.filename).toBe('temp_file_name.json');
     expect(s.breakoff).toBe(true);
     expect(s.topLevelBlocks.length).toBe(0);
@@ -332,33 +338,33 @@ describe('Top level tests', function() {
   });
 
   it('tests adding a block to a survey', function() {
-    let s1 = SurveyMan.new_survey();
-    let b1 = SurveyMan.new_block();
-    // first test copying
-    let s2 = SurveyMan.add_block(s1, b1, null, false);
-    expect(s2).toBeDefined();
-    expect(s1).not.toBe(s2);
-    expect(s1.topLevelBlocks.length).toBe(0);
-    expect(s2.topLevelBlocks.length).toBe(1);
-    // add another top level block.
-    let b3 = SurveyMan.new_block();
-    let s3 = SurveyMan.add_block(s2, b3, null, false);
-    expect(s3).toBeDefined();
-    expect(s3).not.toBe(s2);
-    expect(s3.topLevelBlocks.length).toBe(2);
-    let [tlb1, tlb2] = s3.topLevelBlocks;
-    expect(tlb1.subblocks.length).toBe(0);
-    expect(tlb2.subblocks.length).toBe(0);
-    // add a subblock
-    let child = SurveyMan.new_block();
-    let [par1, par2] = s3.topLevelBlocks;
-    let s4 = SurveyMan.add_block(s3, child, par2, false);
-    let new_par1 = s4.get_block_by_id(par1.id);
-    let new_par2 = s4.get_block_by_id(par2.id);
-    expect(par1.subblocks.length).toBe(0);
-    expect(par2.subblocks.length).toBe(0);
-    expect(new_par1.subblocks.length).toBe(0);
-    expect(new_par2.subblocks.length).toBe(1);
+      let s1 = SurveyMan.new_survey();
+      let b1 = SurveyMan.new_block();
+      // first test copying
+      let s2 = SurveyMan.add_block(s1, b1, null, false);
+      expect(s2).toBeDefined();
+      expect(s1).not.toBe(s2);
+      expect(s1.topLevelBlocks.length).toBe(0);
+      expect(s2.topLevelBlocks.length).toBe(1);
+      // add another top level block.
+      let b3 = SurveyMan.new_block();
+      let s3 = SurveyMan.add_block(s2, b3, null, false);
+      expect(s3).toBeDefined();
+      expect(s3).not.toBe(s2);
+      expect(s3.topLevelBlocks.length).toBe(2);
+      let [tlb1, tlb2] = s3.topLevelBlocks;
+      expect(tlb1.subblocks.length).toBe(0);
+      expect(tlb2.subblocks.length).toBe(0);
+      // add a subblock
+      let child = SurveyMan.new_block();
+      let [par1, par2] = s3.topLevelBlocks;
+      let s4 = SurveyMan.add_block(s3, child, par2, false);
+      let new_par1 = s4.get_block_by_id(par1.id);
+      let new_par2 = s4.get_block_by_id(par2.id);
+      expect(par1.subblocks.length).toBe(0);
+      expect(par2.subblocks.length).toBe(0);
+      expect(new_par1.subblocks.length).toBe(0);
+      expect(new_par2.subblocks.length).toBe(1);
   });
 
   it('tests removing blocks from a survey', function() {
@@ -368,6 +374,6 @@ describe('Top level tests', function() {
     expect(s.topLevelBlocks.length).toBe(1);
     s.remove_block(b);
     expect(s.topLevelBlocks.length).toBe(0);
-  })
+  });
 
 });

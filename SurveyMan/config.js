@@ -1,5 +1,6 @@
 var config = {
-  'verbose': false
+  verbose: false,
+  debug: false
 };
 
 module.exports = config;

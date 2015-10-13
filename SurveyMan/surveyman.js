@@ -64,15 +64,18 @@
 // Incremental adds
 
 require('array.prototype.find');
-var Immutable = require('immutable');
 var log = require('loglevel');
 var config = (function () {
-    try {
-        return require('./config');
-    } catch (e) {
-        console.log(e);
-        return { verbose : false };
+  try {
+    if (eval("config") === undefined) {
+      return require('./config');
     }
+  } catch (e) {
+    console.log(e);
+    return {
+      verbose: false
+    };
+  }
 })();
 
 /*****************************************************************************
@@ -133,17 +136,17 @@ var FYshuffle = function(arr) {
 var sortById = function (lst) {
   // Bubble sort, yo!
   // We generally expect these to already be sorted.
-  while(true) {
+  while(true) { // eslint-disable-line no-constant-condition
     let swapped = false;
     for (let j = 0; j < lst.length - 1; j++) {
       let b1 = lst[j];
-      let b2 = lst[j+1];
+      let b2 = lst[j + 1];
       // getting some weirdness earlier; not sure why
       if (b1.idComp(b2) === 1) {
         log.info(`swapping blocks ${b1.id} and ${b2.id}`);
         swapped = true;
         lst[j] = b2;
-        lst[j+1] = b1;
+        lst[j + 1] = b1;
       }
     }
     // if there were no swaps, then we are already sorted.
@@ -214,13 +217,13 @@ var parseBools = function (thing, defaultVal, question = null) {
   console.assert(defaultVal !== undefined, 'Default value cannot be undefined.');
   if (thing === undefined) {
     return defaultVal;
-  } else if (typeof thing == 'string') {
+  } else if (typeof thing === 'string') {
     try {
       return JSON.parse(thing);
     } catch (err) {
       return thing;
     }
-  } else if (typeof thing == 'boolean') {
+  } else if (typeof thing === 'boolean') {
     return thing;
   } else if (Array.isArray(thing)) {
     // New schemata spec for ordered -- provides a list of the ids that are
@@ -272,7 +275,7 @@ var Option = function (_jsonOption, _question = null) {
     return that instanceof Option &&
         this.id === that.id &&
         this.otext === that.otext;
-  }
+  };
 };
 
 /**
@@ -314,7 +317,7 @@ var Question = function(_jsonQuestion, _block) {
       qtext = _jsonQuestion.qtext,
       options = _jsonQuestion.options,
       correlation = _jsonQuestion.correlation,
-      randomize = _jsonQuestion.randomize,
+      jsonRandomize = _jsonQuestion.randomize,
       ordered = _jsonQuestion.ordered,
       exclusive = _jsonQuestion.exclusive,
       breakoff = _jsonQuestion.breakoff;
@@ -382,7 +385,11 @@ var Question = function(_jsonQuestion, _block) {
    * Boolean indicating whether the options in this question can be shuffled.
    * @type {boolean}
    */
-  this.randomizable = parseBools(randomize, Survey.randomizeDefault);
+  if (config.debug) {
+    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined',
+        `Expected boolean, got ${typeof jsonRandomize}`);
+  }
+  this.randomizable = parseBools(jsonRandomize, Survey.randomizeDefault);
   /**
    * The list of options associated with this question (may be empty).
    * @type {Array.<Option>}
@@ -460,7 +467,7 @@ var Question = function(_jsonQuestion, _block) {
       ordered: this.ordered,
       exclusive: this.exclusive,
       breakoff: this.breakoff
-    }
+    };
   };
   /**
    * Two questions are equal if their fields are equal; note that this is not
@@ -542,18 +549,17 @@ Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
  */
 var Block = function(_jsonBlock) {
   assertJSONHasProperties(_jsonBlock, 'id');
-  var id = _jsonBlock.id,
+  var id = `${_jsonBlock.id}`,
       questions = _jsonBlock.questions || [],
-      randomize = _jsonBlock.randomize,
+      jsonRandomize = _jsonBlock.randomize,
       subblocks = _jsonBlock.subblocks || [];
   blockMAP.set(id, this);
 
   var numbersRegexp = new RegExp('[0-9]+');
-  this._idStringToArray = (_idString) =>
-    _idString.split('.').map((s) =>
-      parseInt(numbersRegexp.exec(s)[0]));
+  this._idStringToArray = _idString =>
+    _idString.split('.').map((s) => parseInt(numbersRegexp.exec(s)[0]));
   var floatingBlockRegexp = new RegExp('(_|[a-z][a-z]*)[1-9][0-9]*');
-  var randomizableId = (_idString) => floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
+  var randomizableId = _idString => floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
   // get the total number of 'slots' and assign indices
   /**
    * The user-supplied id. This will have the heirarchical/randomization semantics embedded in it.
@@ -581,7 +587,11 @@ var Block = function(_jsonBlock) {
    * Boolean indicating whether this is a floating block.
    * @type {boolean}
    */
-  this.randomizable = Boolean(randomizableId(this.id)) || parseBools(randomize, Block.randomizeDefault);
+  if (config.debug) {
+    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined',
+        `Expected boolean, got ${typeof jsonRandomize}`);
+  }
+  this.randomizable = Boolean(randomizableId(this.id)) || parseBools(jsonRandomize, Block.randomizeDefault);
   /**
    * Returns boolean indicating whether this is a branch-all block.
    * @returns {boolean}
@@ -623,7 +633,7 @@ var Block = function(_jsonBlock) {
    */
   this.getQuestion = function(quid, deep = false) {
     for (let i = 0; i < this.topLevelQuestions.length; i++) {
-      if (this.topLevelQuestions[i].id == quid) {
+      if (this.topLevelQuestions[i].id === quid) {
         return this.topLevelQuestions[i];
       }
     }
@@ -632,7 +642,11 @@ var Block = function(_jsonBlock) {
       for (let b in this.subblocks) {
         try {
           return b.getQuestion(quid, true);
-        } catch (e) {}
+        } catch (e) {
+          if (config.debug) {
+            console.log(e);
+          }
+        }
       }
     }
     throw new ObjectNotFoundException('Question', quid, `block ${this.id}`);
@@ -664,11 +678,11 @@ var Block = function(_jsonBlock) {
    */
   this.randomize = function() {
     var i, j;
-    var newSBlocks = this.subblocks.map((_) => -1);
+    var newSBlocks = this.subblocks.map(() => -1);
     // Randomize questions
     FYshuffle(this.topLevelQuestions);
     // Randomize options
-    this.topLevelQuestions.forEach((q) => q.randomize());
+    this.topLevelQuestions.forEach(q => q.randomize());
     // If we have no subblocks, then we're done.
     if (newSBlocks.length === 0) return;
     // Randomize blocks
@@ -693,7 +707,7 @@ var Block = function(_jsonBlock) {
         j++;
       }
     }
-    console.assert(j == stationaryBlocks.length,
+    console.assert(j === stationaryBlocks.length,
       `j should equal the number of stationary blocks: ${j} vs. ${stationaryBlocks.length}`);
     this.subblocks = newSBlocks;
     this.subblocks.forEach((b) => b.randomize());
@@ -870,9 +884,10 @@ Block._blocks_ids = [1];
  * @param {Block|undefined|null} parent If we are creating a subblock, we must supply the parent.
  * @returns {Block}
  */
+// TODO: unit test
 Block.new_block = function(parent) {
   var idArray = [], i = 0;
-  if (parent === undefined) {
+  if (parent) {
     idArray = parent.idArray;
     i = parent.idArray.length;
     if (Block._blocks_ids[i] === undefined) {
@@ -881,7 +896,7 @@ Block.new_block = function(parent) {
   }
   idArray[i] = Block._blocks_ids[i];
   Block._blocks_ids[i] += 1;
-  var id = idArray.reduce(function (a, b) { return a + '.' + b; });
+  var id = idArray.length > 1 ? idArray.reduce((a, b) => `${a}.${b}`) : `${idArray[0]}`;
   return new Block({
     id: id,
     questions: [],
@@ -1078,7 +1093,13 @@ var Survey = function(_jsonSurvey) {
    */
   this.get_question_by_id = function(question_id) {
     // TODO(etosch): write unit test.
-    return this.questions.find(q => q.id === question_id);
+    let q1 = this.questions.find(q => q.id === question_id);
+    let q2 = this.topLevelBlocks.map(b => b.getQuestion(question_id, true)).find(q => q);
+    console.assert(q1.equals(q2),
+        `Top level question store should reflect block-level references; %s found in toplevel; %s found in block`,
+        q1, q2
+    );
+    return q1;
   };
   /**
    * Returns the Block object in this survey that has the provided id.
@@ -1105,6 +1126,7 @@ var Survey = function(_jsonSurvey) {
     }
     throw new ObjectNotFoundException('Block', block_id, 'current survey');
   };
+  // TODO: write unit test
   this.remove_option = function(survey) {
     return function(option, question = null) {
       if (!question) {
@@ -1115,6 +1137,7 @@ var Survey = function(_jsonSurvey) {
       question.remove_option(option);
     }
   }(this);
+  // TODO: write unit test
   this.get_option_by_id = function(oid) {
     for (let i = 0; i < this.questions.length; i++) {
       let q = this.questions[i];
@@ -1130,36 +1153,49 @@ var Survey = function(_jsonSurvey) {
  * @param {Survey} _survey
  */
 Survey.randomize = function(_survey) {
+  let numTopLevelBlocks = _survey.topLevelBlocks.length;
   // Select out and randomize the top level floating blocks.
-  var randomizableBlocks = _survey.topLevelBlocks.filter((_block) => _block.randomizable);
+  var randomizableBlocks = _survey.topLevelBlocks.filter(_block => _block.randomizable);
   // Select out and ensure that the stationary blocks are sorted.
-  var normalBlocks = _survey.topLevelBlocks.filter((_block) => !_block.randomizable);
+  var normalBlocks = _survey.topLevelBlocks.filter(_block => !_block.randomizable);
   sortById(normalBlocks);
   // Create a new array for the top level blocks.
-  var newTLBs = _survey.topLevelBlocks.map((b) => null);
+  var newTLBs = _survey.topLevelBlocks.map(() => null);
   // Sample indices for the floating blocks.
-  var indices = newTLBs.reduce((lst, _) => [lst[0] + 1].concat(lst), [0]);
+  var indices = newTLBs.map((dontcare, i) => i);
   FYshuffle(indices);
   indices = indices.slice(0, randomizableBlocks.length);
 
+  if (config.debug) {
+    console.assert(normalBlocks.length + randomizableBlocks.length === numTopLevelBlocks,
+        `Num normal: ${normalBlocks.length}
+        Num floating: ${randomizableBlocks.length}
+        Num top level: ${numTopLevelBlocks}`
+    );
+    normalBlocks.forEach(b => b !== undefined);
+    randomizableBlocks.forEach(b => b !== undefined);
+  }
+
   // Put the floating blocks where they belong
   for (let j = 0; j < indices.length; j++) {
-      newTLBs[indices[j]] = randomizableBlocks[j];
+    newTLBs[indices[j]] = randomizableBlocks[j];
   }
 
   // Now put the stationary blocks in order
   var k = 0;
-  for (let i = 0; i < newTLBs.length; i++) {
-    if (!newTLBs[i]) {
-      newTLBs[i] = normalBlocks[k];
+  for (let j = 0; j < newTLBs.length; j++) {
+    if (!Boolean(newTLBs[j])) {
+      newTLBs[j] = normalBlocks[k];
       k++;
     }
   }
+  newTLBs.forEach(tlb => tlb.randomize());
 
+  console.assert(newTLBs.length === numTopLevelBlocks,
+      '#/top level blocks is invariant;' +
+      `expecting ${numTopLevelBlocks}, got ${newTLBs.length}`);
   // Reset top level blocks
-  console.assert(newTLBs.length > 0, 'Need at least one top level block.');
   _survey.topLevelBlocks = newTLBs;
-  _survey.topLevelBlocks.forEach((tlb) => tlb.randomize());
 };
 
 // 'static' fields
@@ -1368,7 +1404,7 @@ module.exports = {
    */
   interpreter: {
     init: function (jsonSurvey) {
-      var survey = SurveyMan.survey.init(jsonSurvey);
+      var survey = this.survey.init(jsonSurvey);
       initializeStacks(survey.topLevelBlocks);
       return survey;
     },
@@ -1387,7 +1423,7 @@ module.exports = {
     return new Survey({
       filename: "temp_file_name.json",
       breakoff: Survey.breakoffDefault,
-      survey: []
+      survey: [this.new_block().toJSON()]
     });
   },
   /**
@@ -1406,13 +1442,7 @@ module.exports = {
    * @param {string} bid The block id.
    * @returns {Block}
    */
-  new_block: function (bid = _gensym("block")) {
-    return new Block({
-      id: bid,
-      questions: [],
-      subblocks: []
-    });
-  },
+  new_block: Block.new_block,
   /**
    * Top-level call to copy a block. Done by converting to JSON and copying.
    * This is the quick and dirty approach to copying.
