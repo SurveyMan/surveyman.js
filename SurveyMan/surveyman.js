@@ -63,7 +63,7 @@
 // API returns Immutable objects to be used in React interface
 // Incremental adds
 
-require('array.prototype.find');
+require('es6-shim');
 var log = require('loglevel');
 var config = (function () {
   try {
@@ -820,7 +820,7 @@ var Block = function(_jsonBlock) {
       containingBlock.subblocks.splice(index, 0, block);
       block.parent = containingBlock;
       console.assert(containingBlock.subblocks.length === prev_subs + 1);
-    }
+    };
   }(this);
   /**
    * Adds the provided question to this block.
@@ -864,11 +864,18 @@ var Block = function(_jsonBlock) {
         `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
         `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
   };
-  this.remove_question = (question) => {
-    // TODO(etosch): write unit test
+  /**
+   * Removes the provided question from this block.
+   * @param question The question to remove.
+   */
+  this.remove_question = question => {
+    let ctold = this.topLevelQuestions.length;
     let idx = this.topLevelQuestions.indexOf(q => q.equals(question));
     this.topLevelQuestions.splice(idx, 1);
     question.block = null;
+    if (config.debug) {
+      console.assert(ctold === this.topLevelQuestions.length + 1, 'Did not remove question from block.');
+    }
   };
 };
 
@@ -1044,7 +1051,7 @@ var Survey = function(_jsonSurvey) {
     block.getAllQuestions().forEach(q => {
       let i = this.questions.index(q);
       this.questions.splice(i, 1);
-    })
+    });
   };
   /**
    * Adds the provided question to the provided block in this survey.
@@ -1053,6 +1060,7 @@ var Survey = function(_jsonSurvey) {
    */
   this.add_question = function(question, block) {
     block.add_question(question);
+    this.questions.push(question);
   };
   /**
    * Removes the provided question from the survey. If the containing block is not
@@ -1060,31 +1068,19 @@ var Survey = function(_jsonSurvey) {
    * @param {Question} question The question to remove.
    * @param {?Block} block Optional block to remove the survey from.
    */
-  this.remove_question = (question) => {
+  this.remove_question = question => {
     let block = question.block;
+    let block_num_questions_before = block.topLevelQuestions.length;
     let idx = this.questions.findIndex(q => q.equals(question));
-    let tlq1 = block.topLevelQuestions.length;
+    let survey_num_questions_before = this.questions.length;
     block.remove_question(question);
-    console.assert(tlq1 === block.topLevelQuestions.length + 1, 'Did not remove question');
     this.questions.splice(idx, 1);
-  };
-  /**
-   * Swaps out the provided question for one having the same id.
-   * @param {survey.Question} new_question The replacement question.
-   */
-  this.replace_question = function(new_question) {
-    // TODO(etosch): write unit test.
-    let old_question = this.questions.filter((q) => q.id === new_question.id)[0];
-    let index_to_remove = this.questions.indexOf(old_question);
-    let containing_block = this._find_containing_block(new_question.id);
-    this.questions.splice(index_to_remove, 1, new_question);
-    // swap the questions
-    if (!b.remove_question(old_question)) {
-      throw new SMSurveyException(
-          `Attempting to remove question that has already been removed: ${old_question}`,
-          true);
+    if (config.debug) {
+      console.assert(block_num_questions_before === block.topLevelQuestions.length + 1,
+          'Did not remove question from block.');
+      console.assert(survey_num_questions_before === this.questions.length + 1,
+          'Did not remove question from survey.');
     }
-    b.add_question(new_question);
   };
   /**
    * Returns the Question object in this survey that has the provided id.
@@ -1249,9 +1245,10 @@ var getAllBlockQuestions = function(_block) {
   var bindices = indices.filter((i) => !qindices.find((j) => j === i));
 
   let j = 0, k = 0;
-  for (let i; i < indices.length; i++) {
+  let qfind = (i) => qindices.find(l => l === i);
+  for (let i = 0; i < indices.length; i++) {
     // it happens that i == indices[i]
-    if (qindices.find((l) => l === i).length === 1) {
+    if (qfind(i).length === 1) {
       retval.push(_block.topLevelQuestions[j]);
       j++;
     } else if (bindices.find((l) => l === i).length === 1) {
@@ -1526,9 +1523,13 @@ module.exports = {
    * a new survey.
    * @returns {?Survey}
    */
-  add_question: function (question, block, survey = null, mutate = true) {
+  add_question: function (question, block, survey, mutate = true) {
     if (mutate) {
       block.add_question(question);
+      survey.questions.push(question);
+      if (config.debug) {
+        console.assert(question.block === block);
+      }
       return null;
     } else {
       let s = this.copy_survey(survey);
@@ -1554,12 +1555,7 @@ module.exports = {
       return null;
     } else {
       let s = this.copy_survey(survey);
-      let b = question.block;
-      let ct_survey_q = s.questions.length;
-      let ct_block_q = b.getAllQuestions().length;
       s.remove_question(question);
-      console.assert(ct_survey_q === s.questions.length + 1, 'Did not remove question from survey.');
-      console.assert(ct_block_q === b.topLevelQuestions.length + 1, 'Did not remove question from block.')
       return s;
     }
   },

@@ -2,7 +2,7 @@ jest.dontMock("./globals.js")
     .dontMock("../surveyman.js")
     .dontMock("stack-trace")
     .dontMock("../config.js")
-    .dontMock("array.prototype.find");
+    .dontMock("es6-shim");
 
 var config = require("../config.js");
 config.debug = true;
@@ -374,6 +374,33 @@ describe('Top level tests', function() {
     expect(s.topLevelBlocks.length).toBe(2);
     s.remove_block(b);
     expect(s.topLevelBlocks.length).toBe(1);
+  });
+
+  it('tests adding questions to a survey and mutating', function() {
+    let s = SurveyMan.new_survey();
+    let q1 = SurveyMan.new_question('asdf');
+    SurveyMan.add_question(q1, s.topLevelBlocks[0], s);
+    expect(s.questions.length).toBe(1);
+    expect(s.topLevelBlocks[0].topLevelQuestions.length).toBe(1);
+  });
+
+  it('tests adding questions to a survey and copying', function() {
+    let s1 = SurveyMan.new_survey();
+    let q1 = SurveyMan.new_question('asdf');
+    let s2 = SurveyMan.add_question(q1, s1.topLevelBlocks[0], s1, false);
+    expect(s1.questions.length).toBe(0);
+    expect(s2.questions.length).toBe(1);
+    expect(s1.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
+    expect(s2.topLevelBlocks[0].topLevelQuestions.length).toBe(1);
+  });
+
+  it('tests deleting questions from a survey mutatively', function() {
+    let s = SurveyMan.new_survey();
+    let q1 = SurveyMan.new_question('asdf');
+    SurveyMan.add_question(q1, s.topLevelBlocks[0], s);
+    SurveyMan.remove_question(q1, s);
+    expect(s.questions.length).toBe(0);
+    //expect(s.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
   });
 
 });

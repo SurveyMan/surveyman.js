@@ -21,6 +21,8 @@
   ],
   "main": "surveyman",
   "dependencies": {
+    "array.prototype.find": "1.0.0",
+    "es6-shim": "^0.33.6",
     "immutable": "^3.7.3",
     "jjv": "1.0",
     "jquery": "2.1",
@@ -28,8 +30,7 @@
     "request": "2.53",
     "seedrandom": "2.3",
     "string": "3.0",
-    "underscore": "1.8",
-    "array.prototype.find": "1.0.0"
+    "underscore": "1.8"
   },
   "scripts": {
     "test": "jest",
