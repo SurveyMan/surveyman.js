@@ -321,7 +321,7 @@ describe('Top level tests', function() {
     let s = SurveyMan.new_survey();
     expect(s.filename).toBe('temp_file_name.json');
     expect(s.breakoff).toBe(true);
-    expect(s.topLevelBlocks.length).toBe(0);
+    expect(s.topLevelBlocks.length).toBe(1);
     expect(s.questions.length).toBe(0);
   });
 
@@ -344,14 +344,14 @@ describe('Top level tests', function() {
       let s2 = SurveyMan.add_block(s1, b1, null, false);
       expect(s2).toBeDefined();
       expect(s1).not.toBe(s2);
-      expect(s1.topLevelBlocks.length).toBe(0);
-      expect(s2.topLevelBlocks.length).toBe(1);
+      expect(s1.topLevelBlocks.length).toBe(1);
+      expect(s2.topLevelBlocks.length).toBe(2);
       // add another top level block.
       let b3 = SurveyMan.new_block();
       let s3 = SurveyMan.add_block(s2, b3, null, false);
       expect(s3).toBeDefined();
       expect(s3).not.toBe(s2);
-      expect(s3.topLevelBlocks.length).toBe(2);
+      expect(s3.topLevelBlocks.length).toBe(3);
       let [tlb1, tlb2] = s3.topLevelBlocks;
       expect(tlb1.subblocks.length).toBe(0);
       expect(tlb2.subblocks.length).toBe(0);
@@ -371,9 +371,9 @@ describe('Top level tests', function() {
     let s = SurveyMan.new_survey();
     let b = SurveyMan.new_block();
     s.add_block(b);
-    expect(s.topLevelBlocks.length).toBe(1);
+    expect(s.topLevelBlocks.length).toBe(2);
     s.remove_block(b);
-    expect(s.topLevelBlocks.length).toBe(0);
+    expect(s.topLevelBlocks.length).toBe(1);
   });
 
 });
