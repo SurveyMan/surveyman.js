@@ -546,7 +546,7 @@ var Block = function(_jsonBlock) {
 
   var numbersRegexp = new RegExp('[0-9]+');
   this._idStringToArray = _idString =>
-    _idString.split('.').map((s) => parseInt(numbersRegexp.exec(s)[0]));
+      _idString.split('.').map((s) => parseInt(numbersRegexp.exec(s)[0]));
   var floatingBlockRegexp = new RegExp('(_|[a-z][a-z]*)[1-9][0-9]*');
   var randomizableId = _idString => floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
   // get the total number of 'slots' and assign indices
@@ -585,7 +585,7 @@ var Block = function(_jsonBlock) {
    * Returns boolean indicating whether this is a branch-all block.
    * @returns {boolean}
    */
-  this.isBranchAll = function() {
+  this.isBranchAll = function () {
     // We currently cannot randomly select a subblock.
     if (this.subblocks.length > 0) return false;
     // This previously checked whether the questions in the block all had NEXT pointers
@@ -594,13 +594,13 @@ var Block = function(_jsonBlock) {
     // Since we rely on the static analyzer to do a more thorough check, for now just see
     // if all of the branch maps are not empty.
     return this.topLevelQuestions.length > 1 &&
-      this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
+        this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
   };
   /**
    * Returns boolean indicating whether this is a branch-one block.
    * @returns {boolean}
    */
-  this.isBranchOne = function() {
+  this.isBranchOne = function () {
     // Assume that we are properly formed.
     if (this.isBranchAll()) return false;
     if (this.topLevelQuestions.filter((q) => q.branchMap.size > 0).length === 1) return true;
@@ -619,7 +619,7 @@ var Block = function(_jsonBlock) {
    * @throws ObjectNotFoundException if this block does not contain a question with
    * the input id at the top level.
    */
-  this.getQuestion = function(quid, deep = false) {
+  this.getQuestion = function (quid, deep = false) {
     for (let i = 0; i < this.topLevelQuestions.length; i++) {
       if (this.topLevelQuestions[i].id === quid) {
         return this.topLevelQuestions[i];
@@ -645,7 +645,7 @@ var Block = function(_jsonBlock) {
    * @param {Block} that The block to compare.
    * @returns {number}
    */
-  this.idComp = function(that) {
+  this.idComp = function (that) {
     if (this.id === that.id) return 0;
     for (let i = 0; i < this.idArray.length + 1; i++) {
       // If we have reached the end of the comparison and that block has a longer id, then
@@ -664,7 +664,7 @@ var Block = function(_jsonBlock) {
   /**
    * Randomizes this block. Shuffles this block's questions and its subblocks appropriately.
    */
-  this.randomize = function() {
+  this.randomize = function () {
     var i, j;
     var newSBlocks = this.subblocks.map(() => -1);
     // Randomize questions
@@ -686,7 +686,7 @@ var Block = function(_jsonBlock) {
     for (i = 0; i < sample.length; i++) {
       // Pick the locations for where to put the non-stationary blocks
       console.assert(nonStationaryBlocks[i] !== undefined,
-        'nonStationaryBlocks should never be undefined.');
+          'nonStationaryBlocks should never be undefined.');
       newSBlocks[sample[i]] = nonStationaryBlocks[i];
     }
     for (i = 0, j = 0; i < newSBlocks.length; i++) {
@@ -696,17 +696,18 @@ var Block = function(_jsonBlock) {
       }
     }
     console.assert(j === stationaryBlocks.length,
-      `j should equal the number of stationary blocks: ${j} vs. ${stationaryBlocks.length}`);
+        `j should equal the number of stationary blocks: ${j} vs. ${stationaryBlocks.length}`);
     this.subblocks = newSBlocks;
     this.subblocks.forEach((b) => b.randomize());
   };
   // Added a closure to make this-semantics clear.
-  this.subblocks = function(containingBlock, subblocks) {
+  this.subblocks = function (containingBlock, subblocks) {
     function populate(json_block, parent) {
       var b = new Block(json_block);
       b.parent = parent;
       return b;
     }
+
     if (subblocks.length === 0) {
       log.info(`No subblocks in Block ${containingBlock.id}`);
       return [];
@@ -731,14 +732,14 @@ var Block = function(_jsonBlock) {
   };
   // Assert that the sub-blocks have the appropriate ids
   console.assert(this.subblocks.reduce(
-    (tv, b) => tv && this.idComp(b) === 0, true),
-    'subblocks should all return 0 on idComp'
+          (tv, b) => tv && this.idComp(b) === 0, true),
+      'subblocks should all return 0 on idComp'
   );
   /**
    * Returns the JSON representation of this block.
    * @returns {{id: *, questions: *, randomize: (boolean|*), subblocks: *}}
    */
-  this.toJSON = function() {
+  this.toJSON = function () {
     return {
       id: this.id,
       questions: this.topLevelQuestions.map(q => q.toJSON()),
@@ -753,106 +754,118 @@ var Block = function(_jsonBlock) {
    * @param {*} that The thing to compare.
    * @returns {boolean}
    */
-  this.equals = function(that) {
+  this.equals = function (that) {
     // TODO(etosch) write unit test)
     return that instanceof Block &&
-            this.id === that.id &&
-            this.subblocks.reduce((tv, b1) =>
-              tv && that.subblocks.find(b2 => b1.equals(b2)), true) &&
-            this.topLevelQuestions.reduce((tv, q1) =>
-              tv && that.topLevelQuestions.find(q2 => q1.equals(q2)), true);
+        this.id === that.id &&
+        this.subblocks.reduce((tv, b1) =>
+        tv && that.subblocks.find(b2 => b1.equals(b2)), true) &&
+        this.topLevelQuestions.reduce((tv, q1) =>
+        tv && that.topLevelQuestions.find(q2 => q1.equals(q2)), true);
   };
   /**
    * Returns all questions belonging to this block and its subblocks.
    * @returns {Array<Question>}
    */
-  this.getAllQuestions = function() {
+  this.getAllQuestions = function () {
     let retval = [...this.topLevelQuestions];
     this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
     return retval;
   };
-  /**
+};
+
+/**
    * Gets the id of the parent block, to use for parent block lookup.
    * @returns {string}
    */
-  // TODO(etosch): write unit test
-  this.get_parent_id = function() {
+Block.prototype.get_parent_id = function() {
     let parent_arr = this.id.split('.').slice(0, -1);
     return parent_arr.length === 0 ? "" : parent_arr.reduce((a, b) => `${a}.${b}`);
   };
-  /**
+
+/**
    * Adds the block provided block to this block.
    * @param {Block} block The block to add.
    * @param {?number} index The index at which to add this block.
    */
-  this.add_block = function(containingBlock) {
-    // NOTE: THIS IS A CLOSURE -- the "real" function is the one returned.
-    var update_ids = function(parent, child) {
-      // update block's id
-      child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
-      child.idArray = child._idStringToArray(child.id);
-      child.subblocks.forEach((b) => update_ids(child, b));
-    };
-    return function(block, index = containingBlock.subblocks.length) {
-      // Check whether it is valid to add this block.
-      if (containingBlock.isBranchAll()) {
-        throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
-      }
-      if (containingBlock.isBranchOne() && block.isBranchOne()) {
-        throw new MalformedSurveyException('Cannot add branch-one blocks as subblocks to a branch-all block');
-      }
-      if (block.get_parent_id() !== containingBlock.id) {
-        update_ids(containingBlock, block);
-      }
-      let prev_subs = containingBlock.subblocks.length;
-      containingBlock.subblocks.splice(index, 0, block);
-      block.parent = containingBlock;
-      console.assert(containingBlock.subblocks.length === prev_subs + 1);
-    };
-  }(this);
-  /**
+Block.prototype.add_block = function(block, index = this.subblocks.length) {
+  var update_ids = function (parent, child) {
+    // update block's id
+    child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
+    child.idArray = child._idStringToArray(child.id);
+    child.subblocks.forEach((b) => update_ids(child, b));
+  };
+  // Check whether it is valid to add this block.
+  if (this.isBranchAll()) {
+    throw new MalformedSurveyException('Cannot add subblocks to branch-all blocks.');
+  }
+  if (this.isBranchOne() && block.isBranchOne()) {
+    throw new MalformedSurveyException('Cannot add branch-one blocks as subblocks to a branch-all block');
+  }
+  if (block.get_parent_id() !== this.id) {
+    update_ids(this, block);
+  }
+  let prev_subs = this.subblocks.length;
+  this.subblocks.splice(index, 0, block);
+  block.parent = this;
+  console.assert(this.subblocks.length === prev_subs + 1);
+};
+
+/**
+ * Removes the provided block from this block's list of subblocks.
+ * @param block
+ */
+Block.prototype.remove_block = function(block) {
+  let idx = this.subblocks.find(subb => subb.equals(block));
+  if (idx === -1) {
+    throw new ObjectNotFoundException('Block', block.id, 'Block' + this.id);
+  }
+  this.subblocks.splice(idx, 1);
+  block.parent = null;
+};
+
+/**
    * Adds the provided question to this block.
    * @param {Question} question Question to add to this block.
    * @throws MalformedSurveyException if the question cannot be added.
    */
-  this.add_question = function(question) {
-    let isBranchAll = this.subblocks.length > 0 && this.isBranchAll();
-    let isBranchOne = this.isBranchOne();
-    let isBranchNone = !isBranchAll && !isBranchOne;
-    let addingNonBranchingQuestionToNonBranchAllBlock =
-        question.branchMap.size === 0 &&
-        !isBranchAll;
-    let addingBranchingQuestionToNonBranchingBlock =
-        question.branchMap.size > 0 &&
-        isBranchNone;
-    let addingBranchingQuestionToSingleQuestionBranchOne =
-        question.branchMap.size > 0 &&
-        isBranchOne &&
-        this.subblocks.length === 0 &&
-        this.topLevelQuestions.length === 1 &&
-        this.topLevelQuestions[0].branchMap.size === question.branchMap.size;
-    let addingBranchingQuestionToBranchAllBlock =
-        question.branchMap.size > 0 &&
-        isBranchAll &&
-        this.topLevelQuestions.reduce((tv, q) =>
-            tv && q.branchMap.size === question.branchMap.size,
-            true
-        );
+Block.prototype.add_question = function(question) {
+  let isBranchAll = this.subblocks.length > 0 && this.isBranchAll();
+  let isBranchOne = this.isBranchOne();
+  let isBranchNone = !isBranchAll && !isBranchOne;
+  let addingNonBranchingQuestionToNonBranchAllBlock =
+      question.branchMap.size === 0 &&
+      !isBranchAll;
+  let addingBranchingQuestionToNonBranchingBlock =
+      question.branchMap.size > 0 &&
+      isBranchNone;
+  let addingBranchingQuestionToSingleQuestionBranchOne =
+      question.branchMap.size > 0 &&
+      isBranchOne &&
+      this.subblocks.length === 0 &&
+      this.topLevelQuestions.length === 1 &&
+      this.topLevelQuestions[0].branchMap.size === question.branchMap.size;
+  let addingBranchingQuestionToBranchAllBlock =
+      question.branchMap.size > 0 &&
+      isBranchAll &&
+      this.topLevelQuestions.reduce((tv, q) =>
+          tv && q.branchMap.size === question.branchMap.size,
+          true
+      );
 
-    if (addingNonBranchingQuestionToNonBranchAllBlock ||
-        addingBranchingQuestionToNonBranchingBlock ||
-        addingBranchingQuestionToSingleQuestionBranchOne ||
-        addingBranchingQuestionToBranchAllBlock
-    ) {
-      this.topLevelQuestions.push(question);
-      question.block = this;
-      return;
-    }
-    throw new MalformedSurveyException(
-        `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
-        `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
+  if (addingNonBranchingQuestionToNonBranchAllBlock ||
+      addingBranchingQuestionToNonBranchingBlock ||
+      addingBranchingQuestionToSingleQuestionBranchOne ||
+      addingBranchingQuestionToBranchAllBlock
+  ){
+    this.topLevelQuestions.push(question);
+    question.block = this;
+    return;
+  }
+  throw new MalformedSurveyException(
+      `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
+      `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
   };
-};
 
 /**
  * Removes the provided question from this block.
@@ -895,7 +908,7 @@ Block.new_block = function(parent) {
   idArray[i] = Block._blocks_ids[i];
   Block._blocks_ids[i] += 1;
   console.assert(typeof idArray !== 'undefined', 'idArray cannot be undefined');
-  var id = idArray.length > 1 ? idArray.reduce((a, b) => `${a}.${b}`) : `${idArray[0]}`;
+  let id = idArray.length > 1 ? idArray.reduce((a, b) => `${a}.${b}`) : `${idArray[0]}`;
   return new Block({
     id: id,
     questions: [],
@@ -974,34 +987,6 @@ var Survey = function(_jsonSurvey) {
     }).filter((item) => item !== false)[0];
   };
   /**
-   * Adds the block to the survey. Mutates the survey object. If index is provided with
-   * a parent block, it will try to insert the block at the provided index in the parent
-   * block. If the block is a top-level block, it will insert at the provided index in
-   * the survey's topLevelBlock list.
-   * @param {Block} block The top-level block to add.
-   * @param {?Block} parent This block's parent. If null, it will attempt to find it.
-   * @param {?number} index The index at which to insert the provided block.
-   * the parent.
-   */
-  this.add_block = function(
-    block,
-    parent = this.get_block_by_id(block.get_parent_id()),
-    index = parent ? parent.subblocks.length : this.topLevelBlocks.length
-  ){
-    if(parent) {
-      let prev_subblocks = parent.subblocks.length;
-      parent.add_block(block, index);
-      console.assert(parent.subblocks.length === prev_subblocks + 1);
-    } else {
-      if (block.randomizable && block.isBranchOne()) {
-        throw new SMSurveyException('Cannot have top level blocks that are both branching and randomizable');
-      }
-      this.topLevelBlocks.splice(index, 0, block);
-    }
-    // add this block's questions to the top level survey questions
-    block.getAllQuestions().forEach((q) => this.questions.push(q));
-  };
-  /**
    * Adds the provided question to the provided block in this survey.
    * @param {Question} question The question to add.
    * @param {Block} block The block to add to.
@@ -1025,31 +1010,6 @@ var Survey = function(_jsonSurvey) {
         q1, q2
     );
     return q1;
-  };
-  /**
-   * Returns the Block object in this survey that has the provided id.
-   * @param {string} block_id Block identifier.
-   * @returns {Block}
-   * @throws ObjectNotFoundException
-   */
-  // TODO(etosch): write unit test
-  this.get_block_by_id = function(block_id) {
-    if (block_id === '') {
-      console.warn('Trying to get block with empty string id. Please correct.');
-      return null;
-    }
-    var find_block_by_id = function(b, id) {
-      if (b.id === id) return b;
-      for (let [, subb] of b.subblocks.entries()) {
-        let found = find_block_by_id(subb, id);
-        if (found) return found;
-      }
-    };
-    for (let [, b] of this.topLevelBlocks.entries()) {
-      let found = find_block_by_id(b, block_id);
-      if (found) return found;
-    }
-    throw new ObjectNotFoundException('Block', block_id, 'current survey');
   };
   // TODO: write unit test
   this.remove_option = function(survey) {
@@ -1089,6 +1049,31 @@ Survey.prototype.equals = function(that) {
 };
 
 /**
+ * Returns the Block object in this survey that has the provided id.
+ * @param {string} block_id Block identifier.
+ * @returns {Block}
+ * @throws ObjectNotFoundException
+ */
+Survey.prototype.get_block_by_id = function(block_id) {
+  if (block_id === '') {
+    console.warn('Trying to get block with empty string id. Please correct.');
+    return null;
+  }
+  var find_block_by_id = function(b, id) {
+    if (b.id === id) return b;
+    for (let [, subb] of b.subblocks.entries()) {
+      let found = find_block_by_id(subb, id);
+      if (found) return found;
+    }
+  };
+  for (let [, b] of this.topLevelBlocks.entries()) {
+    let found = find_block_by_id(b, block_id);
+    if (found) return found;
+  }
+  throw new ObjectNotFoundException('Block', block_id, 'current survey');
+};
+
+/**
  * Removes the provided question from the survey. If the containing block is not
  * provided, the method will search for it.
  * @param {Question} question The question to remove.
@@ -1109,6 +1094,35 @@ Survey.prototype.remove_question = function(question) {
 };
 
 /**
+ * Adds the block to the survey. Mutates the survey object. If index is provided with
+ * a parent block, it will try to insert the block at the provided index in the parent
+ * block. If the block is a top-level block, it will insert at the provided index in
+ * the survey's topLevelBlock list.
+ * @param {Block} block The top-level block to add.
+ * @param {?Block} parent This block's parent. If null, it will attempt to find it.
+ * @param {?number} index The index at which to insert the provided block.
+ * the parent.
+ */
+Survey.prototype.add_block = function(
+    block,
+    parent = this.get_block_by_id(block.get_parent_id()),
+    index = parent ? parent.subblocks.length : this.topLevelBlocks.length
+){
+  if(parent) {
+    let prev_subblocks = parent.subblocks.length;
+    parent.add_block(block, index);
+    console.assert(parent.subblocks.length === prev_subblocks + 1);
+  } else {
+    if (block.randomizable && block.isBranchOne()) {
+      throw new SMSurveyException('Cannot have top level blocks that are both branching and randomizable');
+    }
+    this.topLevelBlocks.splice(index, 0, block);
+  }
+  // add this block's questions to the top level survey questions
+  block.getAllQuestions().forEach((q) => this.questions.push(q));
+};
+
+/**
  * Removes the block from the survey. Mutates the survey object.
  * @param {Block} block The block to delete.
  * @param {?Block} parent This block's parent. If null, it will attempt to find
@@ -1120,7 +1134,10 @@ Survey.prototype.remove_block = function(block, parent = null) {
       let parentid = block.get_parent_id();
       parent = getBlockById(parentid);
     }
+    let ctbefore = parent.subblocks.length;
     parent.remove_block(block);
+    console.assert(ctbefore === parent.subblocks.length + 1,
+        `Did not remove Block ${block.id} from Block ${parent.id}`);
   } else {
     let i = this.topLevelBlocks.indexOf(block);
     this.topLevelBlocks.splice(i, 1);
@@ -1479,7 +1496,8 @@ module.exports = {
       return null;
     } else {
       let s = this.copy_survey(survey);
-      s.remove_block(block);
+      let b = s.get_block_by_id(block.id);
+      s.remove_block(b);
       return s;
     }
   },

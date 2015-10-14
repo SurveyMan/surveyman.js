@@ -364,13 +364,46 @@ describe('Top level tests', function() {
       expect(new_par2.subblocks.length).toBe(1);
   });
 
-  it('tests removing blocks from a survey', function() {
+  it('tests removing blocks from a survey mutatively', function() {
     let s = SurveyMan.new_survey();
     let b = SurveyMan.new_block();
     s.add_block(b);
     expect(s.topLevelBlocks.length).toBe(2);
     s.remove_block(b);
     expect(s.topLevelBlocks.length).toBe(1);
+  });
+
+  it('tests removing blocks from a survey via copying', function() {
+    try {
+
+      let b1 = SurveyMan.new_block();
+      let b2 = SurveyMan.new_block();
+
+      let s1 = SurveyMan.new_survey();
+      expect(s1.topLevelBlocks.length).toBe(1);
+      let s2 = SurveyMan.add_block(s1, b1, null, false);
+      expect(s2.topLevelBlocks.length).toBe(2);
+      let s3 = SurveyMan.remove_block(b1, s2, false);
+      expect(s3.topLevelBlocks.length).toBe(1);
+      let s4 = SurveyMan.add_block(s2, b2, b1, false);
+      expect(s4.topLevelBlocks.length).toBe(2);
+      expect(s4.topLevelBlocks[0].subblocks.length).toBe(0);
+      expect(s4.topLevelBlocks[1].subblocks.length).toBe(1);
+      let s5 = SurveyMan.remove_block(b2, s4, false);
+      expect(s5.topLevelBlocks.length).toBe(2);
+      expect(s5.topLevelBlocks[0].subblocks.length).toBe(0);
+      expect(s5.topLevelBlocks[1].subblocks.length).toBe(0);
+
+      expect(s1.topLevelBlocks.length).toBe(1);
+      expect(s2.topLevelBlocks.length).toBe(2);
+      expect(s3.topLevelBlocks.length).toBe(1);
+      expect(s4.topLevelBlocks.length).toBe(2);
+
+    } catch (e) {
+      console.log(e);
+      throw e;
+    }
+
   });
 
   it('tests adding questions to a survey and mutating', function() {
