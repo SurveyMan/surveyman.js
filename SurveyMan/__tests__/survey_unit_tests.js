@@ -4,9 +4,6 @@ jest.dontMock("./globals.js")
     .dontMock("../config.js")
     .dontMock("es6-shim");
 
-var config = require("../config.js");
-config.debug = true;
-
 describe('Top-level auxiliary function tests.', function() {
   it('parses boolean values, taking into account our freetext rules', function() {
     var survey = require('../surveyman').survey;
