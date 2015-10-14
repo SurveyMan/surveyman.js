@@ -400,7 +400,25 @@ describe('Top level tests', function() {
     SurveyMan.add_question(q1, s.topLevelBlocks[0], s);
     SurveyMan.remove_question(q1, s);
     expect(s.questions.length).toBe(0);
-    //expect(s.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
+    expect(s.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
+  });
+
+  it('tests deleting questions from a survey via copying', function() {
+    let q1 = SurveyMan.new_question('asdf');
+
+    var s1 = SurveyMan.new_survey();
+    var s2 = SurveyMan.add_question(q1, s1.topLevelBlocks[0], s1, false);
+    var s3 = SurveyMan.remove_question(q1, s2, false);
+
+    expect(s1.questions.length).toBe(0);
+    expect(s2.questions.length).toBe(1);
+    expect(s3.questions.length).toBe(0);
+
+    expect(q1.equals(s2.topLevelBlocks[0].topLevelQuestions[0])).toBeTruthy();
+
+    expect(s1.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
+    expect(s2.topLevelBlocks[0].topLevelQuestions.length).toBe(1);
+    expect(s3.topLevelBlocks[0].topLevelQuestions.length).toBe(0)
   });
 
 });
