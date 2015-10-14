@@ -73,7 +73,8 @@ var config = (function () {
   } catch (e) {
     console.log(e);
     return {
-      verbose: false
+      verbose: false,
+      debug: false
     };
   }
 })();
