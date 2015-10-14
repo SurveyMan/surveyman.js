@@ -886,6 +886,7 @@ Block.new_block = function(parent) {
   var idArray = [], i = 0;
   if (parent) {
     idArray = parent.idArray;
+    console.assert((typeof parent.idArray) !== 'undefined', 'parent.idArray must be defined');
     i = parent.idArray.length;
     if (Block._blocks_ids[i] === undefined) {
       Block._blocks_ids[i] = 1;
@@ -893,6 +894,7 @@ Block.new_block = function(parent) {
   }
   idArray[i] = Block._blocks_ids[i];
   Block._blocks_ids[i] += 1;
+  console.assert(typeof idArray !== 'undefined', 'idArray cannot be undefined');
   var id = idArray.length > 1 ? idArray.reduce((a, b) => `${a}.${b}`) : `${idArray[0]}`;
   return new Block({
     id: id,
@@ -1000,29 +1002,6 @@ var Survey = function(_jsonSurvey) {
     block.getAllQuestions().forEach((q) => this.questions.push(q));
   };
   /**
-   * Removes the block from the survey. Mutates the survey object.
-   * @param {Block} block The block to delete.
-   * @param {?Block} parent This block's parent. If null, it will attempt to find
-   * the parent.
-   */
-  this.remove_block = function(block, parent = null) {
-    if (block.idArray.length > 1) {
-      if (!parent) {
-        let parentid = block.get_parent_id();
-        parent = getBlockById(parentid);
-      }
-      parent.remove_block(block);
-    } else {
-      let i = this.topLevelBlocks.indexOf(block);
-      this.topLevelBlocks.splice(i, 1);
-    }
-    // remove this block's questions from the top level survey questions.
-    block.getAllQuestions().forEach(q => {
-      let i = this.questions.index(q);
-      this.questions.splice(i, 1);
-    });
-  };
-  /**
    * Adds the provided question to the provided block in this survey.
    * @param {Question} question The question to add.
    * @param {Block} block The block to add to.
@@ -1094,6 +1073,66 @@ var Survey = function(_jsonSurvey) {
   };
 };
 
+
+/**
+ * Compares two surveys to see if they are equal, by comparing the equality of their
+ * subblocks.
+ * @param {Survey} that The survey to compare to.
+ * @returns {boolean}
+ */
+Survey.prototype.equals = function(that) {
+  let rhs = that.topLevelBlocks;
+  let lhs = this.topLevelBlocks;
+  if(!(that instanceof Survey)) return false;
+  if (lhs.length !== rhs.length) return false;
+  return lhs.reduce((tv, b1) => tv && rhs.find(b2 => b1.equals(b2)), true);
+};
+
+/**
+ * Removes the provided question from the survey. If the containing block is not
+ * provided, the method will search for it.
+ * @param {Question} question The question to remove.
+ */
+Survey.prototype.remove_question = function(question) {
+  let block = question.block;
+  let block_num_questions_before = block.topLevelQuestions.length;
+  let idx = this.questions.findIndex(q => q.equals(question));
+  let survey_num_questions_before = this.questions.length;
+  block.remove_question(question);
+  this.questions.splice(idx, 1);
+  if (config.debug) {
+    console.assert(block_num_questions_before === block.topLevelQuestions.length + 1,
+        'Did not remove question from block.');
+    console.assert(survey_num_questions_before === this.questions.length + 1,
+        'Did not remove question from survey.');
+  }
+};
+
+/**
+ * Removes the block from the survey. Mutates the survey object.
+ * @param {Block} block The block to delete.
+ * @param {?Block} parent This block's parent. If null, it will attempt to find
+ * the parent.
+ */
+Survey.prototype.remove_block = function(block, parent = null) {
+  if (block.idArray.length > 1) {
+    if (!parent) {
+      let parentid = block.get_parent_id();
+      parent = getBlockById(parentid);
+    }
+    parent.remove_block(block);
+  } else {
+    let i = this.topLevelBlocks.indexOf(block);
+    this.topLevelBlocks.splice(i, 1);
+  }
+  // remove this block's questions from the top level survey questions.
+  block.getAllQuestions().forEach(q => {
+    this.remove_question(q);
+  });
+};
+
+
+
 /**
  * Randomizes the survey blocks and questions, as appropriate.
  * @param {Survey} _survey
@@ -1144,39 +1183,6 @@ Survey.randomize = function(_survey) {
   _survey.topLevelBlocks = newTLBs;
 };
 
-/**
- * Removes the provided question from the survey. If the containing block is not
- * provided, the method will search for it.
- * @param {Question} question The question to remove.
- */
-Survey.prototype.remove_question = function(question) {
-  let block = question.block;
-  let block_num_questions_before = block.topLevelQuestions.length;
-  let idx = this.questions.findIndex(q => q.equals(question));
-  let survey_num_questions_before = this.questions.length;
-  block.remove_question(question);
-  this.questions.splice(idx, 1);
-  if (config.debug) {
-    console.assert(block_num_questions_before === block.topLevelQuestions.length + 1,
-        'Did not remove question from block.');
-    console.assert(survey_num_questions_before === this.questions.length + 1,
-        'Did not remove question from survey.');
-  }
-};
-
-/**
- * Compares two surveys to see if they are equal, by comparing the equality of their
- * subblocks.
- * @param {Survey} that The survey to compare to.
- * @returns {boolean}
- */
-Survey.prototype.equals = function(that) {
-  let rhs = that.topLevelBlocks;
-  let lhs = this.topLevelBlocks;
-  if(!(that instanceof Survey)) return false;
-  if (lhs.length !== rhs.length) return false;
-  return lhs.reduce((tv, b1) => tv && rhs.find(b2 => b1.equals(b2)), true);
-};
 
 // 'static' fields
 Survey.exclusiveDefault = true;
