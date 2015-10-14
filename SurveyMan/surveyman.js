@@ -67,7 +67,7 @@ require('es6-shim');
 var log = require('loglevel');
 var config = (function () {
   try {
-    if (eval("config") === undefined) {
+    if (eval("config") === 'undefined') {
       return require('./config');
     }
   } catch (e) {
