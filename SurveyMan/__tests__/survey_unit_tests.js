@@ -1,6 +1,6 @@
 jest.dontMock("./globals.js")
     .dontMock("../surveyman.js")
-    .dontMock("stack-trace")
+    .dontMock("stacktrace-js")
     .dontMock("../config.js")
     .dontMock("es6-shim");
 
@@ -389,7 +389,8 @@ describe('Top level tests', function() {
       expect(s4.topLevelBlocks.length).toBe(2);
       expect(s4.topLevelBlocks[0].subblocks.length).toBe(0);
       expect(s4.topLevelBlocks[1].subblocks.length).toBe(1);
-      let s5 = SurveyMan.remove_block(b2, s4, false);
+      let b3 = s4.topLevelBlocks[1].subblocks[0];
+      let s5 = SurveyMan.remove_block(b3, s4, false);
       expect(s5.topLevelBlocks.length).toBe(2);
       expect(s5.topLevelBlocks[0].subblocks.length).toBe(0);
       expect(s5.topLevelBlocks[1].subblocks.length).toBe(0);
@@ -434,21 +435,37 @@ describe('Top level tests', function() {
   });
 
   it('tests deleting questions from a survey via copying', function() {
-    let q1 = SurveyMan.new_question('asdf');
+    try {
+      let get_first_block = survey => survey.topLevelBlocks[0];
+      let q1 = SurveyMan.new_question('asdf');
+      let b1 = SurveyMan.new_block();
 
-    var s1 = SurveyMan.new_survey();
-    var s2 = SurveyMan.add_question(q1, s1.topLevelBlocks[0], s1, false);
-    var s3 = SurveyMan.remove_question(q1, s2, false);
+      var s1 = SurveyMan.new_survey();
+      var s2 = SurveyMan.add_question(q1, get_first_block(s1), s1, false);
+      var s3 = SurveyMan.remove_question(q1, s2, false);
+      var s4 = SurveyMan.add_block(s1, b1, get_first_block(s1), false);
+      var s5 = SurveyMan.add_question(q1, get_first_block(s4).subblocks[0], s4, false);
+      var s6 = SurveyMan.remove_question(q1, s5, false);
 
-    expect(s1.questions.length).toBe(0);
-    expect(s2.questions.length).toBe(1);
-    expect(s3.questions.length).toBe(0);
+      expect(s1.questions.length).toBe(0);
+      expect(s2.questions.length).toBe(1);
+      expect(s3.questions.length).toBe(0);
+      expect(s4.questions.length).toBe(0);
+      expect(s5.questions.length).toBe(1);
 
-    expect(q1.equals(s2.topLevelBlocks[0].topLevelQuestions[0])).toBeTruthy();
+      expect(get_first_block(s1).topLevelQuestions.length).toBe(0);
+      expect(get_first_block(s2).topLevelQuestions.length).toBe(1);
+      expect(get_first_block(s3).topLevelQuestions.length).toBe(0);
+      expect(get_first_block(s4).topLevelQuestions.length).toBe(0);
+      expect(get_first_block(s5).topLevelQuestions.length).toBe(1);
+      expect(get_first_block(s6).topLevelQuestions.length).toBe(0);
 
-    expect(s1.topLevelBlocks[0].topLevelQuestions.length).toBe(0);
-    expect(s2.topLevelBlocks[0].topLevelQuestions.length).toBe(1);
-    expect(s3.topLevelBlocks[0].topLevelQuestions.length).toBe(0)
+      expect(q1.equals(s2.topLevelBlocks[0].topLevelQuestions[0])).toBeTruthy();
+
+    } catch (e) {
+      console.log(e.message);
+      e.stack.split('\n').forEach(line => console.log(line));
+    }
   });
 
 });

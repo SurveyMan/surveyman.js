@@ -66,6 +66,7 @@
 require('es6-shim');
 var log = require('loglevel');
 var config = require('./config.js');
+var StackTrace = require("stacktrace-js");
 
 /*****************************************************************************
  * Survey submodule
@@ -88,21 +89,35 @@ var global_reset = function() {
 
 // Exceptions
 // ----------
-var SMSurveyException = function (msg, override = false) {
-  this.msg = (override) ? msg : `SMSurveyException: ${msg}`;
-};
+function SMSurveyException(msg, override=false) {
+  Error.call(this);
+  this.message = override ? msg : `SMSurveyException: ${msg}`;
+  this.stack = new Error().stack;
+}
+SMSurveyException.prototype = Error.prototype;
+SMSurveyException.prototype.constructor = SMSurveyException;
 
-var UnknownTypeException = function (thing) {
-  return new SMSurveyException(`Unknown type for ${thing}: (${typeof thing})`);
-};
+function UnknownTypeException(thing) {
+  SMSurveyException.call(this);
+  this.message = `Unknown type for ${thing}: (${typeof thing})`;
+}
+UnknownTypeException.prototype = Object.create(SMSurveyException.prototype);
+UnknownTypeException.prototype.constructor = UnknownTypeException;
 
-var ObjectNotFoundException = function (type, id, objName) {
-  return new SMSurveyException(`${type} id ${id} not found in ${objName}`);
-};
+function ObjectNotFoundException(type, id, objName) {
+  SMSurveyException.call(this);
+  this.message = `${type} id ${id} not found in ${objName}`;
+}
+ObjectNotFoundException.prototype = Object.create(SMSurveyException.prototype);
+ObjectNotFoundException.prototype.constructor = ObjectNotFoundException;
 
-var MalformedSurveyException = function (msg) {
-  return new SMSurveyException(`Malformed Survey: ${msg}`, true);
+
+function MalformedSurveyException(msg) {
+  SMSurveyException.call(this);
+  this.message = `Malformed Survey: ${msg}`, true;
 };
+MalformedSurveyException.prototype = Object.create(SMSurveyException.prototype);
+MalformedSurveyException.prototype.constructor = MalformedSurveyException;
 
 // Utility functions
 // -----------------
@@ -627,8 +642,9 @@ var Block = function(_jsonBlock) {
     }
     // TODO(etosch): write unit test
     if (deep) {
-      for (let b in this.subblocks) {
+      for (let j = 0; j < this.subblocks.length; j++) {
         try {
+          let b = this.subblocks[j];
           return b.getQuestion(quid, true);
         } catch (e) {
           if (config.debug) {
@@ -677,7 +693,7 @@ var Block = function(_jsonBlock) {
     var stationaryBlocks = this.subblocks.filter((b) => !b.randomizable);
     var nonStationaryBlocks = this.subblocks.filter((b) => b.randomizable);
     var indices = this.subblocks
-        .reduce((lst, _) => lst.concat(lst.slice(-1)[0] + 1), [-1])
+        .reduce((lst) => lst.concat(lst.slice(-1)[0] + 1), [-1])
         .slice(1);
     FYshuffle(indices);
     var sample = indices.slice(0, nonStationaryBlocks.length);
@@ -863,8 +879,8 @@ Block.prototype.add_question = function(question) {
     return;
   }
   throw new MalformedSurveyException(
-      `Cannot add question with branch map size ${question.branchMap.size} to block of type `+
-      `${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
+      `Cannot add question with branch map size ${question.branchMap.size} to block of type
+      ${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
   };
 
 /**
@@ -956,80 +972,24 @@ var Survey = function(_jsonSurvey) {
    * @type {boolean}
    */
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
-  // Probably need to shim something to make this work:
-  // this.questions = Array.from(questionMAP.values());
   /**
    * The list of all questions.
    * @type {Array<survey.Question>}
    */
   this.questions = [...questionMAP.values()];
-  /**
-   * Returns the JSON representation of this survey.
-   *
-   * Note: we cannot just return the input json because the survey may have been mutated.
-   * @returns {{filename: *, breakoff: *, survey: *}}
-   */
-  this.toJSON = function() {
-    return {
-      filename: this.filename,
-      breakoff: this.breakoff,
-      survey: this.topLevelBlocks.map(b => b.toJSON())
-    };
-  };
-  this._find_containing_question = function(qid, survey) {
-    //  Find the block that holds the question
-    return survey.topLevelBlocks.map(function (b) {
-      try {
-        return b.getQuestion(qid, true);
-      } catch (e) {
-        return false;
-      }
-    }).filter((item) => item !== false)[0];
-  };
-  /**
-   * Adds the provided question to the provided block in this survey.
-   * @param {Question} question The question to add.
-   * @param {Block} block The block to add to.
-   */
-  this.add_question = function(question, block) {
-    block.add_question(question);
-    this.questions.push(question);
-  };
+};
 
-  /**
-   * Returns the Question object in this survey that has the provided id.
-   * @param {string} question_id The identifier of the question of interest.
-   * @returns {Question}
-   */
-  this.get_question_by_id = function(question_id) {
-    // TODO(etosch): write unit test.
-    let q1 = this.questions.find(q => q.id === question_id);
-    let q2 = this.topLevelBlocks.map(b => b.getQuestion(question_id, true)).find(q => q);
-    console.assert(q1.equals(q2),
-        `Top level question store should reflect block-level references; %s found in toplevel; %s found in block`,
-        q1, q2
-    );
-    return q1;
-  };
-  // TODO: write unit test
-  this.remove_option = function(survey) {
-    return function(option, question = null) {
-      if (!question) {
-        question = survey.questions.find(q =>
-            q.options.find(o => o.equals(option))
-        );
-      }
-      question.remove_option(option);
-    };
-  }(this);
-  // TODO: write unit test
-  this.get_option_by_id = function(oid) {
-    for (let i = 0; i < this.questions.length; i++) {
-      let q = this.questions[i];
-      let o = q.options.find(opt => opt.id === oid); // eslint-disable-line no-loop-func
-      if (o) return o;
-    }
-    throw new ObjectNotFoundException('Option', oid, 'current survey');
+/**
+ * Returns the JSON representation of this survey.
+ *
+ * Note: we cannot just return the input json because the survey may have been mutated.
+ * @returns {{filename: *, breakoff: *, survey: *}}
+ */
+Survey.prototype.toJSON = function() {
+  return {
+    filename: this.filename,
+    breakoff: this.breakoff,
+    survey: this.topLevelBlocks.map(b => b.toJSON())
   };
 };
 
@@ -1047,6 +1007,37 @@ Survey.prototype.equals = function(that) {
   if (lhs.length !== rhs.length) return false;
   return lhs.reduce((tv, b1) => tv && rhs.find(b2 => b1.equals(b2)), true);
 };
+
+/**
+ * Searches through the survey for the option with the provided id.
+ * @param {string} oid The id of the option.
+ * @returns {Option}
+ * @throws ObjectNotFoundException if the survey does not contain any options with this id.
+ */
+Survey.prototype.get_option_by_id = function(oid) {
+  for (let i = 0; i < this.questions.length; i++) {
+    let q = this.questions[i];
+    let o = q.options.find(opt => opt.id === oid); // eslint-disable-line no-loop-func
+    if (o) return o;
+  }
+  throw new ObjectNotFoundException('Option', oid, 'current survey');
+};
+
+/**
+ * Returns the Question object in this survey that has the provided id.
+ * @param {string} question_id The identifier of the question of interest.
+ * @returns {Question}
+ */
+Survey.prototype.get_question_by_id = function(question_id) {
+  let q1 = this.questions.find(q => q.id === question_id);
+  let q2 = this.topLevelBlocks.map(b => b.getQuestion(question_id, true)).find(q => q);
+  console.assert(q1.equals(q2),
+      `Top level question store should reflect block-level references; %s found in toplevel; %s found in block`,
+      q1, q2
+  );
+  return q1;
+};
+
 
 /**
  * Returns the Block object in this survey that has the provided id.
@@ -1071,6 +1062,47 @@ Survey.prototype.get_block_by_id = function(block_id) {
     if (found) return found;
   }
   throw new ObjectNotFoundException('Block', block_id, 'current survey');
+};
+
+
+Survey.prototype._find_containing_question = function(qid, survey) {
+  //  Find the block that holds the question
+  return survey.topLevelBlocks.map(function (b) {
+    try {
+      return b.getQuestion(qid, true);
+    } catch (e) {
+      return false;
+    }
+  }).filter((item) => item !== false)[0];
+};
+
+
+/**
+ * Removes the provided option from the survey by searching through the survey.
+ * @param {Option} option The option to remove.
+ * @param {?Question} question The question this option belongs to.
+ */
+Survey.prototype.remove_option = function(option, question = null) {
+  if (!question) {
+    question = this.questions.find(q =>
+        q.options.find(o => o.equals(option))
+    );
+  }
+  question.remove_option(option);
+};
+
+
+/**
+ * Adds the provided question to the provided block in this survey.
+ * @param {Question} question The question to add.
+ * @param {Block} block The block to add to.
+ */
+Survey.prototype.add_question = function(question, block) {
+  // Make sure that this survey contains the provided block.
+  let b = this.get_block_by_id(block.id);
+  console.assert(b.equals(block), 'Provided block is not equal to any known blocks in this survey.');
+  block.add_question(question);
+  this.questions.push(question);
 };
 
 /**
@@ -1109,6 +1141,8 @@ Survey.prototype.add_block = function(
     index = parent ? parent.subblocks.length : this.topLevelBlocks.length
 ){
   if(parent) {
+    let p = this.get_block_by_id(parent.id);
+    console.assert(p.equals(parent), `Parent block ${parent} not found equal to ${p}`);
     let prev_subblocks = parent.subblocks.length;
     parent.add_block(block, index);
     console.assert(parent.subblocks.length === prev_subblocks + 1);
@@ -1477,8 +1511,9 @@ module.exports = {
       return null;
     } else {
       let s = this.copy_survey(survey);
+      let b = this.copy_block(block);
       let p = s.get_block_by_id(parent_block ? parent_block.id : '');
-      s.add_block(block, p, index);
+      s.add_block(b, p, index);
       return s;
     }
   },
@@ -1496,9 +1531,14 @@ module.exports = {
       return null;
     } else {
       let s = this.copy_survey(survey);
-      let b = s.get_block_by_id(block.id);
-      s.remove_block(b);
-      return s;
+      try {
+        let b = s.get_block_by_id(block.id);
+        s.remove_block(b);
+        return s;
+      } catch (e) {
+        //console.log(s);
+        throw e;
+      }
     }
   },
   /**
@@ -1541,9 +1581,10 @@ module.exports = {
       return null;
     } else {
       let s = this.copy_survey(survey);
+      let q = this.copy_question(question);
       // Get the block in our new survey that matches the input block's id.
       let b = s.get_block_by_id(block.id);
-      s.add_question(question, b);
+      s.add_question(q, b);
       return s;
     }
   },
