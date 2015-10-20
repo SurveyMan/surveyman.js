@@ -66,7 +66,6 @@
 require('es6-shim');
 var log = require('loglevel');
 var config = require('./config.js');
-var StackTrace = require("stacktrace-js");
 
 /*****************************************************************************
  * Survey submodule
@@ -114,8 +113,8 @@ ObjectNotFoundException.prototype.constructor = ObjectNotFoundException;
 
 function MalformedSurveyException(msg) {
   SMSurveyException.call(this);
-  this.message = `Malformed Survey: ${msg}`, true;
-};
+  this.message = `Malformed Survey: ${msg}`;
+}
 MalformedSurveyException.prototype = Object.create(SMSurveyException.prototype);
 MalformedSurveyException.prototype.constructor = MalformedSurveyException;
 
@@ -630,28 +629,23 @@ var Block = function(_jsonBlock) {
    * Returns the question object associated with the input id.
    * @param {string} quid The question's id.
    * @param {boolean} deep Flag indicating whether we should search through subblocks.
+   * @param {boolean} thrownotfound Flag indicating whether we should throw an error if the question is not found.
    * @returns {Question}
    * @throws ObjectNotFoundException if this block does not contain a question with
    * the input id at the top level.
    */
-  this.getQuestion = function (quid, deep = false) {
-    for (let i = 0; i < this.topLevelQuestions.length; i++) {
-      if (this.topLevelQuestions[i].id === quid) {
-        return this.topLevelQuestions[i];
-      }
-    }
-    // TODO(etosch): write unit test
-    if (deep) {
-      for (let j = 0; j < this.subblocks.length; j++) {
-        try {
-          let b = this.subblocks[j];
-          return b.getQuestion(quid, true);
-        } catch (e) {
-          if (config.debug) {
-            console.log(e);
-          }
+  this.getQuestion = function (quid, deep = false, thrownotfound = true) {
+    var question = this.topLevelQuestions.find(q => q.id === quid);
+    if (deep && !question) {
+      for (let b of this.subblocks) {
+        question = b.getQuestion(quid, true, false);
+        if (question) {
+          break;
         }
       }
+    }
+    if (question || !thrownotfound) {
+      return question;
     }
     throw new ObjectNotFoundException('Question', quid, `block ${this.id}`);
   };

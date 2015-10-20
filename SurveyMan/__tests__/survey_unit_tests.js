@@ -457,8 +457,20 @@ describe('Top level tests', function() {
       expect(get_first_block(s2).topLevelQuestions.length).toBe(1);
       expect(get_first_block(s3).topLevelQuestions.length).toBe(0);
       expect(get_first_block(s4).topLevelQuestions.length).toBe(0);
-      expect(get_first_block(s5).topLevelQuestions.length).toBe(1);
+      expect(get_first_block(s5).topLevelQuestions.length).toBe(0);
       expect(get_first_block(s6).topLevelQuestions.length).toBe(0);
+
+      let get_first_subblock = b => b.subblocks[0];
+
+      expect(get_first_subblock(get_first_block(s1))).toBeUndefined();
+      expect(get_first_subblock(get_first_block(s2))).toBeUndefined();
+      expect(get_first_subblock(get_first_block(s3))).toBeUndefined();
+      expect(get_first_subblock(get_first_block(s4))).toBeDefined();
+      expect(get_first_subblock(get_first_block(s5))).toBeDefined();
+      expect(get_first_subblock(get_first_block(s6))).toBeDefined();
+      expect(get_first_subblock(get_first_block(s4)).topLevelQuestions.length).toBe(0);
+      expect(get_first_subblock(get_first_block(s5)).topLevelQuestions.length).toBe(1);
+      expect(get_first_subblock(get_first_block(s6)).topLevelQuestions.length).toBe(0);
 
       expect(q1.equals(s2.topLevelBlocks[0].topLevelQuestions[0])).toBeTruthy();
 
