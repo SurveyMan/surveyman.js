@@ -1228,6 +1228,9 @@ Survey.randomize = function(_survey) {
   _survey.topLevelBlocks = newTLBs;
 };
 
+Survey.prototype.randomize = function() {
+  Survey.randomize(this);
+};
 
 // 'static' fields
 Survey.exclusiveDefault = true;
@@ -1413,7 +1416,6 @@ module.exports = {
    * @type {{_parseBools: Function, _sortById: Function, _global_reset: Function, init: Function, getOptionById: Function, getQuestionById: Function, getBlockById: Function, Survey: Function, Block: Function, Question: Function, Option: Function}}
    */
   survey: {
-    _gensym: _gensym,
     _parseBools: parseBools,
     _sortById: sortById,
     _global_reset: global_reset,
@@ -1448,6 +1450,7 @@ module.exports = {
     handleBranching: handleBranching,
     nextSequential: nextSequential
   },
+  _gensym: _gensym,
   /**
    * Top-level call to create a new survey.
    * @returns {survey.Survey}
@@ -1551,10 +1554,15 @@ module.exports = {
    * Top-level call to copy a question.
    * Done by converting to JSON and re-parsing.
    * @param {Question} question
+   * @param {boolean} new_id Flag indicating whether we should generate a new id for the copied object.
    * @returns {Question}
    */
-  copy_question: function (question) {
-    return new Question(question.toJSON());
+  copy_question: function (question, new_id = false) {
+    let new_question = new Question(question.toJSON());
+    if (new_id) {
+      new_question.id = _gensym('q');
+    }
+    return new_question;
   },
   /**
    * Top-level call to add a question to a block.
