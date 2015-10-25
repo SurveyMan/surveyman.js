@@ -302,8 +302,8 @@ describe('Top level tests', function() {
   var {Survey} = SurveyMan.survey;
 
   it('tests gensym', function(){
-    let gs1 = SurveyMan.survey._gensym();
-    let gs2 = SurveyMan.survey._gensym();
+    let gs1 = SurveyMan._gensym();
+    let gs2 = SurveyMan._gensym();
     expect(gs1).toBeDefined();
     expect(gs2).toBeDefined();
     expect(gs1).not.toEqual(gs2);
