@@ -607,8 +607,10 @@ var Block = function(_jsonBlock) {
     // The block is branch-all if all of the questions
     // Since we rely on the static analyzer to do a more thorough check, for now just see
     // if all of the branch maps are not empty.
-    return this.topLevelQuestions.length > 1 &&
-        this.topLevelQuestions.map((q) => q.branchMap.size).reduce((a, b) => a + b, 0) === 0;
+    if (this.topLevelQuestions.length < 2) return false;
+    let branchMapSize = this.topLevelQuestions[0].branchMap.size;
+    return branchMapSize > 0 &&
+        this.topLevelQuestions.reduce((tv, q) => tv && q.branchMap.size === branchMapSize, true);
   };
   /**
    * Returns boolean indicating whether this is a branch-one block.
@@ -1023,13 +1025,7 @@ Survey.prototype.get_option_by_id = function(oid) {
  * @returns {Question}
  */
 Survey.prototype.get_question_by_id = function(question_id) {
-  let q1 = this.questions.find(q => q.id === question_id);
-  let q2 = this.topLevelBlocks.map(b => b.getQuestion(question_id, true)).find(q => q);
-  console.assert(q1.equals(q2),
-      `Top level question store should reflect block-level references; %s found in toplevel; %s found in block`,
-      q1, q2
-  );
-  return q1;
+  return this.questions.find(q => q.id === question_id);
 };
 
 
@@ -1039,7 +1035,7 @@ Survey.prototype.get_question_by_id = function(question_id) {
  * @returns {Block}
  * @throws ObjectNotFoundException
  */
-Survey.prototype.get_block_by_id = function(block_id) {
+Survey.prototype.get_block_by_id = function(block_id, notfounderr=true) {
   if (block_id === '') {
     console.warn('Trying to get block with empty string id. Please correct.');
     return null;
@@ -1055,7 +1051,8 @@ Survey.prototype.get_block_by_id = function(block_id) {
     let found = find_block_by_id(b, block_id);
     if (found) return found;
   }
-  throw new ObjectNotFoundException('Block', block_id, 'current survey');
+  if (notfounderr)
+    throw new ObjectNotFoundException('Block', block_id, 'current survey');
 };
 
 
@@ -1455,7 +1452,7 @@ module.exports = {
    * Top-level call to create a new survey.
    * @returns {survey.Survey}
    */
-  new_survey: function() {
+  new_survey() {
     return new Survey({
       filename: "temp_file_name.json",
       breakoff: Survey.breakoffDefault,
