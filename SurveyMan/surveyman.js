@@ -1478,11 +1478,16 @@ module.exports = {
   /**
    * Top-level call to copy a block. Done by converting to JSON and copying.
    * This is the quick and dirty approach to copying.
-   * @param {Block} block
+   * @param {Block} block The block to copy.
+   * @param {boolean} new_id  Flag indicating whether we should create a new id for this block.
    * @returns {Block}
    */
-  copy_block: function (block) {
-    return new Block(block.toJSON());
+  copy_block: function (block, new_id=false) {
+    let b = new Block(block.toJSON());
+    if (new_id) {
+      b.id =  Block.new_block(block.parent).id;
+    }
+    return b;
   },
   /**
    * Adds a block to the top level of the survey.
