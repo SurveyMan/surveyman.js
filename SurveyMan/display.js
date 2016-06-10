@@ -3,9 +3,13 @@ var SurveyMan = SurveyMan || {};
 _ = require("underscore");
 $ = require("jquery");
 
-SurveyMan.display = (function () {
+require("seedrandom");
+
+var display = (function () {
 
     document.cookies = "test=EMMA_COOKIE_TEST";
+
+    var SurveyMan;
 
     var questionsChosen     =   [],
         dropdownThreshold   =   7,
@@ -324,6 +328,26 @@ SurveyMan.display = (function () {
             //  Previewing for now is unique to mturk.
             $(document).ready(function() {
 
+                SurveyMan = window.SurveyMan.surveyman;
+
+                var start_survey = function () {
+                    console.log("F");
+                    $("#preview").hide();
+                    console.log("G");
+                    Math.seedrandom(assignmentId);
+                    console.log(jsonizedSurvey);
+                    var sm = SurveyMan.interpreter.init(jsonizedSurvey);
+                    console.log("I");
+                    if (sm.breakoff) {
+                        console.log("D");
+                        showBreakoffNotice();
+                    } else {
+                        console.log("E");
+                        showFirstQuestion();
+                        $("div[name=question]").show();
+                    }
+                };
+
                 assignmentId = (mturk && _.isUndefined(assignmentId))? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
                 console.log(assignmentId);
 
@@ -332,26 +356,26 @@ SurveyMan.display = (function () {
                 });
 
                 if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
-                    console.log(loadPreview);
+                    console.log("A");
                     loadPreview();
                     $("#preview").show();
-                    console.log($("#preview"));
                 } else {
-                    $("#preview").hide();
-                    Math.seedrandom(assignmentId);
-                    var sm = SurveyMan.interpreter.init(jsonizedSurvey);
-                    if (sm.breakoff)
-                        showBreakoffNotice();
-                    else {
-                        showFirstQuestion();
-                        $("div[name=question]").show();
-                    }
+                    var nextButton = document.createElement("input");
+                    nextButton.type = "button";
+                    nextButton.onclick = start_survey;
+                    nextButton.value = "Start Survey";
+                    $("#preview").append(nextButton);
+                    console.log("B");
+                    $("#preview").show();
                 }
                 if (typeof(customInit) === "function") {
                     customInit();
+                    console.log("C");
                 }
             });
         }
     };
 
 })();
+
+module.exports = display;

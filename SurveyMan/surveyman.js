@@ -557,7 +557,7 @@ var Block = function(_jsonBlock) {
   assertJSONHasProperties(_jsonBlock, 'id');
   var id = `${_jsonBlock.id}`,
       questions = _jsonBlock.questions || [],
-      jsonRandomize = _jsonBlock.randomize,
+      jsonRandomize = _jsonBlock.randomize ,
       subblocks = _jsonBlock.subblocks || [];
   blockMAP.set(id, this);
 
@@ -770,7 +770,7 @@ var Block = function(_jsonBlock) {
    * @returns {boolean}
    */
   this.equals = function (that) {
-    // TODO(etosch) write unit test)
+    // TODO(etosch) : write unit test
     return that instanceof Block &&
         this.id === that.id &&
         this.subblocks.reduce((tv, b1) =>
@@ -954,23 +954,27 @@ var Survey = function(_jsonSurvey) {
   blockMAP.clear();
   assertJSONHasProperties(_jsonSurvey, 'filename', 'survey');
   var {filename, survey, breakoff} = _jsonSurvey;
-  var makeSurvey = _jsonSurvey => _jsonSurvey.map((jsonBlock) => new Block(jsonBlock));
   /**
    * The path of the source file used to generate this survey; may be empty.
    * @type {string}
    */
   this.filename = filename;
   /**
-   * The list of top level blocks in this survey.
-   * @type {Array<survey.Block>}
-   */
-  this.topLevelBlocks = makeSurvey(survey) || [];
-  questionMAP.forEach(q =>  q.makeBranchMap());
-  /**
    * Boolean indicating whether breakoff is permitted for this survey.
    * @type {boolean}
    */
   this.breakoff = parseBools(breakoff, Survey.breakoffDefault);
+  /**
+   * The list of top level blocks in this survey.
+   * @type {Array<survey.Block>}
+   */
+  this.topLevelBlocks = survey.map(function (jsonBlock) {
+    console.log(jsonBlock);
+    let b = new Block(jsonBlock);
+    console.log("new block:", b);
+    return b;
+  });
+  questionMAP.forEach(q =>  q.makeBranchMap());
   /**
    * The list of all questions.
    * @type {Array<survey.Question>}
@@ -1287,10 +1291,10 @@ var getAllBlockQuestions = function(_block) {
   let bfind = i => bindices.find(l => l === i);
   for (let i = 0; i < indices.length; i++) {
     // it happens that i == indices[i]
-    if (qfind(i).length === 1) {
+    if ( qfind(i) !== undefined ) {
       retval.push(_block.topLevelQuestions[j]);
       j++;
-    } else if (bfind(i).length === 1) {
+    } else if ( bfind(i) !== undefined ) {
       retval.push(getAllBlockQuestions(_block.subblocks[k]));
       k++;
     } else {
@@ -1305,7 +1309,8 @@ var getAllBlockQuestions = function(_block) {
  * @param {Array<survey.Block>} _blist The list of all top-level blocks.
  */
 var initializeStacks = function(_blist) {
-  blockSTACK = _blist;
+  console.assert(_blist.length > 0, "Must initialize with at least one top level block.");
+  blockSTACK = _blist.map(b => b);
   questionSTACK = getAllBlockQuestions(blockSTACK.shift());
 };
 
@@ -1405,6 +1410,14 @@ var _gensym = (function(counter) {
   };
 })(0);
 
+var survey_init = function (jsonSurvey) {
+  console.assert(jsonSurvey !== undefined);
+  var survey = new Survey(jsonSurvey);
+  Survey.randomize(survey);
+  console.assert(survey.topLevelBlocks.length > 0, "Must have at least one top level block.");
+  return survey;
+};
+
 /**
  * Contains top-level calls for use by external programs, e.g. the survey construction GUI.
  * @namespace surveyman
@@ -1419,12 +1432,7 @@ module.exports = {
     _parseBools: parseBools,
     _sortById: sortById,
     _global_reset: global_reset,
-    init: function (jsonSurvey) {
-      console.assert(jsonSurvey !== undefined);
-      var survey = new Survey(jsonSurvey);
-      Survey.randomize(survey);
-      return survey;
-    },
+    init: survey_init,
     getOptionById: getOptionById,
     getQuestionById: getQuestionById,
     getBlockById: getBlockById,
@@ -1444,8 +1452,10 @@ module.exports = {
      * @returns {Survey} The survey object.
      */
     init: function (jsonSurvey) {
-      var survey = this.survey.init(jsonSurvey);
+      var survey = survey_init(jsonSurvey);
+      console.assert(survey.topLevelBlocks.length > 0, "Must have at least one top level block.");
       initializeStacks(survey.topLevelBlocks);
+      console.log("c");
       return survey;
     },
     isQuestionStackEmpty: isQuestionStackEmpty,

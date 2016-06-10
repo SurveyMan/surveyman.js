@@ -24,6 +24,7 @@
     "es6-shim": "^0.35.1",
     "jquery": "^3.0.0",
     "loglevel": "^1.4.1",
+    "seedrandom": "^2.4.2",
     "underscore": "^1.8.3"
   },
   "scripts": {
