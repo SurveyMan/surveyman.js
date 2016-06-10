@@ -21,22 +21,15 @@
   ],
   "main": "surveyman",
   "dependencies": {
-    "array.prototype.find": "1.0.0",
-    "browserify": "^13.0.1",
-    "es6-shim": "^0.33.13",
-    "immutable": "^3.7.3",
-    "jjv": "1.0",
-    "jquery": "2.1",
-    "loglevel": "^1.4.0",
-    "request": "2.53",
-    "seedrandom": "2.3",
-    "string": "3.0",
-    "underscore": "1.8"
+    "es6-shim": "^0.35.1",
+    "jquery": "^3.0.0",
+    "loglevel": "^1.4.1",
+    "underscore": "^1.8.3"
   },
   "scripts": {
     "test": "jest",
     "doc": "jsdoc SurveyMan/surveyman.js SurveyMan/display.js",
-    "browserify" : "browserify SurveyMan/main.js -o SurveyMan.js"
+    "browserify": "browserify SurveyMan/surveyman.js SurveyMan/display.js -o bundle.js"
   },
   "devDependencies": {
     "babel-core": "^5.8.23",

@@ -2,6 +2,6 @@
  * Created by etosch on 6/10/16.
  */
 
-var surveyman = require('./surveyman.js');
-var display = require('./display.js');
-var config = require('./config.js');
+window.surveyman = require('./surveyman.js');
+window.display = require('./display.js');
+window.config = require('./config.js');

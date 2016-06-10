@@ -1,11 +1,7 @@
 var SurveyMan = SurveyMan || {};
 
-if (!_) {
-    _ = require("underscore");
-}
-if (!$) {
-    $ = require("jquery");
-}
+_ = require("underscore");
+$ = require("jquery");
 
 SurveyMan.display = (function () {
 

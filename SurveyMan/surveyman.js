@@ -48,6 +48,9 @@
      &lt;/script&gt;
    </tt>
  *
+ * <p><i>New instructions, not robustly tested:</i></p>
+ * <p><tt>
+ *
  */
 //  surveyman.js 0.2.0
 //  http://surveyman.github.io/surveyman.js
