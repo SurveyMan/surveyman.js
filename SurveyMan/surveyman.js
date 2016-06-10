@@ -1435,6 +1435,11 @@ module.exports = {
    * @type {{init: Function, isQuestionStackEmpty: Function, isBlockStackEmpty: Function, nextBlock: Function, nextQuestion: Function, handleBranching: Function, nextSequential: Function}}
    */
   interpreter: {
+    /**
+     * Initializes the interpreter
+     * @param jsonSurvey The json representation of the survey.
+     * @returns {Survey} The survey object.
+     */
     init: function (jsonSurvey) {
       var survey = this.survey.init(jsonSurvey);
       initializeStacks(survey.topLevelBlocks);

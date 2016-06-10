@@ -5,3 +5,6 @@
 *#
 docs/_build
 node_modules
+*compiled*
+.module-cache
+surveyman.js.iml
