@@ -1253,6 +1253,7 @@ var questionSTACK       =   [],
     branchDest          =   null;
 
 var flatten = function(lst) {
+  console.assert(Array.isArray(lst));
   if (lst.length === 0) {
     return [];
   } else {
