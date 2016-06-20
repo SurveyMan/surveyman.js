@@ -30,6 +30,7 @@
   "scripts": {
     "test": "jest",
     "doc": "jsdoc SurveyMan/surveyman.js SurveyMan/display.js",
+    "webpack" : "webpack SurveyMan/main.js surveyman.main.js",
     "browserify": "browserify SurveyMan/surveyman.js SurveyMan/display.js -o bundle.js"
   },
   "devDependencies": {
