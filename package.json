@@ -8,9 +8,9 @@
   },
   "bugs": {
     "url": "http://github.com/SurveyMan/surveyman.js/issues",
-    "email": "etosch@gmail.com"
+    "email": "etosch@cs.umass.edu"
   },
-  "license": "CRAPL",
+  "license": "GPL",
   "author": {
     "name": "Emma Tosch",
     "email": "etosch@cs.umass.edu",
@@ -22,27 +22,32 @@
   "main": "surveyman",
   "dependencies": {
     "es6-shim": "^0.35.1",
+    "jest": "^12.1.1",
     "jquery": "^3.0.0",
+    "jsdoc": "^3.4.0",
     "loglevel": "^1.4.1",
     "seedrandom": "^2.4.2",
+    "stacktrace-js": "^1.3.0",
     "underscore": "^1.8.3"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --no-cache",
     "doc": "jsdoc SurveyMan/surveyman.js SurveyMan/display.js",
+    "webpack": "webpack SurveyMan/main.js surveyman.main.js",
     "browserify": "browserify SurveyMan/surveyman.js SurveyMan/display.js -o bundle.js"
   },
   "devDependencies": {
-    "babel-core": "^5.8.23",
-    "babel-jest": "^5.3.0",
-    "jest": "^0.1.40",
-    "jest-cli": "^0.5.10",
-    "jsdoc": "^3.3.x",
-    "stack-trace": "0.0.9",
-    "stacktrace-js": "^1.0.0"
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
+    "jest-babel": "^1.0.1",
+    "jest-babel-preprocessor": "^0.3.0",
+    "jest-cli": "^12.1.1",
+    "webpack": "^1.13.1"
   },
   "jest": {
-    "scriptPreprocessor": "./node_modules/babel-jest",
+    "scriptPreprocessor": "./node_modules/jest-babel-preprocessor/preprocessor.js",
     "testFileExtensions": [
       "es6",
       "js"
@@ -51,6 +56,11 @@
       "js",
       "json",
       "es6"
+    ]
+  },
+  "babel": {
+    "presets": [
+      "es2015"
     ]
   }
 }
