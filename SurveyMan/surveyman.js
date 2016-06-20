@@ -1254,7 +1254,9 @@ var questionSTACK       =   [],
 
 var flatten = function(lst) {
   console.assert(Array.isArray(lst));
-  if (lst.length === 0) {
+  if (!Array.isArray(lst)) {
+    return [lst];
+  } else if (lst.length === 0) {
     return [];
   } else {
     let [hd, ...tl] = lst;

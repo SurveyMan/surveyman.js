@@ -2,12 +2,11 @@ sudo: false
 language: node_js
 before_install:
   - npm install
-  - npm link vows
 node_js:
   - iojs
+  - node
 branches:
   only:
     - gh-pages
-    - master
 script:
   - npm test
