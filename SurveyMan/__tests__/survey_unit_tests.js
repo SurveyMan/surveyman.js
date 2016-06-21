@@ -476,7 +476,7 @@ describe('Top level tests', function() {
 
     } catch (e) {
       console.log(e.message);
-      e.stack.split('\n').forEach(line => console.log(line));
+      throw e;
     }
   });
 

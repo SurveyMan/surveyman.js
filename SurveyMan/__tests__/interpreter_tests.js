@@ -1,0 +1,20 @@
+jest.dontMock("es6-shim")
+    .dontMock("../surveyman.js");
+
+describe('Test aux functions.', function () {
+  var { _flatten } = require.requireActual('../surveyman.js').interpreter;
+  it('tests auxiliary functions used by the interpreter namespace', function () {
+      expect(_flatten([1,2,3])).toEqual([1,2,3]);
+      expect(_flatten( [[1],[2],[3]] )).toEqual([1,2,3]);
+      expect(_flatten( [[1,2],[[3]]] )).toEqual([1,2,3]);
+  });
+});
+
+describe('Test interpreter.', function () {
+  it('tests survey initialization', function () {
+    var {survey, interpreter} = require('../surveyman.js');
+      var rosarios_survey_json = JSON.parse('{ "filename" : "/Users/etosch/Downloads/survey.csv", "breakoff" :  true, "survey" : [ { "id" : "_2", "questions" : [ { "id" : "q_27_2", "qtext" : "Do you support marriages between homosexuals BeING recognized by the law as valid, with the same rights as traditional marriages?" , "options" : [ { "id" : "data_27_3", "otext" : "yes" }, { "id" : "data_28_3", "otext" : "no" } ]}, { "id" : "q_29_2", "qtext" : "Do you favor or oppose the law that allows homosexual couples to legally form civil unions, giving them some of the legal rights of married couples?" , "options" : [ { "id" : "data_29_3", "otext" : "yes" }, { "id" : "data_30_3", "otext" : "no" } ]} ] , "randomize" : true }, { "id" : "_1", "questions" : [] , "randomize" : true , "subblocks" : [ { "id" : "_1._1", "questions" : [ { "id" : "q_2_2", "qtext" : "Many children and individuals with no criminal records are undocumented, should they be deported?" , "options" : [ { "id" : "data_2_3", "otext" : "yes" }, { "id" : "data_3_3", "otext" : "no" } ]}, { "id" : "q_4_2", "qtext" : "Do you think undocumented immigrants should be deported?" , "options" : [ { "id" : "data_4_3", "otext" : "yes" }, { "id" : "data_5_3", "otext" : "no" } ]}, { "id" : "q_6_2", "qtext" : "Should undocumented immigrants be allowed to stay in the US?" , "options" : [ { "id" : "data_6_3", "otext" : "yes" }, { "id" : "data_7_3", "otext" : "no" } ]}, { "id" : "q_8_2", "qtext" : "Do you think illegal immigrants should be deported?" , "options" : [ { "id" : "data_8_3", "otext" : "yes" }, { "id" : "data_9_3", "otext" : "no" } ]} ] , "randomize" : true }, { "id" : "_1._2", "questions" : [ { "id" : "q_10_2", "qtext" : "Do you think immigrant labor is good for the economy?" , "options" : [ { "id" : "data_10_3", "otext" : "yes" }, { "id" : "data_11_3", "otext" : "no" } ]}, { "id" : "q_12_2", "qtext" : "Does the economy benefit from immigrant labor?" , "options" : [ { "id" : "data_12_3", "otext" : "yes" }, { "id" : "data_13_3", "otext" : "no" } ]}, { "id" : "q_14_2", "qtext" : "Does the economy benefit from the labor of illegal immigrants?" , "options" : [ { "id" : "data_14_3", "otext" : "yes" }, { "id" : "data_15_3", "otext" : "no" } ]}, { "id" : "q_16_2", "qtext" : "Does the economy benefit from the labor of undocumented immigrants?" , "options" : [ { "id" : "data_16_3", "otext" : "yes" }, { "id" : "data_17_3", "otext" : "no" } ]} ] , "randomize" : true }, { "id" : "_1._3", "questions" : [ { "id" : "q_18_2", "qtext" : "There should be a wall between Mexico and the U.S" , "options" : [ { "id" : "data_19_3", "otext" : "oppose" }, { "id" : "data_20_3", "otext" : "don\'t know" }, { "id" : "data_18_3", "otext" : "favor" } ]}, { "id" : "q_21_2", "qtext" : "There should be a wall between Mexico and the U.S which would keep people from entering the US illegally." , "options" : [ { "id" : "data_22_3", "otext" : "oppose" }, { "id" : "data_23_3", "otext" : "don\'t know" }, { "id" : "data_21_3", "otext" : "favor" } ]}, { "id" : "q_24_2", "qtext" : "To prevent people from entering the country illegally, there should be a wall between the US and Mexico." , "options" : [ { "id" : "data_26_3", "otext" : "don\'t know" }, { "id" : "data_24_3", "otext" : "favor" }, { "id" : "data_25_3", "otext" : "oppose" } ]} ] , "randomize" : true } ]} ] }');
+     var rosarios_survey = interpreter.init(rosarios_survey_json);
+     expect(rosarios_survey.topLevelBlocks.length).toBe(2);
+  });
+});

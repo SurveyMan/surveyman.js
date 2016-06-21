@@ -124,7 +124,7 @@ MalformedSurveyException.prototype.constructor = MalformedSurveyException;
 // Utility functions
 // -----------------
 var assertJSONHasProperties = function (jsonObj, ...plist) {
-  plist.forEach((prop) => console.assert(jsonObj.hasOwnProperty(prop)));
+    plist.forEach((prop) => console.assert(jsonObj.hasOwnProperty(prop), "Missing property " + prop));
 };
 
 var FYshuffle = function(arr) {
@@ -823,7 +823,8 @@ Block.prototype.add_block = function(block, index = this.subblocks.length) {
   let prev_subs = this.subblocks.length;
   this.subblocks.splice(index, 0, block);
   block.parent = this;
-  console.assert(this.subblocks.length === prev_subs + 1);
+    console.assert(this.subblocks.length === prev_subs + 1);
+//                   `Expected these subblocks ${this.subblocks.length} and prev subblocks ${prev_subs} to differ by 1.`});
 };
 
 /**
@@ -969,9 +970,9 @@ var Survey = function(_jsonSurvey) {
    * @type {Array<survey.Block>}
    */
   this.topLevelBlocks = survey.map(function (jsonBlock) {
-    console.log(jsonBlock);
+    // console.log(jsonBlock);
     let b = new Block(jsonBlock);
-    console.log("new block:", b);
+    // console.log("new block:", b);
     return b;
   });
   questionMAP.forEach(q =>  q.makeBranchMap());
@@ -1143,7 +1144,7 @@ Survey.prototype.add_block = function(
     console.assert(p.equals(parent), `Parent block ${parent} not found equal to ${p}`);
     let prev_subblocks = parent.subblocks.length;
     parent.add_block(block, index);
-    console.assert(parent.subblocks.length === prev_subblocks + 1);
+    console.assert(parent.subblocks.length === prev_subblocks + 1, "asdf1");
   } else {
     if (block.randomizable && block.isBranchOne()) {
       throw new SMSurveyException('Cannot have top level blocks that are both branching and randomizable');
@@ -1253,15 +1254,13 @@ var questionSTACK       =   [],
     branchDest          =   null;
 
 var flatten = function(lst) {
-  console.assert(Array.isArray(lst));
-  if (!Array.isArray(lst)) {
-    return [lst];
-  } else if (lst.length === 0) {
+  console.assert(Array.isArray(lst), `${lst} is not an array`);
+  if (lst.length === 0) {
     return [];
   } else {
     let [hd, ...tl] = lst;
     if (Array.isArray(hd)) {
-      return hd.map(flatten).concat(flatten(tl));
+        return flatten(hd).concat(flatten(tl));
     } else {
       return [hd].concat(flatten(tl));
     }
@@ -1287,7 +1286,7 @@ var getAllBlockQuestions = function(_block) {
   var indices = Array.from(_block.topLevelQuestions.concat(_block.subblocks).keys());
   FYshuffle(indices);
   var qindices = indices.slice(0, _block.topLevelQuestions.length);
-  var bindices = indices.filter((i) => !qindices.find((j) => j === i));
+  var bindices = indices.filter((i) => qindices.find((j) => j === i) === undefined);
 
   let j = 0, k = 0;
   let qfind = i => qindices.find(l => l === i);
@@ -1304,6 +1303,7 @@ var getAllBlockQuestions = function(_block) {
       throw "Neither qindices nor bindices contain index " + i;
     }
   }
+  console.assert(Array.isArray(retval), `${retval} is not an array`);
   return flatten(retval);
 };
 
@@ -1458,9 +1458,9 @@ module.exports = {
       var survey = survey_init(jsonSurvey);
       console.assert(survey.topLevelBlocks.length > 0, "Must have at least one top level block.");
       initializeStacks(survey.topLevelBlocks);
-      console.log("c");
       return survey;
     },
+    _flatten: flatten,
     isQuestionStackEmpty: isQuestionStackEmpty,
     isBlockStackEmpty: isBlockStackEmpty,
     nextBlock: nextBlock,

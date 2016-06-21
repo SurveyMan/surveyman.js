@@ -31,7 +31,7 @@
     "underscore": "^1.8.3"
   },
   "scripts": {
-    "test": "jest --no-cache",
+    "test": "jest --no-cache --bail --coverage",
     "doc": "jsdoc SurveyMan/surveyman.js SurveyMan/display.js",
     "webpack" : "webpack SurveyMan/main.js surveyman.main.js",
     "browserify": "browserify SurveyMan/surveyman.js SurveyMan/display.js -o bundle.js"

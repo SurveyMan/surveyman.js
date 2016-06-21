@@ -185,7 +185,7 @@
 	// Utility functions
 	// -----------------
 	var assertJSONHasProperties = function (jsonObj, ...plist) {
-	  plist.forEach((prop) => console.assert(jsonObj.hasOwnProperty(prop)));
+	    plist.forEach((prop) => console.assert(jsonObj.hasOwnProperty(prop), "Missing property " + prop));
 	};
 
 	var FYshuffle = function(arr) {
@@ -884,7 +884,8 @@
 	  let prev_subs = this.subblocks.length;
 	  this.subblocks.splice(index, 0, block);
 	  block.parent = this;
-	  console.assert(this.subblocks.length === prev_subs + 1);
+	    console.assert(this.subblocks.length === prev_subs + 1);
+	//                   `Expected these subblocks ${this.subblocks.length} and prev subblocks ${prev_subs} to differ by 1.`});
 	};
 
 	/**
@@ -1030,9 +1031,9 @@
 	   * @type {Array<survey.Block>}
 	   */
 	  this.topLevelBlocks = survey.map(function (jsonBlock) {
-	    console.log(jsonBlock);
+	    // console.log(jsonBlock);
 	    let b = new Block(jsonBlock);
-	    console.log("new block:", b);
+	    // console.log("new block:", b);
 	    return b;
 	  });
 	  questionMAP.forEach(q =>  q.makeBranchMap());
@@ -1204,7 +1205,7 @@
 	    console.assert(p.equals(parent), `Parent block ${parent} not found equal to ${p}`);
 	    let prev_subblocks = parent.subblocks.length;
 	    parent.add_block(block, index);
-	    console.assert(parent.subblocks.length === prev_subblocks + 1);
+	    console.assert(parent.subblocks.length === prev_subblocks + 1, "asdf1");
 	  } else {
 	    if (block.randomizable && block.isBranchOne()) {
 	      throw new SMSurveyException('Cannot have top level blocks that are both branching and randomizable');
@@ -1314,14 +1315,13 @@
 	    branchDest          =   null;
 
 	var flatten = function(lst) {
-	  if (!Array.isArray(lst)) {
-	    return [lst];
-	  } else if (lst.length === 0) {
+	  console.assert(Array.isArray(lst), `${lst} is not an array`);
+	  if (lst.length === 0) {
 	    return [];
 	  } else {
 	    let [hd, ...tl] = lst;
 	    if (Array.isArray(hd)) {
-	      return hd.map(flatten).concat(flatten(tl));
+	        return flatten(hd).concat(flatten(tl));
 	    } else {
 	      return [hd].concat(flatten(tl));
 	    }
@@ -1347,7 +1347,7 @@
 	  var indices = Array.from(_block.topLevelQuestions.concat(_block.subblocks).keys());
 	  FYshuffle(indices);
 	  var qindices = indices.slice(0, _block.topLevelQuestions.length);
-	  var bindices = indices.filter((i) => !qindices.find((j) => j === i));
+	  var bindices = indices.filter((i) => qindices.find((j) => j === i) === undefined);
 
 	  let j = 0, k = 0;
 	  let qfind = i => qindices.find(l => l === i);
@@ -1364,6 +1364,7 @@
 	      throw "Neither qindices nor bindices contain index " + i;
 	    }
 	  }
+	  console.assert(Array.isArray(retval), `${retval} is not an array`);
 	  return flatten(retval);
 	};
 
@@ -1518,9 +1519,9 @@
 	      var survey = survey_init(jsonSurvey);
 	      console.assert(survey.topLevelBlocks.length > 0, "Must have at least one top level block.");
 	      initializeStacks(survey.topLevelBlocks);
-	      console.log("c");
 	      return survey;
 	    },
+	    _flatten: flatten,
 	    isQuestionStackEmpty: isQuestionStackEmpty,
 	    isBlockStackEmpty: isBlockStackEmpty,
 	    nextBlock: nextBlock,
@@ -5538,6 +5539,31 @@
 	// shim for using process in browser
 
 	var process = module.exports = {};
+
+	// cached from whatever global is present so that test runners that stub it
+	// don't break things.  But we need to wrap it in a try catch in case it is
+	// wrapped in strict mode code which doesn't define any globals.  It's inside a
+	// function because try/catches deoptimize in certain engines.
+
+	var cachedSetTimeout;
+	var cachedClearTimeout;
+
+	(function () {
+	  try {
+	    cachedSetTimeout = setTimeout;
+	  } catch (e) {
+	    cachedSetTimeout = function () {
+	      throw new Error('setTimeout is not defined');
+	    }
+	  }
+	  try {
+	    cachedClearTimeout = clearTimeout;
+	  } catch (e) {
+	    cachedClearTimeout = function () {
+	      throw new Error('clearTimeout is not defined');
+	    }
+	  }
+	} ())
 	var queue = [];
 	var draining = false;
 	var currentQueue;
@@ -5562,7 +5588,7 @@
 	    if (draining) {
 	        return;
 	    }
-	    var timeout = setTimeout(cleanUpNextTick);
+	    var timeout = cachedSetTimeout(cleanUpNextTick);
 	    draining = true;
 
 	    var len = queue.length;
@@ -5579,7 +5605,7 @@
 	    }
 	    currentQueue = null;
 	    draining = false;
-	    clearTimeout(timeout);
+	    cachedClearTimeout(timeout);
 	}
 
 	process.nextTick = function (fun) {
@@ -5591,7 +5617,7 @@
 	    }
 	    queue.push(new Item(fun, args));
 	    if (queue.length === 1 && !draining) {
-	        setTimeout(drainQueue, 0);
+	        cachedSetTimeout(drainQueue, 0);
 	    }
 	};
 
