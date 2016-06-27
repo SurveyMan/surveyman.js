@@ -6229,6 +6229,11 @@
 	        showFirstQuestion : showFirstQuestion,
 	        showSubmit : showSubmit,
 	        ready : function (mturk, jsonizedSurvey, loadPreview, customInit) {
+	            
+	            if (typeof(customInit) === "function") {
+	                customInit();
+	                console.log("C");
+	            }
 	            //  Previewing for now is unique to mturk.
 	            $(document).ready(function() {
 
@@ -6271,10 +6276,6 @@
 	                    $("#preview").append(nextButton);
 	                    console.log("B");
 	                    $("#preview").show();
-	                }
-	                if (typeof(customInit) === "function") {
-	                    customInit();
-	                    console.log("C");
 	                }
 	            });
 	        }
