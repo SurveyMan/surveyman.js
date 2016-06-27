@@ -325,6 +325,7 @@ var display = (function () {
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,
         ready : function (mturk, jsonizedSurvey, loadPreview, customInit) {
+            
             if (typeof(customInit) === "function") {
                 customInit();
                 console.log("C");
