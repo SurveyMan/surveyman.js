@@ -247,9 +247,9 @@ var display = (function () {
             return q.breakoff && q.options.length!=0;
 
         },
-        showBreakoffNotice  = function() {
+        showBreakoffNotice  = function(msg) {
 
-            $(".question").append("<p>This survey will allow you to submit partial responses. The minimum payment is the quantity listed. However, you will be compensated more for completing more of the survey in the form of bonuses, at the completion of this study. The quantity paid depends on the results returned so far. Note that submitting partial results does not guarantee payment.</p>");
+            $(".question").append("<p>" + msg + "</p>");
             $("div[name=question]").show();
             $(".question").append("<input type=\"button\" id=\"continue\" value=\"Continue\" " +
                 "onclick=\"SurveyMan.display.showFirstQuestion();\" />");
@@ -324,7 +324,7 @@ var display = (function () {
         showBreakoffNotice : showBreakoffNotice,
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,
-        ready : function (mturk, jsonizedSurvey, loadPreview, customInit) {
+        ready : function (mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
 
             if (typeof(customInit) === "function") {
                 customInit();
@@ -345,10 +345,10 @@ var display = (function () {
                     console.log("I");
                     if (sm.breakoff) {
                         console.log("D");
-                        SurveyMan.display.showBreakoffNotice();
+                        showBreakoffNotice(breakoffMsg);
                     } else {
                         console.log("E");
-                        SurveyMan.display.showFirstQuestion();
+                        showFirstQuestion();
                         $("div[name=question]").show();
                     }
                 };
@@ -360,18 +360,20 @@ var display = (function () {
                     window.onbeforeunload = null;
                 });
 
+                var preview = $("#preview");
+
                 if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
                     console.log("A");
                     loadPreview();
-                    $("#preview").show();
+                    preview.show();
                 } else {
                     var nextButton = document.createElement("input");
                     nextButton.type = "button";
                     nextButton.onclick = start_survey;
                     nextButton.value = "Start Survey";
-                    $("#preview").append(nextButton);
+                    preview.append(nextButton);
                     console.log("B");
-                    $("#preview").show();
+                    preview.show();
                 }
             });
         }
