@@ -325,7 +325,7 @@ var display = (function () {
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,
         ready : function (mturk, jsonizedSurvey, loadPreview, customInit) {
-            
+
             if (typeof(customInit) === "function") {
                 customInit();
                 console.log("C");
@@ -345,10 +345,10 @@ var display = (function () {
                     console.log("I");
                     if (sm.breakoff) {
                         console.log("D");
-                        showBreakoffNotice();
+                        SurveyMan.display.showBreakoffNotice();
                     } else {
                         console.log("E");
-                        showFirstQuestion();
+                        SurveyMan.display.showFirstQuestion();
                         $("div[name=question]").show();
                     }
                 };
