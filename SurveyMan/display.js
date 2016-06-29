@@ -1,7 +1,7 @@
 var SurveyMan = SurveyMan || {};
 
-_ = require("underscore");
-$ = require("jquery");
+var _ = require("underscore");
+var $ = require("jquery");
 
 require("seedrandom");
 

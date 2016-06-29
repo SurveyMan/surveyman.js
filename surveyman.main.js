@@ -2688,8 +2688,8 @@
 
 	var SurveyMan = SurveyMan || {};
 
-	_ = __webpack_require__(7);
-	$ = __webpack_require__(8);
+	var _ = __webpack_require__(7);
+	var $ = __webpack_require__(8);
 
 	__webpack_require__(10);
 

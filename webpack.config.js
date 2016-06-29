@@ -8,6 +8,7 @@ module.exports = {
     output: {
         filename: "surveyman.main.js"
     },
+    exclude: /(node_modules)/,
     module: {
         // Transforms your application's code using Babel.
         // Babel lets you use new JavaScript features in browsers that do not
