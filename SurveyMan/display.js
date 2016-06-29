@@ -324,7 +324,7 @@ var display = (function () {
         showBreakoffNotice : showBreakoffNotice,
         showFirstQuestion : showFirstQuestion,
         showSubmit : showSubmit,
-        ready : function (mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
+        ready : function (assignmentId, mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
 
             if (typeof(customInit) === "function") {
                 customInit();
@@ -336,23 +336,17 @@ var display = (function () {
                 SurveyMan = window.SurveyMan.surveyman;
 
                 var start_survey = function () {
-                    console.log("F");
                     $("#preview").hide();
-                    console.log("G");
                     Math.seedrandom(assignmentId);
                     console.log(jsonizedSurvey);
                     var sm = SurveyMan.interpreter.init(jsonizedSurvey);
-                    console.log("I");
                     if (sm.breakoff) {
-                        console.log("D");
                         showBreakoffNotice(breakoffMsg);
                     } else {
-                        console.log("E");
                         showFirstQuestion();
                         $("div[name=question]").show();
                     }
                 };
-
                 assignmentId = (mturk && _.isUndefined(assignmentId))? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
                 console.log(assignmentId);
 
@@ -363,7 +357,6 @@ var display = (function () {
                 var preview = $("#preview");
 
                 if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
-                    console.log("A");
                     loadPreview();
                     preview.show();
                 } else {
@@ -372,7 +365,6 @@ var display = (function () {
                     nextButton.onclick = start_survey;
                     nextButton.value = "Start Survey";
                     preview.append(nextButton);
-                    console.log("B");
                     preview.show();
                 }
             });
