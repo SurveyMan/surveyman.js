@@ -44,6 +44,8 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+
 	/**
 	 * Created by etosch on 6/10/16.
 	 */
@@ -54,10 +56,19 @@
 	    "config": __webpack_require__(5)
 	};
 
-
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 	/**
 	 * @fileoverview
@@ -144,7 +155,7 @@
 	/**
 	 * Resets the lookup maps for blocks, options, and questions.
 	 */
-	var global_reset = function() {
+	var global_reset = function global_reset() {
 	  blockMAP.clear();
 	  optionMAP.clear();
 	  questionMAP.clear();
@@ -152,9 +163,11 @@
 
 	// Exceptions
 	// ----------
-	function SMSurveyException(msg, override=false) {
+	function SMSurveyException(msg) {
+	  var override = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
 	  Error.call(this);
-	  this.message = override ? msg : `SMSurveyException: ${msg}`;
+	  this.message = override ? msg : 'SMSurveyException: ' + msg;
 	  this.stack = new Error().stack;
 	}
 	SMSurveyException.prototype = Error.prototype;
@@ -162,33 +175,38 @@
 
 	function UnknownTypeException(thing) {
 	  SMSurveyException.call(this);
-	  this.message = `Unknown type for ${thing}: (${typeof thing})`;
+	  this.message = 'Unknown type for ' + thing + ': (' + (typeof thing === 'undefined' ? 'undefined' : _typeof(thing)) + ')';
 	}
 	UnknownTypeException.prototype = Object.create(SMSurveyException.prototype);
 	UnknownTypeException.prototype.constructor = UnknownTypeException;
 
 	function ObjectNotFoundException(type, id, objName) {
 	  SMSurveyException.call(this);
-	  this.message = `${type} id ${id} not found in ${objName}`;
+	  this.message = type + ' id ' + id + ' not found in ' + objName;
 	}
 	ObjectNotFoundException.prototype = Object.create(SMSurveyException.prototype);
 	ObjectNotFoundException.prototype.constructor = ObjectNotFoundException;
 
-
 	function MalformedSurveyException(msg) {
 	  SMSurveyException.call(this);
-	  this.message = `Malformed Survey: ${msg}`;
+	  this.message = 'Malformed Survey: ' + msg;
 	}
 	MalformedSurveyException.prototype = Object.create(SMSurveyException.prototype);
 	MalformedSurveyException.prototype.constructor = MalformedSurveyException;
 
 	// Utility functions
 	// -----------------
-	var assertJSONHasProperties = function (jsonObj, ...plist) {
-	    plist.forEach((prop) => console.assert(jsonObj.hasOwnProperty(prop), "Missing property " + prop));
+	var assertJSONHasProperties = function assertJSONHasProperties(jsonObj) {
+	  for (var _len = arguments.length, plist = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+	    plist[_key - 1] = arguments[_key];
+	  }
+
+	  plist.forEach(function (prop) {
+	    return console.assert(jsonObj.hasOwnProperty(prop), "Missing property " + prop);
+	  });
 	};
 
-	var FYshuffle = function(arr) {
+	var FYshuffle = function FYshuffle(arr) {
 	  // Implementing this here so I don't have to import underscore or lodash.
 	  var counter = arr.length;
 	  while (counter > 0) {
@@ -200,17 +218,18 @@
 	  }
 	};
 
-	var sortById = function (lst) {
+	var sortById = function sortById(lst) {
 	  // Bubble sort, yo!
 	  // We generally expect these to already be sorted.
-	  while(true) { // eslint-disable-line no-constant-condition
-	    let swapped = false;
-	    for (let j = 0; j < lst.length - 1; j++) {
-	      let b1 = lst[j];
-	      let b2 = lst[j + 1];
+	  while (true) {
+	    // eslint-disable-line no-constant-condition
+	    var swapped = false;
+	    for (var j = 0; j < lst.length - 1; j++) {
+	      var b1 = lst[j];
+	      var b2 = lst[j + 1];
 	      // getting some weirdness earlier; not sure why
 	      if (b1.idComp(b2) === 1) {
-	        log.info(`swapping blocks ${b1.id} and ${b2.id}`);
+	        log.info('swapping blocks ' + b1.id + ' and ' + b2.id);
 	        swapped = true;
 	        lst[j] = b2;
 	        lst[j + 1] = b1;
@@ -221,14 +240,13 @@
 	  }
 	};
 
-
 	/**
 	 * Gets the Option object from the internal mapping of ids to Options.
 	 * Throws an exception if the id is not found.
 	 * @param {string} oid The option id.
 	 * @returns {Option}
 	 */
-	var getOptionById = function (oid) {
+	var getOptionById = function getOptionById(oid) {
 	  if (optionMAP.has(oid)) {
 	    return optionMAP.get(oid);
 	  }
@@ -241,7 +259,7 @@
 	 * @param {string} quid The question id.
 	 * @returns {Question}
 	 */
-	var getQuestionById = function (quid) {
+	var getQuestionById = function getQuestionById(quid) {
 	  if (questionMAP.has(quid)) {
 	    return questionMAP.get(quid);
 	  } else throw new ObjectNotFoundException('Question', quid, 'questionMAP');
@@ -253,9 +271,8 @@
 	 * @param {string} bid The block id. May be null.
 	 * @returns {Block}
 	 */
-	var getBlockById = function (bid) {
-	  if (bid === null)
-	    return null;
+	var getBlockById = function getBlockById(bid) {
+	  if (bid === null) return null;
 	  if (blockMAP.has(bid)) {
 	    return blockMAP.get(bid);
 	  } else throw new ObjectNotFoundException('Object', bid, 'blockMAP');
@@ -280,7 +297,9 @@
 	 * boolean (old version) or an array of option ids (new version).
 	 * @returns {*} the parsed object
 	 */
-	var parseBools = function (thing, defaultVal, question = null) {
+	var parseBools = function parseBools(thing, defaultVal) {
+	  var question = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
 	  console.assert(defaultVal !== undefined, 'Default value cannot be undefined.');
 	  if (thing === undefined) {
 	    return defaultVal;
@@ -296,7 +315,9 @@
 	    // New schemata spec for ordered -- provides a list of the ids that are
 	    // ordered for this question.
 	    // Set the initial ids of the question's options
-	    question.options = thing.map((oid) => getOptionById(oid));
+	    question.options = thing.map(function (oid) {
+	      return getOptionById(oid);
+	    });
 	    return true;
 	  }
 	  throw UnknownTypeException(thing);
@@ -320,13 +341,15 @@
 	 * @param {Question} _question
 	 * @constructor
 	 */
-	var Option = function (_jsonOption, _question = null) {
+	var Option = function Option(_jsonOption) {
+	  var _question = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
 	  assertJSONHasProperties(_jsonOption, 'id', 'otext');
 	  optionMAP.set(_jsonOption.id, this);
 	  this.id = _jsonOption.id;
 	  this.otext = _jsonOption.otext;
 	  this.question = _question;
-	  this.toJSON = function() {
+	  this.toJSON = function () {
 	    return {
 	      id: this.id,
 	      otext: this.otext
@@ -338,10 +361,8 @@
 	   * @param {*} that The object we are comparing this object to.
 	   * @returns {boolean}
 	   */
-	  this.equals = function(that) {
-	    return that instanceof Option &&
-	        this.id === that.id &&
-	        this.otext === that.otext;
+	  this.equals = function (that) {
+	    return that instanceof Option && this.id === that.id && this.otext === that.otext;
 	  };
 	};
 
@@ -353,19 +374,32 @@
 	 * @param {boolean|Array} ordered
 	 * @returns {Array<Option>}
 	 */
-	Option.makeOptions = function (jsonOptions, enclosingQuestion = null, ordered = null) {
+	Option.makeOptions = function (jsonOptions) {
+	  var enclosingQuestion = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	  var ordered = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+
 	  if (jsonOptions === undefined) {
-	    log.info(`No options defined for Question ${enclosingQuestion.id} ( ${enclosingQuestion.qtext} )`);
+	    log.info('No options defined for Question ' + enclosingQuestion.id + ' ( ' + enclosingQuestion.qtext + ' )');
 	    return [];
 	  }
-	  let oList = jsonOptions.map((o) => new Option(o, enclosingQuestion));
+	  var oList = jsonOptions.map(function (o) {
+	    return new Option(o, enclosingQuestion);
+	  });
 	  if (Array.isArray(ordered)) {
-	    console.assert(ordered.length === oList.length,
-	        'Ordered ids have a different length from the number of options.');
-	    let newList = [];
-	    ordered.forEach((oid) =>
-	        newList.push(oList.filter((o) => o.id === oid)[0]));
-	    return newList;
+	    var _ret = function () {
+	      console.assert(ordered.length === oList.length, 'Ordered ids have a different length from the number of options.');
+	      var newList = [];
+	      ordered.forEach(function (oid) {
+	        return newList.push(oList.filter(function (o) {
+	          return o.id === oid;
+	        })[0]);
+	      });
+	      return {
+	        v: newList
+	      };
+	    }();
+
+	    if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
 	  }
 	  return oList;
 	};
@@ -376,7 +410,7 @@
 	 * @param {Question} _block
 	 * @constructor
 	 */
-	var Question = function(_jsonQuestion, _block) {
+	var Question = function Question(_jsonQuestion, _block) {
 	  assertJSONHasProperties(_jsonQuestion, 'id', 'qtext');
 	  var id = _jsonQuestion.id,
 	      branchMap = _jsonQuestion.branchMap || {},
@@ -399,12 +433,12 @@
 	   * option with the provided id.
 	   */
 	  this.getOption = function (oid) {
-	    for (let i = 0; i < this.options.length; i++) {
+	    for (var i = 0; i < this.options.length; i++) {
 	      if (this.options[i].id === oid) {
 	        return this.options[i];
 	      }
 	    }
-	    throw new ObjectNotFoundException('Option', oid, `question ${this.id}`);
+	    throw new ObjectNotFoundException('Option', oid, 'question ' + this.id);
 	  };
 	  /**
 	   * Function used to parse the provided freetext.
@@ -439,8 +473,7 @@
 	   * Provides freetext data about this question.
 	   * @type {boolean|string|RegExp}
 	   */
-	  this.freetext = parseBools(freetext, false) ?
-	      this.setFreetext(freetext) : Survey.freetextDefault;
+	  this.freetext = parseBools(freetext, false) ? this.setFreetext(freetext) : Survey.freetextDefault;
 	  /**
 	   * Either a string or a list of strings corresponding to questions we expect
 	   * to be correlated with this question.
@@ -453,8 +486,7 @@
 	   * @type {boolean}
 	   */
 	  if (config.debug) {
-	    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined',
-	        `Expected boolean, got ${typeof jsonRandomize}`);
+	    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined', 'Expected boolean, got ' + (typeof jsonRandomize === 'undefined' ? 'undefined' : _typeof(jsonRandomize)));
 	  }
 	  this.randomizable = parseBools(jsonRandomize, Survey.randomizeDefault);
 	  /**
@@ -518,9 +550,14 @@
 	   * Returns the json representation of this question.
 	   * @returns {{id: *, qtext: *, branchMap: {}, freetext: *, correlation: *, randomize: (boolean|*), options: *, ordered: *, exclusive: *, breakoff: *}}
 	   */
-	  this.toJSON = function() {
-	    let branchMap = {};
-	    for (let [v, k] in this.branchMap.entries()) {
+	  this.toJSON = function () {
+	    var branchMap = {};
+	    for (var _ref3 in this.branchMap.entries()) {
+	      var _ref2 = _slicedToArray(_ref3, 2);
+
+	      var v = _ref2[0];
+	      var k = _ref2[1];
+
 	      branchMap[k] = v;
 	    }
 	    return {
@@ -530,7 +567,9 @@
 	      freetext: this.freetext instanceof RegExp ? this.freetext.source : this.freetext,
 	      correlation: this.correlation,
 	      randomize: this.randomizable,
-	      options: this.options.map((o) => o.toJSON()),
+	      options: this.options.map(function (o) {
+	        return o.toJSON();
+	      }),
 	      ordered: this.ordered,
 	      exclusive: this.exclusive,
 	      breakoff: this.breakoff
@@ -542,25 +581,43 @@
 	   * @param {*} that The object to compare
 	   * @returns {boolean}
 	   */
-	  this.equals = function(that) {
+	  this.equals = function (that) {
 	    if (!(that instanceof Question)) return false;
 	    var branchMapEqual = true;
-	    for (var [k, v] of that.branchMap) {
-	      branchMapEqual = branchMapEqual &&
-	          that.branchMap.has(k) &&
-	          that.branchMap.get(k).equals(v);
-	      if (!branchMapEqual) break;
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	      for (var _iterator = that.branchMap[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        var _step$value = _slicedToArray(_step.value, 2);
+
+	        var k = _step$value[0];
+	        var v = _step$value[1];
+
+	        branchMapEqual = branchMapEqual && that.branchMap.has(k) && that.branchMap.get(k).equals(v);
+	        if (!branchMapEqual) break;
+	      }
+	    } catch (err) {
+	      _didIteratorError = true;
+	      _iteratorError = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion && _iterator.return) {
+	          _iterator.return();
+	        }
+	      } finally {
+	        if (_didIteratorError) {
+	          throw _iteratorError;
+	        }
+	      }
 	    }
-	    return that instanceof Question &&
-	        this.id === that.id &&
-	        this.qtext === that.qtext &&
-	        branchMapEqual &&
-	        this.freetext === that.freetext &&
-	        this.randomizable === that.randomizable &&
-	        this.options.reduce((tv, o1) => tv && that.options.find(o2 => o2.equals(o1)), true) &&
-	        this.ordered === that.ordered &&
-	        this.exclusive === that.exclusive &&
-	        this.breakoff === that.breakoff;
+
+	    return that instanceof Question && this.id === that.id && this.qtext === that.qtext && branchMapEqual && this.freetext === that.freetext && this.randomizable === that.randomizable && this.options.reduce(function (tv, o1) {
+	      return tv && that.options.find(function (o2) {
+	        return o2.equals(o1);
+	      });
+	    }, true) && this.ordered === that.ordered && this.exclusive === that.exclusive && this.breakoff === that.breakoff;
 	  };
 	  /**
 	   * Adds the provided option to this question. If the question and if option ids are not
@@ -568,7 +625,7 @@
 	   * That is, this function assumes that for ordered options, options will be added in order.
 	   * @param {Option} option The option to add to this question.
 	   */
-	  this.add_option = function(option) {
+	  this.add_option = function (option) {
 	    // TODO(etosch): write unit test.
 	    if (this.freetext) {
 	      throw new MalformedSurveyException('Cannot add an option to a freetext question.');
@@ -579,11 +636,13 @@
 	      }
 	    }
 	  };
-	  this.remove_option = function(option) {
-	    let index = this.options.findIndex(o => o.equals(option));
+	  this.remove_option = function (option) {
+	    var index = this.options.findIndex(function (o) {
+	      return o.equals(option);
+	    });
 	    this.options.splice(index, 1);
 	  };
-	  this.clear_options = function() {
+	  this.clear_options = function () {
 	    // TODO: write unit test.
 	    this.options = [];
 	    this.branchMap = new Map();
@@ -599,8 +658,9 @@
 	 * @param {Block} enclosingBlock
 	 * @returns {Array}
 	 */
-	Question.makeQuestions = function(_jsonQuestions, enclosingBlock) {
-	  var i, qList = [];
+	Question.makeQuestions = function (_jsonQuestions, enclosingBlock) {
+	  var i,
+	      qList = [];
 
 	  for (i = 0; i < _jsonQuestions.length; i++) {
 	    var q = new Question(_jsonQuestions[i], enclosingBlock);
@@ -614,19 +674,26 @@
 	 * @param {JSON} _jsonBlock The json version of the block, passed as the initial input.
 	 * @constructor
 	 */
-	var Block = function(_jsonBlock) {
+	var Block = function Block(_jsonBlock) {
+	  var _this = this;
+
 	  assertJSONHasProperties(_jsonBlock, 'id');
-	  var id = `${_jsonBlock.id}`,
+	  var id = '' + _jsonBlock.id,
 	      questions = _jsonBlock.questions || [],
-	      jsonRandomize = _jsonBlock.randomize ,
+	      jsonRandomize = _jsonBlock.randomize,
 	      subblocks = _jsonBlock.subblocks || [];
 	  blockMAP.set(id, this);
 
 	  var numbersRegexp = new RegExp('[0-9]+');
-	  this._idStringToArray = _idString =>
-	      _idString.split('.').map((s) => parseInt(numbersRegexp.exec(s)[0]));
+	  this._idStringToArray = function (_idString) {
+	    return _idString.split('.').map(function (s) {
+	      return parseInt(numbersRegexp.exec(s)[0]);
+	    });
+	  };
 	  var floatingBlockRegexp = new RegExp('(_|[a-z][a-z]*)[1-9][0-9]*');
-	  var randomizableId = _idString => floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
+	  var randomizableId = function randomizableId(_idString) {
+	    return floatingBlockRegexp.exec(_idString.split('.').slice(-1)[0]);
+	  };
 	  // get the total number of 'slots' and assign indices
 	  /**
 	   * The user-supplied id. This will have the heirarchical/randomization semantics embedded in it.
@@ -655,8 +722,7 @@
 	   * @type {boolean}
 	   */
 	  if (config.debug) {
-	    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined',
-	        `Expected boolean, got ${typeof jsonRandomize}`);
+	    console.assert(typeof jsonRandomize === 'boolean' || typeof jsonRandomize === 'undefined', 'Expected boolean, got ' + (typeof jsonRandomize === 'undefined' ? 'undefined' : _typeof(jsonRandomize)));
 	  }
 	  this.randomizable = Boolean(randomizableId(this.id)) || parseBools(jsonRandomize, Block.randomizeDefault);
 	  /**
@@ -672,9 +738,10 @@
 	    // Since we rely on the static analyzer to do a more thorough check, for now just see
 	    // if all of the branch maps are not empty.
 	    if (this.topLevelQuestions.length < 2) return false;
-	    let branchMapSize = this.topLevelQuestions[0].branchMap.size;
-	    return branchMapSize > 0 &&
-	        this.topLevelQuestions.reduce((tv, q) => tv && q.branchMap.size === branchMapSize, true);
+	    var branchMapSize = this.topLevelQuestions[0].branchMap.size;
+	    return branchMapSize > 0 && this.topLevelQuestions.reduce(function (tv, q) {
+	      return tv && q.branchMap.size === branchMapSize;
+	    }, true);
 	  };
 	  /**
 	   * Returns boolean indicating whether this is a branch-one block.
@@ -683,8 +750,10 @@
 	  this.isBranchOne = function () {
 	    // Assume that we are properly formed.
 	    if (this.isBranchAll()) return false;
-	    if (this.topLevelQuestions.filter((q) => q.branchMap.size > 0).length === 1) return true;
-	    for (let i = 0; i < this.subblocks.length; i++) {
+	    if (this.topLevelQuestions.filter(function (q) {
+	      return q.branchMap.size > 0;
+	    }).length === 1) return true;
+	    for (var i = 0; i < this.subblocks.length; i++) {
 	      if (this.subblocks[i].isBranchOne()) {
 	        return true;
 	      }
@@ -700,20 +769,46 @@
 	   * @throws ObjectNotFoundException if this block does not contain a question with
 	   * the input id at the top level.
 	   */
-	  this.getQuestion = function (quid, deep = false, thrownotfound = true) {
-	    var question = this.topLevelQuestions.find(q => q.id === quid);
+	  this.getQuestion = function (quid) {
+	    var deep = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	    var thrownotfound = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+	    var question = this.topLevelQuestions.find(function (q) {
+	      return q.id === quid;
+	    });
 	    if (deep && !question) {
-	      for (let b of this.subblocks) {
-	        question = b.getQuestion(quid, true, false);
-	        if (question) {
-	          break;
+	      var _iteratorNormalCompletion2 = true;
+	      var _didIteratorError2 = false;
+	      var _iteratorError2 = undefined;
+
+	      try {
+	        for (var _iterator2 = this.subblocks[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+	          var b = _step2.value;
+
+	          question = b.getQuestion(quid, true, false);
+	          if (question) {
+	            break;
+	          }
+	        }
+	      } catch (err) {
+	        _didIteratorError2 = true;
+	        _iteratorError2 = err;
+	      } finally {
+	        try {
+	          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+	            _iterator2.return();
+	          }
+	        } finally {
+	          if (_didIteratorError2) {
+	            throw _iteratorError2;
+	          }
 	        }
 	      }
 	    }
 	    if (question || !thrownotfound) {
 	      return question;
 	    }
-	    throw new ObjectNotFoundException('Question', quid, `block ${this.id}`);
+	    throw new ObjectNotFoundException('Question', quid, 'block ' + this.id);
 	  };
 	  /**
 	   * Returns whether that follows (+1), precedes (-1), or is a sub-block (0) of this.
@@ -723,7 +818,7 @@
 	   */
 	  this.idComp = function (that) {
 	    if (this.id === that.id) return 0;
-	    for (let i = 0; i < this.idArray.length + 1; i++) {
+	    for (var i = 0; i < this.idArray.length + 1; i++) {
 	      // If we have reached the end of the comparison and that block has a longer id, then
 	      // that block is a subblock.
 	      if (i >= that.idArray.length || i === this.idArray.length) return 0;
@@ -742,27 +837,34 @@
 	   */
 	  this.randomize = function () {
 	    var i, j;
-	    var newSBlocks = this.subblocks.map(() => -1);
+	    var newSBlocks = this.subblocks.map(function () {
+	      return -1;
+	    });
 	    // Randomize questions
 	    FYshuffle(this.topLevelQuestions);
 	    // Randomize options
-	    this.topLevelQuestions.forEach(q => q.randomize());
+	    this.topLevelQuestions.forEach(function (q) {
+	      return q.randomize();
+	    });
 	    // If we have no subblocks, then we're done.
 	    if (newSBlocks.length === 0) return;
 	    // Randomize blocks
-	    var stationaryBlocks = this.subblocks.filter((b) => !b.randomizable);
-	    var nonStationaryBlocks = this.subblocks.filter((b) => b.randomizable);
-	    var indices = this.subblocks
-	        .reduce((lst) => lst.concat(lst.slice(-1)[0] + 1), [-1])
-	        .slice(1);
+	    var stationaryBlocks = this.subblocks.filter(function (b) {
+	      return !b.randomizable;
+	    });
+	    var nonStationaryBlocks = this.subblocks.filter(function (b) {
+	      return b.randomizable;
+	    });
+	    var indices = this.subblocks.reduce(function (lst) {
+	      return lst.concat(lst.slice(-1)[0] + 1);
+	    }, [-1]).slice(1);
 	    FYshuffle(indices);
 	    var sample = indices.slice(0, nonStationaryBlocks.length);
 	    FYshuffle(nonStationaryBlocks);
 
 	    for (i = 0; i < sample.length; i++) {
 	      // Pick the locations for where to put the non-stationary blocks
-	      console.assert(nonStationaryBlocks[i] !== undefined,
-	          'nonStationaryBlocks should never be undefined.');
+	      console.assert(nonStationaryBlocks[i] !== undefined, 'nonStationaryBlocks should never be undefined.');
 	      newSBlocks[sample[i]] = nonStationaryBlocks[i];
 	    }
 	    for (i = 0, j = 0; i < newSBlocks.length; i++) {
@@ -771,10 +873,11 @@
 	        j++;
 	      }
 	    }
-	    console.assert(j === stationaryBlocks.length,
-	        `j should equal the number of stationary blocks: ${j} vs. ${stationaryBlocks.length}`);
+	    console.assert(j === stationaryBlocks.length, 'j should equal the number of stationary blocks: ' + j + ' vs. ' + stationaryBlocks.length);
 	    this.subblocks = newSBlocks;
-	    this.subblocks.forEach((b) => b.randomize());
+	    this.subblocks.forEach(function (b) {
+	      return b.randomize();
+	    });
 	  };
 	  // Added a closure to make this-semantics clear.
 	  this.subblocks = function (containingBlock, subblocks) {
@@ -785,32 +888,28 @@
 	    }
 
 	    if (subblocks.length === 0) {
-	      log.info(`No subblocks in Block ${containingBlock.id}`);
+	      log.info('No subblocks in Block ' + containingBlock.id);
 	      return [];
 	    }
-	    return subblocks.map((subb) => populate(subb, containingBlock));
+	    return subblocks.map(function (subb) {
+	      return populate(subb, containingBlock);
+	    });
 	  }(this, subblocks);
-	  console.assert(
-	      subblocks.length === this.subblocks.length,
-	      `json subblocks must match Block object subblocks: ` +
-	      `${subblocks.length} vs. ${this.subblocks.length}`);
+	  console.assert(subblocks.length === this.subblocks.length, 'json subblocks must match Block object subblocks: ' + (subblocks.length + ' vs. ' + this.subblocks.length));
 	  /**
 	   * Returns the first question to be seen from this block.
 	   * @returns {Question}
 	   * @throws MalformedSurveyException if there are no questions or subblocks.
 	   */
 	  this.getFirstQuestion = function () {
-	    if (this.topLevelQuestions.length !== 0)
-	      return this.topLevelQuestions[0];
-	    if (this.subblocks.length === 0)
-	      throw new MalformedSurveyException(`empty block stack ending in ${this.id}`);
+	    if (this.topLevelQuestions.length !== 0) return this.topLevelQuestions[0];
+	    if (this.subblocks.length === 0) throw new MalformedSurveyException('empty block stack ending in ' + this.id);
 	    return this.subblocks[0].getFirstQuestion();
 	  };
 	  // Assert that the sub-blocks have the appropriate ids
-	  console.assert(this.subblocks.reduce(
-	          (tv, b) => tv && this.idComp(b) === 0, true),
-	      'subblocks should all return 0 on idComp'
-	  );
+	  console.assert(this.subblocks.reduce(function (tv, b) {
+	    return tv && _this.idComp(b) === 0;
+	  }, true), 'subblocks should all return 0 on idComp');
 	  /**
 	   * Returns the JSON representation of this block.
 	   * @returns {{id: *, questions: *, randomize: (boolean|*), subblocks: *}}
@@ -818,9 +917,13 @@
 	  this.toJSON = function () {
 	    return {
 	      id: this.id,
-	      questions: this.topLevelQuestions.map(q => q.toJSON()),
+	      questions: this.topLevelQuestions.map(function (q) {
+	        return q.toJSON();
+	      }),
 	      randomize: this.randomizable,
-	      subblocks: this.subblocks.map(b => b.toJSON())
+	      subblocks: this.subblocks.map(function (b) {
+	        return b.toJSON();
+	      })
 	    };
 	  };
 	  /**
@@ -832,20 +935,27 @@
 	   */
 	  this.equals = function (that) {
 	    // TODO(etosch) : write unit test
-	    return that instanceof Block &&
-	        this.id === that.id &&
-	        this.subblocks.reduce((tv, b1) =>
-	        tv && that.subblocks.find(b2 => b1.equals(b2)), true) &&
-	        this.topLevelQuestions.reduce((tv, q1) =>
-	        tv && that.topLevelQuestions.find(q2 => q1.equals(q2)), true);
+	    return that instanceof Block && this.id === that.id && this.subblocks.reduce(function (tv, b1) {
+	      return tv && that.subblocks.find(function (b2) {
+	        return b1.equals(b2);
+	      });
+	    }, true) && this.topLevelQuestions.reduce(function (tv, q1) {
+	      return tv && that.topLevelQuestions.find(function (q2) {
+	        return q1.equals(q2);
+	      });
+	    }, true);
 	  };
 	  /**
 	   * Returns all questions belonging to this block and its subblocks.
 	   * @returns {Array<Question>}
 	   */
 	  this.getAllQuestions = function () {
-	    let retval = [...this.topLevelQuestions];
-	    this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
+	    var retval = [].concat(_toConsumableArray(this.topLevelQuestions));
+	    this.subblocks.forEach(function (b) {
+	      return b.getAllQuestions().forEach(function (q) {
+	        return retval.push(q);
+	      });
+	    });
 	    return retval;
 	  };
 	};
@@ -854,22 +964,28 @@
 	   * Gets the id of the parent block, to use for parent block lookup.
 	   * @returns {string}
 	   */
-	Block.prototype.get_parent_id = function() {
-	    let parent_arr = this.id.split('.').slice(0, -1);
-	    return parent_arr.length === 0 ? "" : parent_arr.reduce((a, b) => `${a}.${b}`);
-	  };
+	Block.prototype.get_parent_id = function () {
+	  var parent_arr = this.id.split('.').slice(0, -1);
+	  return parent_arr.length === 0 ? "" : parent_arr.reduce(function (a, b) {
+	    return a + '.' + b;
+	  });
+	};
 
 	/**
 	   * Adds the block provided block to this block.
 	   * @param {Block} block The block to add.
 	   * @param {?number} index The index at which to add this block.
 	   */
-	Block.prototype.add_block = function(block, index = this.subblocks.length) {
-	  var update_ids = function (parent, child) {
+	Block.prototype.add_block = function (block) {
+	  var index = arguments.length <= 1 || arguments[1] === undefined ? this.subblocks.length : arguments[1];
+
+	  var update_ids = function update_ids(parent, child) {
 	    // update block's id
-	    child.id = `${parent.id}.${child.randomizable ? '_' : ""}${parent.subblocks.length}`;
+	    child.id = parent.id + '.' + (child.randomizable ? '_' : "") + parent.subblocks.length;
 	    child.idArray = child._idStringToArray(child.id);
-	    child.subblocks.forEach((b) => update_ids(child, b));
+	    child.subblocks.forEach(function (b) {
+	      return update_ids(child, b);
+	    });
 	  };
 	  // Check whether it is valid to add this block.
 	  if (this.isBranchAll()) {
@@ -881,19 +997,21 @@
 	  if (block.get_parent_id() !== this.id) {
 	    update_ids(this, block);
 	  }
-	  let prev_subs = this.subblocks.length;
+	  var prev_subs = this.subblocks.length;
 	  this.subblocks.splice(index, 0, block);
 	  block.parent = this;
-	    console.assert(this.subblocks.length === prev_subs + 1);
-	//                   `Expected these subblocks ${this.subblocks.length} and prev subblocks ${prev_subs} to differ by 1.`});
+	  console.assert(this.subblocks.length === prev_subs + 1);
+	  //                   `Expected these subblocks ${this.subblocks.length} and prev subblocks ${prev_subs} to differ by 1.`});
 	};
 
 	/**
 	 * Removes the provided block from this block's list of subblocks.
 	 * @param block
 	 */
-	Block.prototype.remove_block = function(block) {
-	  let idx = this.subblocks.find(subb => subb.equals(block));
+	Block.prototype.remove_block = function (block) {
+	  var idx = this.subblocks.find(function (subb) {
+	    return subb.equals(block);
+	  });
 	  if (idx === -1) {
 	    throw new ObjectNotFoundException('Block', block.id, 'Block' + this.id);
 	  }
@@ -906,58 +1024,40 @@
 	   * @param {Question} question Question to add to this block.
 	   * @throws MalformedSurveyException if the question cannot be added.
 	   */
-	Block.prototype.add_question = function(question) {
-	  let isBranchAll = this.subblocks.length > 0 && this.isBranchAll();
-	  let isBranchOne = this.isBranchOne();
-	  let isBranchNone = !isBranchAll && !isBranchOne;
-	  let addingNonBranchingQuestionToNonBranchAllBlock =
-	      question.branchMap.size === 0 &&
-	      !isBranchAll;
-	  let addingBranchingQuestionToNonBranchingBlock =
-	      question.branchMap.size > 0 &&
-	      isBranchNone;
-	  let addingBranchingQuestionToSingleQuestionBranchOne =
-	      question.branchMap.size > 0 &&
-	      isBranchOne &&
-	      this.subblocks.length === 0 &&
-	      this.topLevelQuestions.length === 1 &&
-	      this.topLevelQuestions[0].branchMap.size === question.branchMap.size;
-	  let addingBranchingQuestionToBranchAllBlock =
-	      question.branchMap.size > 0 &&
-	      isBranchAll &&
-	      this.topLevelQuestions.reduce((tv, q) =>
-	          tv && q.branchMap.size === question.branchMap.size,
-	          true
-	      );
+	Block.prototype.add_question = function (question) {
+	  var isBranchAll = this.subblocks.length > 0 && this.isBranchAll();
+	  var isBranchOne = this.isBranchOne();
+	  var isBranchNone = !isBranchAll && !isBranchOne;
+	  var addingNonBranchingQuestionToNonBranchAllBlock = question.branchMap.size === 0 && !isBranchAll;
+	  var addingBranchingQuestionToNonBranchingBlock = question.branchMap.size > 0 && isBranchNone;
+	  var addingBranchingQuestionToSingleQuestionBranchOne = question.branchMap.size > 0 && isBranchOne && this.subblocks.length === 0 && this.topLevelQuestions.length === 1 && this.topLevelQuestions[0].branchMap.size === question.branchMap.size;
+	  var addingBranchingQuestionToBranchAllBlock = question.branchMap.size > 0 && isBranchAll && this.topLevelQuestions.reduce(function (tv, q) {
+	    return tv && q.branchMap.size === question.branchMap.size;
+	  }, true);
 
-	  if (addingNonBranchingQuestionToNonBranchAllBlock ||
-	      addingBranchingQuestionToNonBranchingBlock ||
-	      addingBranchingQuestionToSingleQuestionBranchOne ||
-	      addingBranchingQuestionToBranchAllBlock
-	  ){
+	  if (addingNonBranchingQuestionToNonBranchAllBlock || addingBranchingQuestionToNonBranchingBlock || addingBranchingQuestionToSingleQuestionBranchOne || addingBranchingQuestionToBranchAllBlock) {
 	    this.topLevelQuestions.push(question);
 	    question.block = this;
 	    return;
 	  }
-	  throw new MalformedSurveyException(
-	      `Cannot add question with branch map size ${question.branchMap.size} to block of type
-	      ${isBranchAll ? 'BRANCH_ALL' : (isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE')}`);
-	  };
+	  throw new MalformedSurveyException('Cannot add question with branch map size ' + question.branchMap.size + ' to block of type\n      ' + (isBranchAll ? 'BRANCH_ALL' : isBranchNone ? 'BRANCH_NONE' : 'BRANCH_ONE'));
+	};
 
 	/**
 	 * Removes the provided question from this block.
 	 * @param question The question to remove.
 	 */
-	Block.prototype.remove_question = function(question) {
-	  let ctold = this.topLevelQuestions.length;
-	  let idx = this.topLevelQuestions.findIndex(q => q.equals(question));
+	Block.prototype.remove_question = function (question) {
+	  var ctold = this.topLevelQuestions.length;
+	  var idx = this.topLevelQuestions.findIndex(function (q) {
+	    return q.equals(question);
+	  });
 	  this.topLevelQuestions.splice(idx, 1);
 	  question.block = null;
 	  if (config.debug) {
 	    console.assert(ctold === this.topLevelQuestions.length + 1, 'Did not remove question from block.');
 	  }
 	};
-
 
 	/**
 	 * Internal tracking for generated block ids.
@@ -972,11 +1072,12 @@
 	 * @returns {Block}
 	 */
 	// TODO: unit test
-	Block.new_block = function(parent) {
-	  var idArray = [], i = 0;
+	Block.new_block = function (parent) {
+	  var idArray = [],
+	      i = 0;
 	  if (parent) {
 	    idArray = parent.idArray;
-	    console.assert((typeof parent.idArray) !== 'undefined', 'parent.idArray must be defined');
+	    console.assert(typeof parent.idArray !== 'undefined', 'parent.idArray must be defined');
 	    i = parent.idArray.length;
 	    if (Block._blocks_ids[i] === undefined) {
 	      Block._blocks_ids[i] = 1;
@@ -985,7 +1086,9 @@
 	  idArray[i] = Block._blocks_ids[i];
 	  Block._blocks_ids[i] += 1;
 	  console.assert(typeof idArray !== 'undefined', 'idArray cannot be undefined');
-	  let id = idArray.length > 1 ? idArray.reduce((a, b) => `${a}.${b}`) : `${idArray[0]}`;
+	  var id = idArray.length > 1 ? idArray.reduce(function (a, b) {
+	    return a + '.' + b;
+	  }) : '' + idArray[0];
 	  return new Block({
 	    id: id,
 	    questions: [],
@@ -998,10 +1101,10 @@
 	 * @returns {{id: string, randomize: Function}}
 	 * @constructor
 	 */
-	Block.NEXT_BLOCK = function() {
+	Block.NEXT_BLOCK = function () {
 	  return {
 	    id: "NEXT",
-	    randomize: function() {}
+	    randomize: function randomize() {}
 	  };
 	};
 
@@ -1011,15 +1114,18 @@
 	 * @param {json} _jsonSurvey The input survey, typically generated by another program.
 	 * @constructor
 	 */
-	var Survey = function(_jsonSurvey) {
+	var Survey = function Survey(_jsonSurvey) {
 	  questionMAP.clear();
 	  blockMAP.clear();
 	  assertJSONHasProperties(_jsonSurvey, 'filename', 'survey');
-	  var {filename, survey, breakoff} = _jsonSurvey;
+	  var filename = _jsonSurvey.filename;
+	  var survey = _jsonSurvey.survey;
+	  var breakoff = _jsonSurvey.breakoff;
 	  /**
 	   * The path of the source file used to generate this survey; may be empty.
 	   * @type {string}
 	   */
+
 	  this.filename = filename;
 	  /**
 	   * Boolean indicating whether breakoff is permitted for this survey.
@@ -1032,16 +1138,18 @@
 	   */
 	  this.topLevelBlocks = survey.map(function (jsonBlock) {
 	    // console.log(jsonBlock);
-	    let b = new Block(jsonBlock);
+	    var b = new Block(jsonBlock);
 	    // console.log("new block:", b);
 	    return b;
 	  });
-	  questionMAP.forEach(q =>  q.makeBranchMap());
+	  questionMAP.forEach(function (q) {
+	    return q.makeBranchMap();
+	  });
 	  /**
 	   * The list of all questions.
 	   * @type {Array<survey.Question>}
 	   */
-	  this.questions = [...questionMAP.values()];
+	  this.questions = [].concat(_toConsumableArray(questionMAP.values()));
 	};
 
 	/**
@@ -1050,14 +1158,15 @@
 	 * Note: we cannot just return the input json because the survey may have been mutated.
 	 * @returns {{filename: *, breakoff: *, survey: *}}
 	 */
-	Survey.prototype.toJSON = function() {
+	Survey.prototype.toJSON = function () {
 	  return {
 	    filename: this.filename,
 	    breakoff: this.breakoff,
-	    survey: this.topLevelBlocks.map(b => b.toJSON())
+	    survey: this.topLevelBlocks.map(function (b) {
+	      return b.toJSON();
+	    })
 	  };
 	};
-
 
 	/**
 	 * Compares two surveys to see if they are equal, by comparing the equality of their
@@ -1065,12 +1174,16 @@
 	 * @param {Survey} that The survey to compare to.
 	 * @returns {boolean}
 	 */
-	Survey.prototype.equals = function(that) {
-	  let rhs = that.topLevelBlocks;
-	  let lhs = this.topLevelBlocks;
-	  if(!(that instanceof Survey)) return false;
+	Survey.prototype.equals = function (that) {
+	  var rhs = that.topLevelBlocks;
+	  var lhs = this.topLevelBlocks;
+	  if (!(that instanceof Survey)) return false;
 	  if (lhs.length !== rhs.length) return false;
-	  return lhs.reduce((tv, b1) => tv && rhs.find(b2 => b1.equals(b2)), true);
+	  return lhs.reduce(function (tv, b1) {
+	    return tv && rhs.find(function (b2) {
+	      return b1.equals(b2);
+	    });
+	  }, true);
 	};
 
 	/**
@@ -1079,10 +1192,12 @@
 	 * @returns {Option}
 	 * @throws ObjectNotFoundException if the survey does not contain any options with this id.
 	 */
-	Survey.prototype.get_option_by_id = function(oid) {
-	  for (let i = 0; i < this.questions.length; i++) {
-	    let q = this.questions[i];
-	    let o = q.options.find(opt => opt.id === oid); // eslint-disable-line no-loop-func
+	Survey.prototype.get_option_by_id = function (oid) {
+	  for (var i = 0; i < this.questions.length; i++) {
+	    var q = this.questions[i];
+	    var o = q.options.find(function (opt) {
+	      return opt.id === oid;
+	    }); // eslint-disable-line no-loop-func
 	    if (o) return o;
 	  }
 	  throw new ObjectNotFoundException('Option', oid, 'current survey');
@@ -1093,10 +1208,11 @@
 	 * @param {string} question_id The identifier of the question of interest.
 	 * @returns {Question}
 	 */
-	Survey.prototype.get_question_by_id = function(question_id) {
-	  return this.questions.find(q => q.id === question_id);
+	Survey.prototype.get_question_by_id = function (question_id) {
+	  return this.questions.find(function (q) {
+	    return q.id === question_id;
+	  });
 	};
-
 
 	/**
 	 * Returns the Block object in this survey that has the provided id.
@@ -1104,28 +1220,75 @@
 	 * @returns {Block}
 	 * @throws ObjectNotFoundException
 	 */
-	Survey.prototype.get_block_by_id = function(block_id, notfounderr=true) {
+	Survey.prototype.get_block_by_id = function (block_id) {
+	  var notfounderr = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
 	  if (block_id === '') {
 	    console.warn('Trying to get block with empty string id. Please correct.');
 	    return null;
 	  }
-	  var find_block_by_id = function(b, id) {
+	  var find_block_by_id = function find_block_by_id(b, id) {
 	    if (b.id === id) return b;
-	    for (let [, subb] of b.subblocks.entries()) {
-	      let found = find_block_by_id(subb, id);
-	      if (found) return found;
+	    var _iteratorNormalCompletion3 = true;
+	    var _didIteratorError3 = false;
+	    var _iteratorError3 = undefined;
+
+	    try {
+	      for (var _iterator3 = b.subblocks.entries()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	        var _step3$value = _slicedToArray(_step3.value, 2);
+
+	        var subb = _step3$value[1];
+
+	        var found = find_block_by_id(subb, id);
+	        if (found) return found;
+	      }
+	    } catch (err) {
+	      _didIteratorError3 = true;
+	      _iteratorError3 = err;
+	    } finally {
+	      try {
+	        if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	          _iterator3.return();
+	        }
+	      } finally {
+	        if (_didIteratorError3) {
+	          throw _iteratorError3;
+	        }
+	      }
 	    }
 	  };
-	  for (let [, b] of this.topLevelBlocks.entries()) {
-	    let found = find_block_by_id(b, block_id);
-	    if (found) return found;
+	  var _iteratorNormalCompletion4 = true;
+	  var _didIteratorError4 = false;
+	  var _iteratorError4 = undefined;
+
+	  try {
+	    for (var _iterator4 = this.topLevelBlocks.entries()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	      var _step4$value = _slicedToArray(_step4.value, 2);
+
+	      var b = _step4$value[1];
+
+	      var found = find_block_by_id(b, block_id);
+	      if (found) return found;
+	    }
+	  } catch (err) {
+	    _didIteratorError4 = true;
+	    _iteratorError4 = err;
+	  } finally {
+	    try {
+	      if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	        _iterator4.return();
+	      }
+	    } finally {
+	      if (_didIteratorError4) {
+	        throw _iteratorError4;
+	      }
+	    }
 	  }
-	  if (notfounderr)
-	    throw new ObjectNotFoundException('Block', block_id, 'current survey');
+
+	  if (notfounderr) throw new ObjectNotFoundException('Block', block_id, 'current survey');
 	};
 
-
-	Survey.prototype._find_containing_question = function(qid, survey) {
+	Survey.prototype._find_containing_question = function (qid, survey) {
 	  //  Find the block that holds the question
 	  return survey.topLevelBlocks.map(function (b) {
 	    try {
@@ -1133,33 +1296,37 @@
 	    } catch (e) {
 	      return false;
 	    }
-	  }).filter((item) => item !== false)[0];
+	  }).filter(function (item) {
+	    return item !== false;
+	  })[0];
 	};
-
 
 	/**
 	 * Removes the provided option from the survey by searching through the survey.
 	 * @param {Option} option The option to remove.
 	 * @param {?Question} question The question this option belongs to.
 	 */
-	Survey.prototype.remove_option = function(option, question = null) {
+	Survey.prototype.remove_option = function (option) {
+	  var question = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
 	  if (!question) {
-	    question = this.questions.find(q =>
-	        q.options.find(o => o.equals(option))
-	    );
+	    question = this.questions.find(function (q) {
+	      return q.options.find(function (o) {
+	        return o.equals(option);
+	      });
+	    });
 	  }
 	  question.remove_option(option);
 	};
-
 
 	/**
 	 * Adds the provided question to the provided block in this survey.
 	 * @param {Question} question The question to add.
 	 * @param {Block} block The block to add to.
 	 */
-	Survey.prototype.add_question = function(question, block) {
+	Survey.prototype.add_question = function (question, block) {
 	  // Make sure that this survey contains the provided block.
-	  let b = this.get_block_by_id(block.id);
+	  var b = this.get_block_by_id(block.id);
 	  console.assert(b.equals(block), 'Provided block is not equal to any known blocks in this survey.');
 	  block.add_question(question);
 	  this.questions.push(question);
@@ -1170,18 +1337,18 @@
 	 * provided, the method will search for it.
 	 * @param {Question} question The question to remove.
 	 */
-	Survey.prototype.remove_question = function(question) {
-	  let block = question.block;
-	  let block_num_questions_before = block.topLevelQuestions.length;
-	  let idx = this.questions.findIndex(q => q.equals(question));
-	  let survey_num_questions_before = this.questions.length;
+	Survey.prototype.remove_question = function (question) {
+	  var block = question.block;
+	  var block_num_questions_before = block.topLevelQuestions.length;
+	  var idx = this.questions.findIndex(function (q) {
+	    return q.equals(question);
+	  });
+	  var survey_num_questions_before = this.questions.length;
 	  block.remove_question(question);
 	  this.questions.splice(idx, 1);
 	  if (config.debug) {
-	    console.assert(block_num_questions_before === block.topLevelQuestions.length + 1,
-	        'Did not remove question from block.');
-	    console.assert(survey_num_questions_before === this.questions.length + 1,
-	        'Did not remove question from survey.');
+	    console.assert(block_num_questions_before === block.topLevelQuestions.length + 1, 'Did not remove question from block.');
+	    console.assert(survey_num_questions_before === this.questions.length + 1, 'Did not remove question from survey.');
 	  }
 	};
 
@@ -1195,15 +1362,16 @@
 	 * @param {?number} index The index at which to insert the provided block.
 	 * the parent.
 	 */
-	Survey.prototype.add_block = function(
-	    block,
-	    parent = this.get_block_by_id(block.get_parent_id()),
-	    index = parent ? parent.subblocks.length : this.topLevelBlocks.length
-	){
-	  if(parent) {
-	    let p = this.get_block_by_id(parent.id);
-	    console.assert(p.equals(parent), `Parent block ${parent} not found equal to ${p}`);
-	    let prev_subblocks = parent.subblocks.length;
+	Survey.prototype.add_block = function (block) {
+	  var _this2 = this;
+
+	  var parent = arguments.length <= 1 || arguments[1] === undefined ? this.get_block_by_id(block.get_parent_id()) : arguments[1];
+	  var index = arguments.length <= 2 || arguments[2] === undefined ? parent ? parent.subblocks.length : this.topLevelBlocks.length : arguments[2];
+
+	  if (parent) {
+	    var p = this.get_block_by_id(parent.id);
+	    console.assert(p.equals(parent), 'Parent block ' + parent + ' not found equal to ' + p);
+	    var prev_subblocks = parent.subblocks.length;
 	    parent.add_block(block, index);
 	    console.assert(parent.subblocks.length === prev_subblocks + 1, "asdf1");
 	  } else {
@@ -1213,7 +1381,9 @@
 	    this.topLevelBlocks.splice(index, 0, block);
 	  }
 	  // add this block's questions to the top level survey questions
-	  block.getAllQuestions().forEach((q) => this.questions.push(q));
+	  block.getAllQuestions().forEach(function (q) {
+	    return _this2.questions.push(q);
+	  });
 	};
 
 	/**
@@ -1222,79 +1392,88 @@
 	 * @param {?Block} parent This block's parent. If null, it will attempt to find
 	 * the parent.
 	 */
-	Survey.prototype.remove_block = function(block, parent = null) {
+	Survey.prototype.remove_block = function (block) {
+	  var _this3 = this;
+
+	  var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
 	  if (block.idArray.length > 1) {
 	    if (!parent) {
-	      let parentid = block.get_parent_id();
+	      var parentid = block.get_parent_id();
 	      parent = getBlockById(parentid);
 	    }
-	    let ctbefore = parent.subblocks.length;
+	    var ctbefore = parent.subblocks.length;
 	    parent.remove_block(block);
-	    console.assert(ctbefore === parent.subblocks.length + 1,
-	        `Did not remove Block ${block.id} from Block ${parent.id}`);
+	    console.assert(ctbefore === parent.subblocks.length + 1, 'Did not remove Block ' + block.id + ' from Block ' + parent.id);
 	  } else {
-	    let i = this.topLevelBlocks.indexOf(block);
+	    var i = this.topLevelBlocks.indexOf(block);
 	    this.topLevelBlocks.splice(i, 1);
 	  }
 	  // remove this block's questions from the top level survey questions.
-	  block.getAllQuestions().forEach(q => {
-	    this.remove_question(q);
+	  block.getAllQuestions().forEach(function (q) {
+	    _this3.remove_question(q);
 	  });
 	};
-
-
 
 	/**
 	 * Randomizes the survey blocks and questions, as appropriate.
 	 * @param {Survey} _survey
 	 */
-	Survey.randomize = function(_survey) {
-	  let numTopLevelBlocks = _survey.topLevelBlocks.length;
+	Survey.randomize = function (_survey) {
+	  var numTopLevelBlocks = _survey.topLevelBlocks.length;
 	  // Select out and randomize the top level floating blocks.
-	  var randomizableBlocks = _survey.topLevelBlocks.filter(_block => _block.randomizable);
+	  var randomizableBlocks = _survey.topLevelBlocks.filter(function (_block) {
+	    return _block.randomizable;
+	  });
 	  // Select out and ensure that the stationary blocks are sorted.
-	  var normalBlocks = _survey.topLevelBlocks.filter(_block => !_block.randomizable);
+	  var normalBlocks = _survey.topLevelBlocks.filter(function (_block) {
+	    return !_block.randomizable;
+	  });
 	  sortById(normalBlocks);
 	  // Create a new array for the top level blocks.
-	  var newTLBs = _survey.topLevelBlocks.map(() => null);
+	  var newTLBs = _survey.topLevelBlocks.map(function () {
+	    return null;
+	  });
 	  // Sample indices for the floating blocks.
-	  var indices = newTLBs.map((dontcare, i) => i);
+	  var indices = newTLBs.map(function (dontcare, i) {
+	    return i;
+	  });
 	  FYshuffle(indices);
 	  indices = indices.slice(0, randomizableBlocks.length);
 
 	  if (config.debug) {
-	    console.assert(normalBlocks.length + randomizableBlocks.length === numTopLevelBlocks,
-	        `Num normal: ${normalBlocks.length}
-	        Num floating: ${randomizableBlocks.length}
-	        Num top level: ${numTopLevelBlocks}`
-	    );
-	    normalBlocks.forEach(b => b !== undefined);
-	    randomizableBlocks.forEach(b => b !== undefined);
+	    console.assert(normalBlocks.length + randomizableBlocks.length === numTopLevelBlocks, 'Num normal: ' + normalBlocks.length + '\n        Num floating: ' + randomizableBlocks.length + '\n        Num top level: ' + numTopLevelBlocks);
+	    normalBlocks.forEach(function (b) {
+	      return b !== undefined;
+	    });
+	    randomizableBlocks.forEach(function (b) {
+	      return b !== undefined;
+	    });
 	  }
 
 	  // Put the floating blocks where they belong
-	  for (let j = 0; j < indices.length; j++) {
+	  for (var j = 0; j < indices.length; j++) {
 	    newTLBs[indices[j]] = randomizableBlocks[j];
 	  }
 
 	  // Now put the stationary blocks in order
 	  var k = 0;
-	  for (let j = 0; j < newTLBs.length; j++) {
-	    if (!Boolean(newTLBs[j])) {
-	      newTLBs[j] = normalBlocks[k];
+	  for (var _j = 0; _j < newTLBs.length; _j++) {
+	    if (!Boolean(newTLBs[_j])) {
+	      newTLBs[_j] = normalBlocks[k];
 	      k++;
 	    }
 	  }
-	  newTLBs.forEach(tlb => tlb.randomize());
+	  newTLBs.forEach(function (tlb) {
+	    return tlb.randomize();
+	  });
 
-	  console.assert(newTLBs.length === numTopLevelBlocks,
-	      '#/top level blocks is invariant;' +
-	      `expecting ${numTopLevelBlocks}, got ${newTLBs.length}`);
+	  console.assert(newTLBs.length === numTopLevelBlocks, '#/top level blocks is invariant;' + ('expecting ' + numTopLevelBlocks + ', got ' + newTLBs.length));
 	  // Reset top level blocks
 	  _survey.topLevelBlocks = newTLBs;
 	};
 
-	Survey.prototype.randomize = function() {
+	Survey.prototype.randomize = function () {
 	  Survey.randomize(this);
 	};
 
@@ -1310,18 +1489,23 @@
 	 * Interpreter submodule
 	 *****************************************************************************/
 
-	var questionSTACK       =   [],
-	    blockSTACK          =   [],
-	    branchDest          =   null;
+	var questionSTACK = [],
+	    blockSTACK = [],
+	    branchDest = null;
 
-	var flatten = function(lst) {
-	  console.assert(Array.isArray(lst), `${lst} is not an array`);
+	var flatten = function flatten(lst) {
+	  console.assert(Array.isArray(lst), lst + ' is not an array');
 	  if (lst.length === 0) {
 	    return [];
 	  } else {
-	    let [hd, ...tl] = lst;
+	    var _lst = _toArray(lst);
+
+	    var hd = _lst[0];
+
+	    var tl = _lst.slice(1);
+
 	    if (Array.isArray(hd)) {
-	        return flatten(hd).concat(flatten(tl));
+	      return flatten(hd).concat(flatten(tl));
 	    } else {
 	      return [hd].concat(flatten(tl));
 	    }
@@ -1337,7 +1521,7 @@
 	 * @param _block {survey.Block} The block whose questions we want.
 	 * @returns {Array} A stack of questions.
 	 */
-	var getAllBlockQuestions = function(_block) {
+	var getAllBlockQuestions = function getAllBlockQuestions(_block) {
 	  if (_block.isBranchAll()) {
 	    FYshuffle(_block.topLevelQuestions);
 	    return _block.topLevelQuestions[0];
@@ -1347,24 +1531,37 @@
 	  var indices = Array.from(_block.topLevelQuestions.concat(_block.subblocks).keys());
 	  FYshuffle(indices);
 	  var qindices = indices.slice(0, _block.topLevelQuestions.length);
-	  var bindices = indices.filter((i) => qindices.find((j) => j === i) === undefined);
+	  var bindices = indices.filter(function (i) {
+	    return qindices.find(function (j) {
+	      return j === i;
+	    }) === undefined;
+	  });
 
-	  let j = 0, k = 0;
-	  let qfind = i => qindices.find(l => l === i);
-	  let bfind = i => bindices.find(l => l === i);
-	  for (let i = 0; i < indices.length; i++) {
+	  var j = 0,
+	      k = 0;
+	  var qfind = function qfind(i) {
+	    return qindices.find(function (l) {
+	      return l === i;
+	    });
+	  };
+	  var bfind = function bfind(i) {
+	    return bindices.find(function (l) {
+	      return l === i;
+	    });
+	  };
+	  for (var i = 0; i < indices.length; i++) {
 	    // it happens that i == indices[i]
-	    if ( qfind(i) !== undefined ) {
+	    if (qfind(i) !== undefined) {
 	      retval.push(_block.topLevelQuestions[j]);
 	      j++;
-	    } else if ( bfind(i) !== undefined ) {
+	    } else if (bfind(i) !== undefined) {
 	      retval.push(getAllBlockQuestions(_block.subblocks[k]));
 	      k++;
 	    } else {
 	      throw "Neither qindices nor bindices contain index " + i;
 	    }
 	  }
-	  console.assert(Array.isArray(retval), `${retval} is not an array`);
+	  console.assert(Array.isArray(retval), retval + ' is not an array');
 	  return flatten(retval);
 	};
 
@@ -1372,9 +1569,11 @@
 	 * Intitalizes the block and question stacks for the interpreter.
 	 * @param {Array<survey.Block>} _blist The list of all top-level blocks.
 	 */
-	var initializeStacks = function(_blist) {
+	var initializeStacks = function initializeStacks(_blist) {
 	  console.assert(_blist.length > 0, "Must initialize with at least one top level block.");
-	  blockSTACK = _blist.map(b => b);
+	  blockSTACK = _blist.map(function (b) {
+	    return b;
+	  });
 	  questionSTACK = getAllBlockQuestions(blockSTACK.shift());
 	};
 
@@ -1383,7 +1582,7 @@
 	 * blocks.
 	 * @param {Array<survey.Question>} _qList The next set of questions to ask.
 	 */
-	var loadQuestions = function(_qList) {
+	var loadQuestions = function loadQuestions(_qList) {
 	  questionSTACK = _qList;
 	};
 
@@ -1391,7 +1590,7 @@
 	 * Tests whether we have exhausted the questions for this block.
 	 * @returns {boolean}
 	 */
-	var isQuestionStackEmpty = function () {
+	var isQuestionStackEmpty = function isQuestionStackEmpty() {
 	  return questionSTACK.length === 0;
 	};
 
@@ -1399,7 +1598,7 @@
 	 * Tests whether we have exhaused the blocks in this survey.
 	 * @returns {boolean}
 	 */
-	var isBlockStackEmpty = function() {
+	var isBlockStackEmpty = function isBlockStackEmpty() {
 	  return blockSTACK.length === 0;
 	};
 
@@ -1408,7 +1607,7 @@
 	 * this returns undefined.
 	 * @returns {survey.Question}
 	 */
-	var nextQuestion = function() {
+	var nextQuestion = function nextQuestion() {
 	  return questionSTACK.shift();
 	};
 
@@ -1419,7 +1618,7 @@
 	 * the branchDest pointer.
 	 * @returns {survey.Block}
 	 */
-	var nextBlock =  function() {
+	var nextBlock = function nextBlock() {
 	  var head;
 	  if (branchDest) {
 	    while (!isBlockStackEmpty()) {
@@ -1428,7 +1627,7 @@
 	        blockSTACK.unshift(head);
 	        branchDest = null;
 	        break;
-	      } else if ( head.randomizable ) {
+	      } else if (head.randomizable) {
 	        blockSTACK.unshift(head);
 	        break;
 	      }
@@ -1446,11 +1645,9 @@
 	 * @param {survey.Option} o
 	 * @returns {survey.Question}
 	 */
-	var handleBranching = function (q, o){
-	  if (q.branchMap.has(o.id))
-	    branchDest = q.branchMap.get(o.id);
-	  if ( isQuestionStackEmpty() )
-	    nextBlock();
+	var handleBranching = function handleBranching(q, o) {
+	  if (q.branchMap.has(o.id)) branchDest = q.branchMap.get(o.id);
+	  if (isQuestionStackEmpty()) nextBlock();
 	  return nextQuestion();
 	};
 
@@ -1458,9 +1655,8 @@
 	 * Returns the next question. If the block stack is empty, refreshes it.
 	 * @returns {survey.Question}
 	 */
-	var nextSequential = function () {
-	  if ( isQuestionStackEmpty() )
-	    nextBlock();
+	var nextSequential = function nextSequential() {
+	  if (isQuestionStackEmpty()) nextBlock();
 	  return nextQuestion();
 	};
 
@@ -1468,13 +1664,15 @@
 	 * top-level surveyman module
 	 *****************************************************************************/
 
-	var _gensym = (function(counter) {
-	  return function (prefix = "") {
-	    return `${prefix}${counter++}`;
-	  };
-	})(0);
+	var _gensym = function (counter) {
+	  return function () {
+	    var prefix = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
 
-	var survey_init = function (jsonSurvey) {
+	    return '' + prefix + counter++;
+	  };
+	}(0);
+
+	var survey_init = function survey_init(jsonSurvey) {
 	  console.assert(jsonSurvey !== undefined);
 	  var survey = new Survey(jsonSurvey);
 	  Survey.randomize(survey);
@@ -1515,7 +1713,7 @@
 	     * @param jsonSurvey The json representation of the survey.
 	     * @returns {Survey} The survey object.
 	     */
-	    init: function (jsonSurvey) {
+	    init: function init(jsonSurvey) {
 	      var survey = survey_init(jsonSurvey);
 	      console.assert(survey.topLevelBlocks.length > 0, "Must have at least one top level block.");
 	      initializeStacks(survey.topLevelBlocks);
@@ -1534,21 +1732,22 @@
 	   * Top-level call to create a new survey.
 	   * @returns {survey.Survey}
 	   */
-	  new_survey() {
+	  new_survey: function new_survey() {
 	    return new Survey({
 	      filename: "temp_file_name.json",
 	      breakoff: Survey.breakoffDefault,
 	      survey: [this.new_block().toJSON()]
 	    });
 	  },
+
 	  /**
 	   * Top-level call to copy the input survey to a new survey.
 	   * Quick and dirty approach -- converts to JSON and re-parses.
 	   * @param survey
 	   * @returns {Survey}
 	   */
-	  copy_survey: function (survey) {
-	    let s = JSON.stringify(survey.toJSON());
+	  copy_survey: function copy_survey(survey) {
+	    var s = JSON.stringify(survey.toJSON());
 	    return new Survey(JSON.parse(s));
 	  },
 	  /**
@@ -1564,10 +1763,12 @@
 	   * @param {boolean} new_id  Flag indicating whether we should create a new id for this block.
 	   * @returns {Block}
 	   */
-	  copy_block: function (block, new_id=false) {
-	    let b = new Block(block.toJSON());
+	  copy_block: function copy_block(block) {
+	    var new_id = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	    var b = new Block(block.toJSON());
 	    if (new_id) {
-	      b.id =  Block.new_block(block.parent).id;
+	      b.id = Block.new_block(block.parent).id;
 	    }
 	    return b;
 	  },
@@ -1580,20 +1781,18 @@
 	   * @param {number} index Index at which to add the the block in its containing parent.
 	   * @returns {?Survey}
 	   */
-	  add_block: function (
-	      survey,
-	      block,
-	      parent_block = survey.get_block_by_id(block.get_parent_id()),
-	      mutate = true,
-	      index = parent_block ? parent_block.subblocks.length : survey.topLevelBlocks.length
-	  ) {
+	  add_block: function add_block(survey, block) {
+	    var parent_block = arguments.length <= 2 || arguments[2] === undefined ? survey.get_block_by_id(block.get_parent_id()) : arguments[2];
+	    var mutate = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+	    var index = arguments.length <= 4 || arguments[4] === undefined ? parent_block ? parent_block.subblocks.length : survey.topLevelBlocks.length : arguments[4];
+
 	    if (mutate) {
 	      survey.add_block(block, parent_block, index);
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
-	      let b = this.copy_block(block);
-	      let p = s.get_block_by_id(parent_block ? parent_block.id : '');
+	      var s = this.copy_survey(survey);
+	      var b = this.copy_block(block);
+	      var p = s.get_block_by_id(parent_block ? parent_block.id : '');
 	      s.add_block(b, p, index);
 	      return s;
 	    }
@@ -1606,14 +1805,16 @@
 	   * or return a new survey with this block removed.
 	   * @returns {?Survey}
 	   */
-	  remove_block: function (block, survey, mutate = true) {
+	  remove_block: function remove_block(block, survey) {
+	    var mutate = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
 	    if (mutate) {
 	      survey.remove_block(block);
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
+	      var s = this.copy_survey(survey);
 	      try {
-	        let b = s.get_block_by_id(block.id);
+	        var b = s.get_block_by_id(block.id);
 	        s.remove_block(b);
 	        return s;
 	      } catch (e) {
@@ -1628,7 +1829,9 @@
 	   * @param {string} qid The question id.
 	   * @returns {Question}
 	   */
-	  new_question: function (surface_text, qid = _gensym("question")) {
+	  new_question: function new_question(surface_text) {
+	    var qid = arguments.length <= 1 || arguments[1] === undefined ? _gensym("question") : arguments[1];
+
 	    return new Question({
 	      id: qid,
 	      qtext: surface_text
@@ -1641,8 +1844,10 @@
 	   * @param {boolean} new_id Flag indicating whether we should generate a new id for the copied object.
 	   * @returns {Question}
 	   */
-	  copy_question: function (question, new_id = false) {
-	    let new_question = new Question(question.toJSON());
+	  copy_question: function copy_question(question) {
+	    var new_id = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+
+	    var new_question = new Question(question.toJSON());
 	    if (new_id) {
 	      new_question.id = _gensym('q');
 	    }
@@ -1657,7 +1862,9 @@
 	   * a new survey.
 	   * @returns {?Survey}
 	   */
-	  add_question: function (question, block, survey, mutate = true) {
+	  add_question: function add_question(question, block, survey) {
+	    var mutate = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 	    if (mutate) {
 	      block.add_question(question);
 	      survey.questions.push(question);
@@ -1666,10 +1873,10 @@
 	      }
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
-	      let q = this.copy_question(question);
+	      var s = this.copy_survey(survey);
+	      var q = this.copy_question(question);
 	      // Get the block in our new survey that matches the input block's id.
-	      let b = s.get_block_by_id(block.id);
+	      var b = s.get_block_by_id(block.id);
 	      s.add_question(q, b);
 	      return s;
 	    }
@@ -1682,13 +1889,15 @@
 	   * survey or return a new one.
 	   * @returns {?Survey}
 	   */
-	  remove_question: function (question, survey, mutate = true) {
+	  remove_question: function remove_question(question, survey) {
+	    var mutate = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
 	    if (mutate) {
 	      survey.remove_question(question);
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
-	      let q = s.get_question_by_id(question.id);
+	      var s = this.copy_survey(survey);
+	      var q = s.get_question_by_id(question.id);
 	      s.remove_question(q);
 	      return s;
 	    }
@@ -1699,7 +1908,9 @@
 	   * @param {string} oid The option id.
 	   * @returns {Option}
 	   */
-	  new_option: function (surface_text, oid = _gensym("option")) {
+	  new_option: function new_option(surface_text) {
+	    var oid = arguments.length <= 1 || arguments[1] === undefined ? _gensym("option") : arguments[1];
+
 	    return new Option({
 	      id: oid,
 	      otext: surface_text
@@ -1714,13 +1925,17 @@
 	   * provided, or return a new survey.
 	   * @returns {?Survey}
 	   */
-	  add_option: function (option, question, survey, mutate = true) {
+	  add_option: function add_option(option, question, survey) {
+	    var mutate = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 	    if (mutate) {
 	      question.add_option(option);
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
-	      let q = s.questions.find(q => q.id === question.id);
+	      var s = this.copy_survey(survey);
+	      var q = s.questions.find(function (q) {
+	        return q.id === question.id;
+	      });
 	      q.add_option(option);
 	      return s;
 	    }
@@ -1734,19 +1949,20 @@
 	   * mutated or if a new survey should be returned.
 	   * @returns {?Survey}
 	   */
-	  remove_option: function(option, survey, question = null, mutate = true) {
+	  remove_option: function remove_option(option, survey) {
+	    var question = arguments.length <= 2 || arguments[2] === undefined ? null : arguments[2];
+	    var mutate = arguments.length <= 3 || arguments[3] === undefined ? true : arguments[3];
+
 	    if (mutate) {
 	      survey.remove_option(option, question, survey);
 	      return null;
 	    } else {
-	      let s = this.copy_survey(survey);
+	      var s = this.copy_survey(survey);
 	      s.remove_option(option);
 	      return s;
 	    }
 	  }
 	};
-
-
 
 /***/ },
 /* 2 */
@@ -5890,6 +6106,8 @@
 /* 5 */
 /***/ function(module, exports) {
 
+	"use strict";
+
 	var config = {
 	  verbose: false,
 	  debug: false
@@ -5897,10 +6115,13 @@
 
 	module.exports = config;
 
-
 /***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	var SurveyMan = SurveyMan || {};
 
@@ -5909,337 +6130,315 @@
 
 	__webpack_require__(9);
 
-	var display = (function () {
+	var display = function () {
 
 	    document.cookies = "test=EMMA_COOKIE_TEST";
 
 	    var SurveyMan;
 
-	    var questionsChosen     =   [],
-	        dropdownThreshold   =   7,
-	        id                  =   0,
-	        DUMMY_ID            =   "dummy",
-	        SUBMIT_FINAL        =   "submit_final",
-	        SUBMIT_PREFIX       =   "submit_",
-	        NEXT_PREFIX         =   "next_",
-	        MTURK_FORM          =   "mturk_form";
+	    var questionsChosen = [],
+	        dropdownThreshold = 7,
+	        id = 0,
+	        DUMMY_ID = "dummy",
+	        SUBMIT_FINAL = "submit_final",
+	        SUBMIT_PREFIX = "submit_",
+	        NEXT_PREFIX = "next_",
+	        MTURK_FORM = "mturk_form";
 
+	    var hideNextButton = function hideNextButton(q) {
 
-	    var hideNextButton = function (q) {
-
-	            $("#" + NEXT_PREFIX + q.id).remove();
-	            $("#" + SUBMIT_PREFIX + q.id).remove();
-	            $("#" + SUBMIT_FINAL).remove();
-
-	        },
-	        showNextButton = function (pid, q, o) {
-	            var id, nextHTML;
-	            id = NEXT_PREFIX + q.id;
-	            if ($("#" + id).length > 0)
-	                document.getElementById(id).onclick = function () { registerAnswerAndShowNextQuestion(pid, q, o); };
-	            else if ( ! finalSubmit() ) {
-	                nextHTML = document.createElement("input");
-	                nextHTML.id = id;
-	                nextHTML.type = "button";
-	                nextHTML.onclick = function () {
-	                    $("#"+q.id).hide();
-	                    registerAnswerAndShowNextQuestion(pid, q, o);
-	                };
-	                nextHTML.value = "Next";
-	                $("div[name=question]").append(nextHTML);
-	            }
-	            showSubmit(q,o);
-	        },
-	        getNextQuestion = function (q, o) {
-
-	            var nextQ;
-	            if (o && !_.isUndefined(q.branchMap)) {
-	                // returns a block
-	                nextQ = SurveyMan.interpreter.handleBranching(q, o);
-	            } else {
-	                // get the next sequential question
-	                //console.log("get next sequential question after " + q.id + "(" + q.qtext + ")" );
-	                nextQ = SurveyMan.interpreter.nextSequential();
-	            }
-	            return nextQ;
-
-	        },
-	        showQuestion =  function(q) {
-
-	            $(".question").empty();
-	            $(".question").append(q.qtext);
-	            $(".question").attr({ name : q.id });
-
-	        },
-	        getNextID = function() {
-
-	            id += 1;
-	            return "ans"+id;
-
-	        },
-	        testFreetext = function (freetext, text) {
-	            var matches = freetext.exec(text);
-	            return _.contains(matches, text);
-	        },
-	        setReturnValueForFreetext = function (q,o,qpos) {
-
-	            var retval = {"quid" : q.id, "oid" : "comp_-1_-1", "qpos" : qpos, "opos" : -1, "text" : o.value};
-	            o.value = JSON.stringify(retval);
-
-	        },
-	        getOptionHTML = function (q) {
-
-	            // would like to replace text area, select, etc. with JS objects
-	            var opt, i, elt, dummy,
-	                qpos    =   questionsChosen.length,
-	                pid     =   getNextID(),
-	                par     =   document.createElement("p");
-
-	            par.id = pid;
-	            $(par).attr({ name : q.id});
-
-	            if ( q.freetext ) {
-
-	                elt = document.createElement("textarea");
-	                elt.id = q.id;
-	                elt.type = "text";
-	                elt.oninput = function () {
-	                    var response = document.getElementById(elt.id);
-	                    if ( q.freetext instanceof RegExp ) {
-	                        var inputText = response.value;
-	                        if ( testFreetext(q.freetext, inputText) )
-	                            showNextButton(pid, q, response, qpos);
-	                    } else showNextButton(pid, q, response, qpos);
-	                };
-	                elt.name  = q.id;
-	                if (q.freetext instanceof String)
-	                    elt.placeholder = q.freetext;
-	                elt.form = MTURK_FORM;
-	                $(par).append(elt);
-
-	            } else if ( _.isUndefined(q.options) || q.options.length == 0 ) {
-
-	                dummy = getDummyOpt(q);
-
-	                if ( ! finalSubmit() )
-	                    showNextButton(pid, q, dummy);
-	                showSubmit(q, dummy);
-
-	            } else if ( q.options.length > dropdownThreshold && q.exclusive ) {
-
-	                elt = document.createElement("select");
-	                elt.id = "select_" + q.id;
-	                elt.onchange = function () {
-	                    var thing = getDropdownOpt(q);
-	                    if (_.isUndefined(thing))
-	                        hideNextButton(q);
-	                    else showNextButton(pid, q, thing);
-	                };
-	                $(elt).attr({ name : q.id, form : MTURK_FORM});
-	                if (!q.exclusive) {
-	                    $(elt).prop("multiple", true);
-	                }
-
-	                dummy = document.createElement('option');
-	                dummy.id = DUMMY_ID;
-	                dummy.text = "CHOOSE ONE";
-	                $(dummy).attr({disable : true, selected : true});
-	                $(dummy).attr({onselect : function () { hideNextButton(q); }});
-	                elt.options[elt.options.length] = dummy;
-
-	                for ( i = 0 ; i < q.options.length ; i++ ) {
-	                    opt = q.options[i];
-	                    elt.add(makeDropDown(pid, q, opt, qpos, i));
-	                }
-
-	                $(par).append(elt);
-
-	            } else {
-
-	                for ( i = 0 ; i < q.options.length ; i++) {
-
-	                    if (q.options.length === 1 && q.options[0].otext === "null") {
-	                        // no options; just display next
-	                        showNextButton(null, q, null);
-	                        return "";
-	                    }
-
-	                    opt = q.options[i];
-	                    elt = document.createElement("label");
-	                    $(elt).attr("for", opt.oid);
-	                    $(elt).append(makeRadioOrCheck(pid, q, opt, qpos, i));
-	                    $(elt).append(opt.otext);
-	                    $(par).append(elt);
-
-	                }
-	            }
-	            return par;
-	        },
-	        showOptions = function(q) {
-	            $(".answer").empty();
-	            var opts = getOptionHTML(q);
-	            $(".answer").append(opts);
-	            if (finalSubmit() && submitNotYetShown() && q.options.length===0)
-	                showSubmit(q,true);
-	        },
-	        registerAnswerAndShowNextQuestion = function (pid, q, o) {
-	            // if we're coming from an instructional question, just skip registering
-	            if (o) {
-	                $("form").append($("#"+pid));
-	                $("#"+pid).hide();
-	            }
-
-	            if (q.freetext) {
-	                setReturnValueForFreetext(q, o);
-	            }
-
-	            questionsChosen.push(q);
-	            $("#" + NEXT_PREFIX + q.id).remove();
-	            $("#" + SUBMIT_PREFIX + q.id).remove();
-	            q = getNextQuestion(q, o);
-	            showQuestion(q);
-	            showOptions(q);
-	        },
-	        makeDropDown = function (pid, q, opt, qpos, opos) {
-
-	            var ojson  =   {"quid" : q.id, "oid" : opt.id, "qpos" : qpos, "opos" : opos},
-	                o       =   document.createElement("option");
-
-	            o.text = opt.otext;
-	            o.value = JSON.stringify(ojson);
-	            o.id = opt.id;
-
-	            return o;
-
-	        },
-	        makeRadioOrCheck = function (pid, q, opt, qpos, opos) {
-
-	            var ojson  =   {"quid" : q.id, "oid" : opt.id, "qpos" : qpos, "opos" : opos},
-	                o      =   document.createElement("input");
-
-	            o.type = q.exclusive ? "radio" : "checkbox";
-	            o.id = opt.id;
-	            o.onchange = function () {
-	                if (o.type==="checkbox") {
-	                    var toSelect = "[name=" + q.id + "] :checked";
-	                    if ($(toSelect).length === 0) {
-	                        hideNextButton(q);
-	                        return;
-	                    }
-	                }
-	                showNextButton(pid, q, opt);
+	        $("#" + NEXT_PREFIX + q.id).remove();
+	        $("#" + SUBMIT_PREFIX + q.id).remove();
+	        $("#" + SUBMIT_FINAL).remove();
+	    },
+	        showNextButton = function showNextButton(pid, q, o) {
+	        var id, nextHTML;
+	        id = NEXT_PREFIX + q.id;
+	        if ($("#" + id).length > 0) document.getElementById(id).onclick = function () {
+	            registerAnswerAndShowNextQuestion(pid, q, o);
+	        };else if (!finalSubmit()) {
+	            nextHTML = document.createElement("input");
+	            nextHTML.id = id;
+	            nextHTML.type = "button";
+	            nextHTML.onclick = function () {
+	                $("#" + q.id).hide();
+	                registerAnswerAndShowNextQuestion(pid, q, o);
 	            };
-	            o.name = q.id;
-	            o.value = JSON.stringify(ojson);
-	            o.form = MTURK_FORM;
+	            nextHTML.value = "Next";
+	            $("div[name=question]").append(nextHTML);
+	        }
+	        showSubmit(q, o);
+	    },
+	        getNextQuestion = function getNextQuestion(q, o) {
 
-	            return o;
+	        var nextQ;
+	        if (o && !_.isUndefined(q.branchMap)) {
+	            // returns a block
+	            nextQ = SurveyMan.interpreter.handleBranching(q, o);
+	        } else {
+	            // get the next sequential question
+	            //console.log("get next sequential question after " + q.id + "(" + q.qtext + ")" );
+	            nextQ = SurveyMan.interpreter.nextSequential();
+	        }
+	        return nextQ;
+	    },
+	        showQuestion = function showQuestion(q) {
 
-	        },
-	        getDummyOpt = function(q) {
+	        $(".question").empty();
+	        $(".question").append(q.qtext);
+	        $(".question").attr({ name: q.id });
+	    },
+	        getNextID = function getNextID() {
 
-	            return new Option({"id" : "comp_-1_-1", "otext" : ""}, q)
+	        id += 1;
+	        return "ans" + id;
+	    },
+	        testFreetext = function testFreetext(freetext, text) {
+	        var matches = freetext.exec(text);
+	        return _.contains(matches, text);
+	    },
+	        setReturnValueForFreetext = function setReturnValueForFreetext(q, o, qpos) {
 
-	        },
-	        finalSubmit = function () {
+	        var retval = { "quid": q.id, "oid": "comp_-1_-1", "qpos": qpos, "opos": -1, "text": o.value };
+	        o.value = JSON.stringify(retval);
+	    },
+	        getOptionHTML = function getOptionHTML(q) {
 
-	            return SurveyMan.interpreter.isQuestionStackEmpty() && SurveyMan.interpreter.isBlockStackEmpty();
+	        // would like to replace text area, select, etc. with JS objects
+	        var opt,
+	            i,
+	            elt,
+	            dummy,
+	            qpos = questionsChosen.length,
+	            pid = getNextID(),
+	            par = document.createElement("p");
 
-	        },
-	        showEarlySubmit = function (q) {
+	        par.id = pid;
+	        $(par).attr({ name: q.id });
 
-	            return q.breakoff && q.options.length!=0;
+	        if (q.freetext) {
 
-	        },
-	        showBreakoffNotice  = function(msg) {
+	            elt = document.createElement("textarea");
+	            elt.id = q.id;
+	            elt.type = "text";
+	            elt.oninput = function () {
+	                var response = document.getElementById(elt.id);
+	                if (q.freetext instanceof RegExp) {
+	                    var inputText = response.value;
+	                    if (testFreetext(q.freetext, inputText)) showNextButton(pid, q, response, qpos);
+	                } else showNextButton(pid, q, response, qpos);
+	            };
+	            elt.name = q.id;
+	            if (q.freetext instanceof String) elt.placeholder = q.freetext;
+	            elt.form = MTURK_FORM;
+	            $(par).append(elt);
+	        } else if (_.isUndefined(q.options) || q.options.length == 0) {
 
-	            $(".question").append("<p>" + msg + "</p>");
-	            $("div[name=question]").show();
-	            $(".question").append("<input type=\"button\" id=\"continue\" value=\"Continue\" " +
-	                "onclick=\"SurveyMan.display.showFirstQuestion();\" />");
-	        },
-	        showFirstQuestion = function() {
+	            dummy = getDummyOpt(q);
 
-	            var firstQ = SurveyMan.interpreter.nextQuestion();
-	            showQuestion(firstQ);
-	            showOptions(firstQ);
+	            if (!finalSubmit()) showNextButton(pid, q, dummy);
+	            showSubmit(q, dummy);
+	        } else if (q.options.length > dropdownThreshold && q.exclusive) {
 
-	        },
-	        freetextValid = function(q,o) {
-
-	            if (_.isUndefined(q.freetext) || !q.freetext) {
-	                return true;
-	            } else if (q.freetext instanceof String) {
-	                return true;
-	            } else if ((q.freetext instanceof Boolean || typeof(q.freetext)==="boolean") && q.freetext){
-	                return o.value!="";
-	            } else if (q.freetext instanceof RegExp) {
-	                return testFreetext(q.freetext,o.value);
-	            } else throw "Unknown type of freetext: " + typeof(q.freetext);
-
-	        },
-	        showSubmit = function(q,o) {
-
-	            var submitHTML;
-	            if (submitNotYetShown()) {
-	                submitHTML = document.createElement("input");
-	                submitHTML.type = "submit";
-	                submitHTML.onclick = function () {
-	                    if (q.freetext) {
-	                        $("#"+q.id).hide();
-	                        setReturnValueForFreetext(q, o);
-	                    }
-	                };
-	                if ( finalSubmit() && freetextValid(q,o) ) {
-	                    submitHTML.defaultValue = "Submit";
-	                    submitHTML.id = SUBMIT_FINAL;
-	                } else if ( (showEarlySubmit(q) && o) || freetextValid(q,o) ) {
-	                    submitHTML.defaultValue = "Submit Early";
-	                    submitHTML.classList.add("breakoff");
-	                    submitHTML.id = SUBMIT_PREFIX + q.id;
-	                } else return;
-	                $("div[name=question]").append(submitHTML);
-
+	            elt = document.createElement("select");
+	            elt.id = "select_" + q.id;
+	            elt.onchange = function () {
+	                var thing = getDropdownOpt(q);
+	                if (_.isUndefined(thing)) hideNextButton(q);else showNextButton(pid, q, thing);
+	            };
+	            $(elt).attr({ name: q.id, form: MTURK_FORM });
+	            if (!q.exclusive) {
+	                $(elt).prop("multiple", true);
 	            }
-	        },
-	        submitNotYetShown = function () {
 
-	            var submits = $(":submit");
-	            return submits.length === 0;
+	            dummy = document.createElement('option');
+	            dummy.id = DUMMY_ID;
+	            dummy.text = "CHOOSE ONE";
+	            $(dummy).attr({ disable: true, selected: true });
+	            $(dummy).attr({ onselect: function onselect() {
+	                    hideNextButton(q);
+	                } });
+	            elt.options[elt.options.length] = dummy;
 
-	        },
-	        getDropdownOpt = function(q) {
+	            for (i = 0; i < q.options.length; i++) {
+	                opt = q.options[i];
+	                elt.add(makeDropDown(pid, q, opt, qpos, i));
+	            }
 
-	            var dropdownOpt =   $("#select_" + q.id + " option:selected"),
-	                oid         =   dropdownOpt.attr("id");
-	            if (oid===DUMMY_ID) return;
-	            return SurveyMan.survey.getOptionById(oid);
+	            $(par).append(elt);
+	        } else {
 
+	            for (i = 0; i < q.options.length; i++) {
+
+	                if (q.options.length === 1 && q.options[0].otext === "null") {
+	                    // no options; just display next
+	                    showNextButton(null, q, null);
+	                    return "";
+	                }
+
+	                opt = q.options[i];
+	                elt = document.createElement("label");
+	                $(elt).attr("for", opt.oid);
+	                $(elt).append(makeRadioOrCheck(pid, q, opt, qpos, i));
+	                $(elt).append(opt.otext);
+	                $(par).append(elt);
+	            }
+	        }
+	        return par;
+	    },
+	        showOptions = function showOptions(q) {
+	        $(".answer").empty();
+	        var opts = getOptionHTML(q);
+	        $(".answer").append(opts);
+	        if (finalSubmit() && submitNotYetShown() && q.options.length === 0) showSubmit(q, true);
+	    },
+	        registerAnswerAndShowNextQuestion = function registerAnswerAndShowNextQuestion(pid, q, o) {
+	        // if we're coming from an instructional question, just skip registering
+	        if (o) {
+	            $("form").append($("#" + pid));
+	            $("#" + pid).hide();
+	        }
+
+	        if (q.freetext) {
+	            setReturnValueForFreetext(q, o);
+	        }
+
+	        questionsChosen.push(q);
+	        $("#" + NEXT_PREFIX + q.id).remove();
+	        $("#" + SUBMIT_PREFIX + q.id).remove();
+	        q = getNextQuestion(q, o);
+	        showQuestion(q);
+	        showOptions(q);
+	    },
+	        makeDropDown = function makeDropDown(pid, q, opt, qpos, opos) {
+
+	        var ojson = { "quid": q.id, "oid": opt.id, "qpos": qpos, "opos": opos },
+	            o = document.createElement("option");
+
+	        o.text = opt.otext;
+	        o.value = JSON.stringify(ojson);
+	        o.id = opt.id;
+
+	        return o;
+	    },
+	        makeRadioOrCheck = function makeRadioOrCheck(pid, q, opt, qpos, opos) {
+
+	        var ojson = { "quid": q.id, "oid": opt.id, "qpos": qpos, "opos": opos },
+	            o = document.createElement("input");
+
+	        o.type = q.exclusive ? "radio" : "checkbox";
+	        o.id = opt.id;
+	        o.onchange = function () {
+	            if (o.type === "checkbox") {
+	                var toSelect = "[name=" + q.id + "] :checked";
+	                if ($(toSelect).length === 0) {
+	                    hideNextButton(q);
+	                    return;
+	                }
+	            }
+	            showNextButton(pid, q, opt);
 	        };
+	        o.name = q.id;
+	        o.value = JSON.stringify(ojson);
+	        o.form = MTURK_FORM;
+
+	        return o;
+	    },
+	        getDummyOpt = function getDummyOpt(q) {
+
+	        return new Option({ "id": "comp_-1_-1", "otext": "" }, q);
+	    },
+	        finalSubmit = function finalSubmit() {
+
+	        return SurveyMan.interpreter.isQuestionStackEmpty() && SurveyMan.interpreter.isBlockStackEmpty();
+	    },
+	        showEarlySubmit = function showEarlySubmit(q) {
+
+	        return q.breakoff && q.options.length != 0;
+	    },
+	        showBreakoffNotice = function showBreakoffNotice(msg) {
+
+	        $(".question").append("<p>" + msg + "</p>");
+	        $("div[name=question]").show();
+	        $(".question").append("<input type=\"button\" id=\"continue\" value=\"Continue\" " + "onclick=\"SurveyMan.display.showFirstQuestion();\" />");
+	    },
+	        showFirstQuestion = function showFirstQuestion() {
+
+	        var firstQ = SurveyMan.interpreter.nextQuestion();
+	        showQuestion(firstQ);
+	        showOptions(firstQ);
+	    },
+	        freetextValid = function freetextValid(q, o) {
+
+	        if (_.isUndefined(q.freetext) || !q.freetext) {
+	            return true;
+	        } else if (q.freetext instanceof String) {
+	            return true;
+	        } else if ((q.freetext instanceof Boolean || typeof q.freetext === "boolean") && q.freetext) {
+	            return o.value != "";
+	        } else if (q.freetext instanceof RegExp) {
+	            return testFreetext(q.freetext, o.value);
+	        } else throw "Unknown type of freetext: " + _typeof(q.freetext);
+	    },
+	        showSubmit = function showSubmit(q, o) {
+
+	        var submitHTML;
+	        if (submitNotYetShown()) {
+	            submitHTML = document.createElement("input");
+	            submitHTML.type = "submit";
+	            submitHTML.onclick = function () {
+	                if (q.freetext) {
+	                    $("#" + q.id).hide();
+	                    setReturnValueForFreetext(q, o);
+	                }
+	            };
+	            if (finalSubmit() && freetextValid(q, o)) {
+	                submitHTML.defaultValue = "Submit";
+	                submitHTML.id = SUBMIT_FINAL;
+	            } else if (showEarlySubmit(q) && o || freetextValid(q, o)) {
+	                submitHTML.defaultValue = "Submit Early";
+	                submitHTML.classList.add("breakoff");
+	                submitHTML.id = SUBMIT_PREFIX + q.id;
+	            } else return;
+	            $("div[name=question]").append(submitHTML);
+	        }
+	    },
+	        submitNotYetShown = function submitNotYetShown() {
+
+	        var submits = $(":submit");
+	        return submits.length === 0;
+	    },
+	        getDropdownOpt = function getDropdownOpt(q) {
+
+	        var dropdownOpt = $("#select_" + q.id + " option:selected"),
+	            oid = dropdownOpt.attr("id");
+	        if (oid === DUMMY_ID) return;
+	        return SurveyMan.survey.getOptionById(oid);
+	    };
 
 	    return {
-	        hideNextButton : hideNextButton,
-	        showNextButton : showNextButton,
-	        getNextQuestion : getNextQuestion,
-	        showQuestion : showQuestion,
-	        getOptionHTML : getOptionHTML,
-	        showOptions : showOptions,
-	        registerAnswerAndShowNextQuestion : registerAnswerAndShowNextQuestion,
-	        showBreakoffNotice : showBreakoffNotice,
-	        showFirstQuestion : showFirstQuestion,
-	        showSubmit : showSubmit,
-	        ready : function (mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
+	        hideNextButton: hideNextButton,
+	        showNextButton: showNextButton,
+	        getNextQuestion: getNextQuestion,
+	        showQuestion: showQuestion,
+	        getOptionHTML: getOptionHTML,
+	        showOptions: showOptions,
+	        registerAnswerAndShowNextQuestion: registerAnswerAndShowNextQuestion,
+	        showBreakoffNotice: showBreakoffNotice,
+	        showFirstQuestion: showFirstQuestion,
+	        showSubmit: showSubmit,
+	        ready: function ready(mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
 
-	            if (typeof(customInit) === "function") {
+	            if (typeof customInit === "function") {
 	                customInit();
 	                console.log("C");
 	            }
 	            //  Previewing for now is unique to mturk.
-	            $(document).ready(function() {
+	            $(document).ready(function () {
 
 	                SurveyMan = window.SurveyMan.surveyman;
 
-	                var start_survey = function () {
+	                var start_survey = function start_survey() {
 	                    console.log("F");
 	                    $("#preview").hide();
 	                    console.log("G");
@@ -6257,16 +6456,16 @@
 	                    }
 	                };
 
-	                assignmentId = (mturk && _.isUndefined(assignmentId))? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
+	                assignmentId = mturk && _.isUndefined(assignmentId) ? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
 	                console.log(assignmentId);
 
-	                $('form').submit(function() {
+	                $('form').submit(function () {
 	                    window.onbeforeunload = null;
 	                });
 
 	                var preview = $("#preview");
 
-	                if (assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE" && typeof(loadPreview) === "function") {
+	                if (assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE" && typeof loadPreview === "function") {
 	                    console.log("A");
 	                    loadPreview();
 	                    preview.show();
@@ -6282,8 +6481,7 @@
 	            });
 	        }
 	    };
-
-	})();
+	}();
 
 	module.exports = display;
 
