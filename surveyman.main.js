@@ -56,6 +56,8 @@
 	    "config": __webpack_require__(5)
 	};
 
+	window.$ = __webpack_require__(8);
+
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
@@ -2903,7 +2905,7 @@
 	        };
 	        o.name = q.id;
 	        o.value = JSON.stringify(ojson);
-	        o.form = MTURK_FORM;
+	        // o.form = MTURK_FORM;
 
 	        return o;
 	    },
@@ -2990,7 +2992,7 @@
 	        showBreakoffNotice: showBreakoffNotice,
 	        showFirstQuestion: showFirstQuestion,
 	        showSubmit: showSubmit,
-	        ready: function ready(mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
+	        ready: function ready(assignmentId, mturk, jsonizedSurvey, loadPreview, customInit, breakoffMsg) {
 
 	            if (typeof customInit === "function") {
 	                customInit();
@@ -3002,23 +3004,17 @@
 	                SurveyMan = window.SurveyMan.surveyman;
 
 	                var start_survey = function start_survey() {
-	                    console.log("F");
 	                    $("#preview").hide();
-	                    console.log("G");
 	                    Math.seedrandom(assignmentId);
 	                    console.log(jsonizedSurvey);
 	                    var sm = SurveyMan.interpreter.init(jsonizedSurvey);
-	                    console.log("I");
 	                    if (sm.breakoff) {
-	                        console.log("D");
 	                        showBreakoffNotice(breakoffMsg);
 	                    } else {
-	                        console.log("E");
 	                        showFirstQuestion();
 	                        $("div[name=question]").show();
 	                    }
 	                };
-
 	                assignmentId = mturk && _.isUndefined(assignmentId) ? "ASSIGNMENT_ID_NOT_AVAILABLE" : document.getElementById('assignmentId').value;
 	                console.log(assignmentId);
 
@@ -3029,7 +3025,6 @@
 	                var preview = $("#preview");
 
 	                if (assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE" && typeof loadPreview === "function") {
-	                    console.log("A");
 	                    loadPreview();
 	                    preview.show();
 	                } else {
@@ -3038,7 +3033,6 @@
 	                    nextButton.onclick = start_survey;
 	                    nextButton.value = "Start Survey";
 	                    preview.append(nextButton);
-	                    console.log("B");
 	                    preview.show();
 	                }
 	            });

@@ -227,7 +227,7 @@ var display = (function () {
             };
             o.name = q.id;
             o.value = JSON.stringify(ojson);
-            o.form = MTURK_FORM;
+            // o.form = MTURK_FORM;
 
             return o;
 

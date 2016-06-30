@@ -7,3 +7,6 @@ window.SurveyMan = {
     "display": require('./display.js'),
     "config": require('./config.js')
 };
+
+window.$ = require("jquery");
+
