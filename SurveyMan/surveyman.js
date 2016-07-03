@@ -238,7 +238,7 @@ var parseBools = function (thing, defaultVal, question = null) {
     question.options = thing.map((oid) => getOptionById(oid));
     return true;
   }
-  throw UnknownTypeException(thing);
+  throw new UnknownTypeException(thing);
 };
 
 /**
@@ -414,7 +414,7 @@ var Question = function(_jsonQuestion, _block) {
         var o = question.getOption(k);
         var b;
         if (branchMap[k] === null) {
-          b = Block.NEXT_BLOCK;
+          b = Block.NEXT_BLOCK();
         } else {
           b = getBlockById(branchMap[k]);
         }
@@ -787,6 +787,15 @@ var Block = function(_jsonBlock) {
     this.subblocks.forEach((b) => b.getAllQuestions().forEach((q) => retval.push(q)));
     return retval;
   };
+};
+
+/**
+ * Tests whether this block is a next block pointer.
+ * @param block
+ */
+Block.is_next_block = function (block) {
+  "use strict";
+  return block.id === "NEXT";
 };
 
 /**
@@ -1352,6 +1361,7 @@ var nextQuestion = function() {
 };
 
 /**
+/**
  * Returns the next block in the survey. If the previous block was a branch-one
  * block, pops off stationary blocks until it either reaches a floating block or
  * the branch destination. If it finds the branch destination first, it resets
@@ -1360,7 +1370,7 @@ var nextQuestion = function() {
  */
 var nextBlock =  function() {
   var head;
-  if (branchDest) {
+  if (branchDest && !Block.is_next_block(branchDest)) {
     while (!isBlockStackEmpty()) {
       head = blockSTACK.shift();
       if (head === branchDest) {
@@ -1385,9 +1395,15 @@ var nextBlock =  function() {
  * @param {survey.Option} o
  * @returns {survey.Question}
  */
-var handleBranching = function (q, o){
-  if (q.branchMap.has(o.id))
-    branchDest = q.branchMap.get(o.id);
+var handleBranching = function (q, o) {
+  if (q.branchMap.has(o)) {
+      let bdest = q.branchMap.get(o);
+      if (Block.is_next_block(bdest)) {
+        branchDest = blockSTACK[0];
+      } else {
+        branchDest = bdest;
+      }
+  }
   if ( isQuestionStackEmpty() )
     nextBlock();
   return nextQuestion();
@@ -1460,6 +1476,7 @@ module.exports = {
       initializeStacks(survey.topLevelBlocks);
       return survey;
     },
+    _branchDest: branchDest,
     _flatten: flatten,
     isQuestionStackEmpty: isQuestionStackEmpty,
     isBlockStackEmpty: isBlockStackEmpty,

@@ -322,7 +322,7 @@
 	    });
 	    return true;
 	  }
-	  throw UnknownTypeException(thing);
+	  throw new UnknownTypeException(thing);
 	};
 
 	/**
@@ -509,7 +509,7 @@
 	        var o = question.getOption(k);
 	        var b;
 	        if (branchMap[k] === null) {
-	          b = Block.NEXT_BLOCK;
+	          b = Block.NEXT_BLOCK();
 	        } else {
 	          b = getBlockById(branchMap[k]);
 	        }
@@ -960,6 +960,16 @@
 	    });
 	    return retval;
 	  };
+	};
+
+	/**
+	 * Tests whether this block is a next block pointer.
+	 * @param block
+	 */
+	Block.is_next_block = function (block) {
+	  "use strict";
+
+	  return block.id === "NEXT";
 	};
 
 	/**
@@ -1614,6 +1624,7 @@
 	};
 
 	/**
+	/**
 	 * Returns the next block in the survey. If the previous block was a branch-one
 	 * block, pops off stationary blocks until it either reaches a floating block or
 	 * the branch destination. If it finds the branch destination first, it resets
@@ -1622,7 +1633,7 @@
 	 */
 	var nextBlock = function nextBlock() {
 	  var head;
-	  if (branchDest) {
+	  if (branchDest && !Block.is_next_block(branchDest)) {
 	    while (!isBlockStackEmpty()) {
 	      head = blockSTACK.shift();
 	      if (head === branchDest) {
@@ -1648,7 +1659,14 @@
 	 * @returns {survey.Question}
 	 */
 	var handleBranching = function handleBranching(q, o) {
-	  if (q.branchMap.has(o.id)) branchDest = q.branchMap.get(o.id);
+	  if (q.branchMap.has(o)) {
+	    var bdest = q.branchMap.get(o);
+	    if (Block.is_next_block(bdest)) {
+	      branchDest = blockSTACK[0];
+	    } else {
+	      branchDest = bdest;
+	    }
+	  }
 	  if (isQuestionStackEmpty()) nextBlock();
 	  return nextQuestion();
 	};
@@ -1721,6 +1739,7 @@
 	      initializeStacks(survey.topLevelBlocks);
 	      return survey;
 	    },
+	    _branchDest: branchDest,
 	    _flatten: flatten,
 	    isQuestionStackEmpty: isQuestionStackEmpty,
 	    isBlockStackEmpty: isBlockStackEmpty,
